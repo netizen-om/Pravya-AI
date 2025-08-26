@@ -103,10 +103,11 @@ export default function UserSettingsPage() {
     }
 
     try {
+      
       profileImageSchema.parse({ file });
       setIsLoading((prev) => ({ ...prev, image: true }));
 
-      const response = await fetch("/api/user/update-profileimage", {
+      const response = await fetch("/api/user/update-profileImage", {
         method: "POST",
         body: formData,
       });

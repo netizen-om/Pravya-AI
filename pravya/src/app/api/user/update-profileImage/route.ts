@@ -4,6 +4,14 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prismadb";
 import cloudinary from "@/lib/cloudinary";
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb', // increase limit
+    },
+  },
+};
+
 type CloudinaryUploadResult = {
   secure_url: string;
   public_id: string;
