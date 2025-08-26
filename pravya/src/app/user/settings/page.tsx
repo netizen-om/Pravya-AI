@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -21,6 +21,7 @@ import { z } from "zod";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import Link from "next/link";
 import LeftArrow from "@/components/icons/LeftArrow";
+import { useSession } from "next-auth/react";
 
 // Validation schemas
 const profileImageSchema = z.object({
@@ -72,6 +73,20 @@ export default function UserSettingsPage() {
     bio: false,
     password: false,
   });
+
+  const { data: session, status } = useSession()
+
+  useEffect(() => {
+    //@ts-ignore
+    setUsername(session?.user.name ? session.user.name : "");
+    //@ts-ignore
+    setBio(session?.user.bio ? session?.user.bio : "");
+    //@ts-ignore
+    setProfileImage(session?.user.image ? session.user.image : "");
+    console.log(session?.user.id);
+    
+    
+  })
 
   const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
