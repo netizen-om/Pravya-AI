@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
-    const file = formData.get("proileImage") as File;
+    const file = formData.get("profileImage") as File;
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
