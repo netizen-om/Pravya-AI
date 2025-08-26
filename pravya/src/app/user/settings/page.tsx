@@ -18,10 +18,8 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { z } from "zod";
-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import Link from "next/link";
 import LeftArrow from "@/components/icons/LeftArrow";
-import { useSession } from "next-auth/react";
 import axios from "axios";
 
 // Validation schemas
@@ -90,7 +88,7 @@ export default function UserSettingsPage() {
       }
     }
     getUserDetails();
-  }, [])
+  }, [profileImage])
 
   const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
