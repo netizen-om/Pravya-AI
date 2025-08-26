@@ -13,6 +13,13 @@ export async function GET(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
+      include: {
+        accounts: {
+          select: {
+            provider: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json({ user }, { status: 200 });
