@@ -75,8 +75,8 @@ export default function UserSettingsPage() {
 
   useEffect(() => {
     const getUserDetails = async() => {    
-      const res = await axios.get("/api/user/get-user-details")
-
+      const res = await axios.get("/api/user/get-user-details");
+      
       if(res.status === 200) {
         const { bio, image, name } = res.data.user
         console.log(image);

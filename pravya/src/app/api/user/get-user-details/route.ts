@@ -21,8 +21,27 @@ export async function GET(req: Request) {
         },
       },
     });
-
-    return NextResponse.json({ user }, { status: 200 });
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    const provider = user.accounts.length > 0 ? user.accounts[0].provider : null;
+    
+    // build a simplified response
+    const userResponse = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      image: user.image,
+      imagePublicId: user.imagePublicId,
+      bio: user.bio,
+      isSubscribed: user.isSubscribed,
+      isDeleted: user.isDeleted,
+      provider, // flattened field
+    };
+    return NextResponse.json({ userResponse }, { status: 200 });
   } catch (error) {
     console.log("Erroe getting user data : ", error);
     return NextResponse.json(
