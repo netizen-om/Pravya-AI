@@ -66,6 +66,7 @@ export default function UserSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [provider, setProvider] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState({
     image: false,
     username: false,
@@ -78,11 +79,12 @@ export default function UserSettingsPage() {
       const res = await axios.get("/api/user/get-user-details");
       
       if(res.status === 200) {
-        const { bio, image, name } = res.data.user
+        const { bio, image, name, provider } = res.data.userResponse
         console.log(image);
         setBio(bio);
         setProfileImage(image);
         setUsername(name);
+        setProvider(provider);
       } else {
         toast.error("Error fetching user data");
       }
@@ -374,7 +376,8 @@ export default function UserSettingsPage() {
             <Separator className="bg-gray-800" />
 
             {/* Password Section */}
-            <Card className="bg-neutral-900 border-neutral-800">
+            { !provider && (
+              <Card className="bg-neutral-900 border-neutral-800">
               <CardHeader className="pb-4 md:pb-6">
                 <CardTitle className="text-white text-lg md:text-xl">Reset Password</CardTitle>
                 <CardDescription className="text-gray-400 text-sm">
@@ -432,6 +435,7 @@ export default function UserSettingsPage() {
                 </form>
               </CardContent>
             </Card>
+            )}
 
             {/* Bottom spacing for mobile */}
             <div className="pb-6 md:pb-0" />

@@ -41,6 +41,7 @@ export async function GET(req: Request) {
       isDeleted: user.isDeleted,
       provider, // flattened field
     };
+    
     return NextResponse.json({ userResponse }, { status: 200 });
   } catch (error) {
     console.log("Erroe getting user data : ", error);
