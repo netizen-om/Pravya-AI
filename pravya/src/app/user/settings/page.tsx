@@ -75,14 +75,11 @@ export default function UserSettingsPage() {
     password: false,
   });
 
-  const { data: session, status } = useSession()
-
   useEffect(() => {
     const getUserDetails = async() => {    
       const res = await axios.get("/api/user/get-user-details")
 
       if(res.status === 200) {
-
         const { bio, image, name } = res.data.user
         console.log(image);
         setBio(bio);
@@ -91,10 +88,9 @@ export default function UserSettingsPage() {
       } else {
         toast.error("Error fetching user data");
       }
-        
     }
     getUserDetails();
-  })
+  }, [])
 
   const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -142,7 +138,6 @@ export default function UserSettingsPage() {
 
       const response = await fetch("/api/user/update-username", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username }),
       });
 
@@ -170,9 +165,8 @@ export default function UserSettingsPage() {
       setIsLoading((prev) => ({ ...prev, bio: true }));
 
       const response = await fetch("/api/user/update-bio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bio }),
+        method: "PATCH",
+        body: JSON.stringify({ newBio : bio }),
       });
 
       if (response.ok) {
