@@ -22,6 +22,7 @@ import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import Link from "next/link";
 import LeftArrow from "@/components/icons/LeftArrow";
 import { useSession } from "next-auth/react";
+import axios from "axios";
 
 // Validation schemas
 const profileImageSchema = z.object({
@@ -77,15 +78,22 @@ export default function UserSettingsPage() {
   const { data: session, status } = useSession()
 
   useEffect(() => {
-    //@ts-ignore
-    setUsername(session?.user.name ? session.user.name : "");
-    //@ts-ignore
-    setBio(session?.user.bio ? session?.user.bio : "");
-    //@ts-ignore
-    setProfileImage(session?.user.image ? session.user.image : "");
-    console.log(session?.user.id);
-    
-    
+    const getUserDetails = async() => {    
+      const res = await axios.get("/api/user/get-user-details")
+
+      if(res.status === 200) {
+
+        const { bio, image, name } = res.data.user
+        console.log(image);
+        setBio(bio);
+        setProfileImage(image);
+        setUsername(name);
+      } else {
+        toast.error("Error fetching user data");
+      }
+        
+    }
+    getUserDetails();
   })
 
   const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
