@@ -4,18 +4,7 @@ import Link from "next/link";
 import axios from "axios";
 import { AuthInput } from "@/components/ui/auth-input";
 import { AuthButton } from "@/components/ui/auth-button";
-
-// Extract SVG components to prevent recreation on each render
-const BackIcon = () => (
-  <svg 
-    className="w-6 h-6 -ml-2"
-    fill="none" 
-    viewBox="0 0 24 24" 
-    stroke="currentColor"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.25 8.75L9.75 12L13.25 15.25" />
-  </svg>
-);
+import { toast } from "sonner";
 
 const CheckIcon = () => (
   <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,34 +18,7 @@ const TITLE_CLASSES = "text-2xl font-semibold text-white mb-6 font-['ABCFavorit'
 
 // Memoized success screen component
 const SuccessScreen = ({ username, userEmail }: { username: string; userEmail?: string }) => {
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
   const [hasAttemptedSend, setHasAttemptedSend] = useState(false);
-
-  // Send email automatically when component mounts
-  useEffect(() => {
-    // Prevent multiple email sends
-    if (hasAttemptedSend || !userEmail) return;
-    
-    const sendVerificationEmail = async () => {
-      setHasAttemptedSend(true);
-      console.log("Trying to send email");
-      
-      try {
-        // Send verification email without additional data
-        const response = await axios.post('/api/send-verification-email');
-        if (response.status === 200) {
-          setEmailSent(true);
-          console.log('Verification email sent successfully');
-        }
-      } catch (error) {
-        console.error('Error sending verification email:', error);
-        setEmailError('Failed to send verification email. Please try again.');
-      }
-    };
-
-    // sendVerificationEmail();
-  }, [userEmail, hasAttemptedSend]);
 
   return (
     <>
@@ -109,11 +71,7 @@ const SuccessScreen = ({ username, userEmail }: { username: string; userEmail?: 
 };
 
 export default function Onboarding() {
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [hasAttemptedSend, setHasAttemptedSend] = useState(false);
   const [username, setUsername] = useState("");
-  const [userEmail, setUserEmail] = useState(""); // Add email state if needed
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Memoize the form submit handler
@@ -132,20 +90,17 @@ export default function Onboarding() {
         setIsSubmitted(true);
         console.log("Username updated successfully:", response.data);
       }
-
-      setHasAttemptedSend(true);
-      console.log("Trying to send email");
       
       try {
         // Send verification email without additional data
         const response = await axios.post('/api/send-verification-email');
         if (response.status === 200) {
-          setEmailSent(true);
+          toast.success("Verification email sent")
           console.log('Verification email sent successfully');
         } 
       } catch (error) {
         console.error('Error sending verification email:', error);
-        setEmailError('Failed to send verification email. Please try again.');
+        toast.error('Failed to send verification email. Please try again.');
       }
 
     } catch (error: any) {
@@ -158,19 +113,11 @@ export default function Onboarding() {
     setUsername(e.target.value);
   }, []);
 
-  // Add email change handler if you want to collect email
-  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserEmail(e.target.value);
-  }, []);
-
   // Memoize the trimmed username check
   const isUsernameValid = useMemo(() => username.trim().length > 0, [username]);
 
-
-
-  // Early return for success screen
   if (isSubmitted) {
-    return <SuccessScreen username={username} userEmail={userEmail} />;
+    return <SuccessScreen username={username} />;
   }
 
   return (
