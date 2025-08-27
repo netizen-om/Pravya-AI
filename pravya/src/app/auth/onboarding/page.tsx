@@ -5,6 +5,7 @@ import axios from "axios";
 import { AuthInput } from "@/components/ui/auth-input";
 import { AuthButton } from "@/components/ui/auth-button";
 import { toast } from "sonner";
+import { signOut } from "next-auth/react";
 
 const CheckIcon = () => (
   <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,6 +99,11 @@ export default function Onboarding() {
           toast.success("Verification email sent")
           console.log('Verification email sent successfully');
         } 
+
+        setTimeout(() => {
+          signOut({ callbackUrl: "/dashboard" });
+        }, 3000);
+        
       } catch (error) {
         console.error('Error sending verification email:', error);
         toast.error('Failed to send verification email. Please try again.');
