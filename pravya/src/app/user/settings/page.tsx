@@ -21,41 +21,7 @@ import { z } from "zod";
 import Link from "next/link";
 import LeftArrow from "@/components/icons/LeftArrow";
 import axios from "axios";
-
-// Validation schemas
-const profileImageSchema = z.object({
-  file: z
-    .instanceof(File)
-    .refine(
-      (file) => file.size <= 5 * 1024 * 1024,
-      "File size must be less than 5MB"
-    )
-    .refine(
-      (file) => ["image/jpeg", "image/png", "image/gif"].includes(file.type),
-      "Only JPG, PNG, and GIF files are allowed"
-    ),
-});
-
-const usernameSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters long"),
-});
-
-const bioSchema = z.object({
-  bio: z.string().max(500, "Bio must be less than 500 characters"),
-});
-
-const passwordSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z
-      .string()
-      .min(8, "New password must be at least 8 characters long"),
-    confirmPassword: z.string().min(1, "Please confirm your new password"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+import { bioSchema, passwordSchema, profileImageSchema, usernameSchema } from "@/utlis/zod";
 
 export default function UserSettingsPage() {
   const [profileImage, setProfileImage] = useState<string>(
