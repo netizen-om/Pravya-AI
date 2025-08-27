@@ -164,14 +164,18 @@ export default function UserSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ oldPassword : currentPassword, newPassword : newPassword }),
       });
-
+      const err = await response.json();
       if (response.ok) {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
         toast.success("Password updated successfully!");
       } else {
-        toast.error("Failed to update password");
+        if(err) {
+          toast.error(err.message);
+        } else {
+          toast.error("Failed to update password");
+        }
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

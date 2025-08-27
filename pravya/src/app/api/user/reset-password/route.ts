@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     if (!oldPassword || !newPassword) {
       return NextResponse.json(
         { error: "Password is required" },
-        { status: 500 }
+        { status: 501 }
       );
     }
   
@@ -27,7 +27,9 @@ export async function POST(req: Request) {
     if (!user || !user.password) throw new Error("No user found");
   
     const ok = await bcrypt.compare(oldPassword, user.password);
-    if (!ok) throw new Error("Invalid Password");
+    if (!ok) {
+      return NextResponse.json({ message : "Invalid Password"}, {status : 401});
+    }
   
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
   
