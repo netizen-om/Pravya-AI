@@ -5,18 +5,13 @@ import GoogleLogo from "@/components/icons/GoogleLogo";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { getErrorMessage } from "@/utlis/getErrorMessage";
 import { AuthInput } from "@/components/ui/auth-input";
 import { AuthButton } from "@/components/ui/auth-button";
 import { SocialLoginButton } from "@/components/ui/social-login-button";
-
-const signinSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
+import { signinSchema } from "@/utlis/zod";
 
 export default function SignIn({ className = "" }) {
 
