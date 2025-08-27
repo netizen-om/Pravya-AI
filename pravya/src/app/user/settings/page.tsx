@@ -25,7 +25,7 @@ import { bioSchema, passwordSchema, profileImageSchema, usernameSchema } from "@
 
 export default function UserSettingsPage() {
   const [profileImage, setProfileImage] = useState<string>(
-    "/diverse-user-avatars.png"
+    "/profile.png"
   );
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
@@ -46,11 +46,11 @@ export default function UserSettingsPage() {
       
       if(res.status === 200) {
         const { bio, image, name, provider } = res.data.userResponse
-        console.log(image);
-        setBio(bio);
-        setProfileImage(image);
-        setUsername(name);
-        setProvider(provider);
+        console.log(bio);
+        setBio(bio ? bio : "");
+        setProfileImage(image ? image : "");
+        setUsername(name ? name : "");
+        setProvider(provider ? provider : "");
       } else {
         toast.error("Error fetching user data");
       }
