@@ -1,0 +1,135 @@
+"use client";
+import axios from "axios";
+import React, { useCallback, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { AuthInput } from "@/components/ui/auth-input";
+import { AuthButton } from "@/components/ui/auth-button";
+import { z } from "zod";
+import { toast } from "sonner";
+import { signOut } from "next-auth/react";
+
+const resetPasswordSchema = z.object({
+  password: z.string().min(8, { message: "Password must be at least 8 characters long." }),
+});
+
+const TITLE_CLASSES = "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
+
+function ForgotPassword() {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const token = searchParams.get("token");
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      const trimmedPassword = password.trim();
+      const trimmedConfirmPassword = confirmPassword.trim();
+
+      if(trimmedConfirmPassword !== trimmedPassword) {
+        toast.error("Both Password Must Match")
+        return;
+      }
+
+      try {
+        resetPasswordSchema.parse({ password: trimmedPassword });
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          const validationError = err.errors[0].message;
+          setError(validationError);
+          toast.error(validationError); 
+          return;
+        }
+      }
+
+      if (!token) {
+        setError("Password reset token is missing.");
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const response = await axios.post("/api/forget-password", {
+          newPassword: trimmedPassword,
+          token,
+        });
+
+        if (response.status === 200) {
+          toast.success("Password updated successfully!");
+          router.push("/auth/sign-in");
+        }
+      } catch (err: any) {
+        const errorMessage = err.response?.data?.error || "An unexpected error occurred.";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [password, token, router]
+  );
+
+  const handlePasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPassword(e.target.value);
+    },
+    []
+  );
+
+  const handleConfirmPasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setConfirmPassword(e.target.value);
+    },
+    []
+  );
+
+  return (
+    <>
+      <div className="text-center mb-6">
+        <div className="inline-block w-12 mb-6" />
+        <h1 className={TITLE_CLASSES}>Forget Password</h1>
+        <span className="text-gray-400 text-sm">
+          Please enter your email to recieve forget password mail
+        </span>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && <p className="text-red-500 text-sm text-center -mb-2">{error}</p>}
+        
+        <AuthInput
+          id="email"
+          name="email"
+          type="email"
+          placeholder=" "
+          value={password}
+          onChange={handlePasswordChange}
+          required
+        />
+
+        <AuthButton type="submit" disabled={isLoading}>
+          {isLoading ? "Loading..." : "Confirm"}
+        </AuthButton>
+      </form>
+
+      <p className="text-xs text-gray-400 text-center mt-8">
+        <span>By continuing, you agree to our </span>
+        <a href="#" className="underline hover:text-gray-300 transition-colors">
+          Terms
+        </a>
+        <span> and </span>
+        <a href="#" className="underline hover:text-gray-300 transition-colors">
+          Privacy Policy
+        </a>
+        <span>.</span>
+      </p>
+    </>
+  );
+}
+
+export default ForgotPassword;
