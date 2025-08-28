@@ -64,7 +64,7 @@ export async function GET() {
       return NextResponse.json({
         success: true,
         message: "Verification email sent successfully",
-      });
+      }, {status : 200});
     } catch (emailError) {
       console.error("[EMAIL_SEND_ERROR]", emailError);
       return NextResponse.json(

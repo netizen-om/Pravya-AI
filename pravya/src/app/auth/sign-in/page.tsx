@@ -185,6 +185,7 @@ export default function SignIn({ className = "" }) {
               onChange={handlePasswordChange}
               required
               error={errors.password}
+              isForgetPassword={true}
             />
 
             <AuthButton type="submit" disabled={!isFormValid()}>
