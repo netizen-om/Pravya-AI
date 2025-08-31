@@ -11,11 +11,25 @@ export async function POST(req : NextRequest) {
   try {
 
     const user = await prisma.user.findUnique({
-      where : { email }
+      where : { email },
+      include: {
+        accounts: {
+          select: {
+            provider: true,
+          },
+        },
+      },
     })
 
+    
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 500 });
+    }
+    
+    const provider = user.accounts.length > 0 ? user.accounts[0].provider : null;
+    
+    if(provider) {
+      return NextResponse.json({ error: "Password reset is not available. You signed in using Google/GitHub." }, { status: 500 });
     }
 
     // Generate JWT token
