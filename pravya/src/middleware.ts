@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 // Define public (unprotected) routes
-const PUBLIC_ROUTES = ["/", "/auth/sign-in", "/auth/sign-up", "/auth/verify-email"];
+const PUBLIC_ROUTES = ["/", "/auth/sign-in", "/auth/sign-up", "/auth/verify-email", "/auth/forget-password", "/auth/forget-password/enter-email"];
 const ONBOARDING_ROUTE = "/auth/onboarding";
 const DASHBOARD_ROUTE = "/dashboard"
 

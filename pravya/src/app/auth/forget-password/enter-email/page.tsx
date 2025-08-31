@@ -15,7 +15,7 @@ const resetPasswordSchema = z.object({
 const TITLE_CLASSES = "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
 
 function ForgotPassword() {
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ function ForgotPassword() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-      const trimmedPassword = password.trim();
+      const trimmedPassword = email.trim();
       const trimmedConfirmPassword = confirmPassword.trim();
 
       if(trimmedConfirmPassword !== trimmedPassword) {
@@ -72,19 +72,12 @@ function ForgotPassword() {
         setIsLoading(false);
       }
     },
-    [password, token, router]
+    [email, token, router]
   );
 
-  const handlePasswordChange = useCallback(
+  const handleEmailChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPassword(e.target.value);
-    },
-    []
-  );
-
-  const handleConfirmPasswordChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setConfirmPassword(e.target.value);
+      setEmail(e.target.value);
     },
     []
   );
@@ -107,8 +100,8 @@ function ForgotPassword() {
           name="email"
           type="email"
           placeholder=" "
-          value={password}
-          onChange={handlePasswordChange}
+          value={email}
+          onChange={handleEmailChange}
           required
         />
 

@@ -1,30 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { getCurrentUser } from "@/lib/auth";
 import { sendEmail } from "@/lib/mailer";
+import { prisma } from "@/lib/prismadb";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-export async function GET() {
+export async function POST(req : NextRequest) {
+  const { email } = await req.json();
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser) {
+
+    const user = await prisma.user.findUnique({
+      where : { email }
+    })
+
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 500 });
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: currentUser.id, email: currentUser.email },
+      { userId: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: "10m" }
     );
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/forget-password?token=${token}`;
-    console.log("Attempting to send verification email to:", currentUser.email);
+    console.log("Attempting to send verification email to:", user.email);
 
     try {
       await sendEmail({
-        to: currentUser.email!,
+        to: user.email!,
         subject: "Verify Your Email - Pravya AI",
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
