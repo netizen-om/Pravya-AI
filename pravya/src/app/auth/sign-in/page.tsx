@@ -31,7 +31,6 @@ export default function SignIn({ className = "" }) {
     if (error) {
       const message = getErrorMessage(error);
       console.log("Error detected:", error, "Message:", message);
-      // Add a small delay to ensure toast is visible
       setTimeout(() => {
         toast.error(message);
       }, 100);

@@ -121,7 +121,7 @@ function ForgotPassword() {
 
         <AuthInput
           id="ConfirmPassword"
-          name="Confirmpassword"
+          name="Confirm password"
           type="password"
           placeholder=" "
           value={confirmPassword}

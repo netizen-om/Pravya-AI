@@ -1,11 +1,13 @@
 export function getErrorMessage(errorCode: string) {
   switch (errorCode) {
-    case "CredentialsSignin":
     case "No user found":
       return "Invalid email or password. Please try again.";
 
     case "OAuthAccountNotLinked":
       return "This email is already linked with a different provider.";
+    
+    case "Invalid Password" :
+      return "Invalid Credential";
 
     case "AccessDenied":
       return "You don't have permission to access this.";
