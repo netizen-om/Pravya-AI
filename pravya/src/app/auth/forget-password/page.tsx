@@ -8,11 +8,20 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
 
-const resetPasswordSchema = z.object({
-  password: z.string().min(8, { message: "Password must be at least 8 characters long." }),
-});
+const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters long." }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords must match.",
+    path: ["confirmPassword"],
+  });
 
-const TITLE_CLASSES = "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
+const TITLE_CLASSES =
+  "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
 
 function ForgotPassword() {
   const [password, setPassword] = useState("");
@@ -28,21 +37,16 @@ function ForgotPassword() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-      const trimmedPassword = password.trim();
-      const trimmedConfirmPassword = confirmPassword.trim();
-
-      if(trimmedConfirmPassword !== trimmedPassword) {
-        toast.error("Both Password Must Match")
-        return;
-      }
-
+      console.log("Password : ", password);
+          console.log("Confirm Password : ", confirmPassword);
       try {
-        resetPasswordSchema.parse({ password: trimmedPassword });
+        resetPasswordSchema.parse({ password, confirmPassword });
       } catch (err) {
         if (err instanceof z.ZodError) {
+          
           const validationError = err.errors[0].message;
           setError(validationError);
-          toast.error(validationError); 
+          toast.error(validationError);
           return;
         }
       }
@@ -56,7 +60,7 @@ function ForgotPassword() {
 
       try {
         const response = await axios.post("/api/forget-password", {
-          newPassword: trimmedPassword,
+          newPassword: password,
           token,
         });
 
@@ -65,7 +69,8 @@ function ForgotPassword() {
           router.push("/auth/sign-in");
         }
       } catch (err: any) {
-        const errorMessage = err.response?.data?.error || "An unexpected error occurred.";
+        const errorMessage =
+          err.response?.data?.error || "An unexpected error occurred.";
         setError(errorMessage);
         toast.error(errorMessage);
       } finally {
@@ -83,11 +88,11 @@ function ForgotPassword() {
   );
 
   const handleConfirmPasswordChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setConfirmPassword(e.target.value);
-    },
-    []
-  );
+  (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);  // always gives the input value
+  },
+  []
+);
 
   return (
     <>
@@ -100,8 +105,10 @@ function ForgotPassword() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && <p className="text-red-500 text-sm text-center -mb-2">{error}</p>}
-        
+        {error && (
+          <p className="text-red-500 text-sm text-center -mb-2">{error}</p>
+        )}
+
         <AuthInput
           id="password"
           name="New password"
@@ -114,11 +121,12 @@ function ForgotPassword() {
 
         <AuthInput
           id="ConfirmPassword"
-          name="Confirm password"
+          name="Confirmpassword"
           type="password"
           placeholder=" "
           value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
+          // onChange={handleConfirmPasswordChange}
+          onChange={(e: any) => setConfirmPassword(e.target.value)}
           required
         />
 
