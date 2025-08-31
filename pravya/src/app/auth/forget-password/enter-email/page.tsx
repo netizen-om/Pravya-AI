@@ -20,48 +20,22 @@ function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get("token");
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-      const trimmedPassword = email.trim();
-      const trimmedConfirmPassword = confirmPassword.trim();
-
-      if(trimmedConfirmPassword !== trimmedPassword) {
-        toast.error("Both Password Must Match")
-        return;
-      }
-
-      try {
-        resetPasswordSchema.parse({ password: trimmedPassword });
-      } catch (err) {
-        if (err instanceof z.ZodError) {
-          const validationError = err.errors[0].message;
-          setError(validationError);
-          toast.error(validationError); 
-          return;
-        }
-      }
-
-      if (!token) {
-        setError("Password reset token is missing.");
-        return;
-      }
 
       setIsLoading(true);
 
       try {
-        const response = await axios.post("/api/forget-password", {
-          newPassword: trimmedPassword,
-          token,
+        const response = await axios.post("/api/send-forget-password-email", {
+          email
         });
 
         if (response.status === 200) {
-          toast.success("Password updated successfully!");
+          toast.success("Forget-password email sent");
           router.push("/auth/sign-in");
         }
       } catch (err: any) {
@@ -72,7 +46,7 @@ function ForgotPassword() {
         setIsLoading(false);
       }
     },
-    [email, token, router]
+    [email, router]
   );
 
   const handleEmailChange = useCallback(
