@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 import React from "react";
 
 interface AuthInputProps {
@@ -28,12 +27,6 @@ export function AuthInput({
   isForgetPassword = false
 }: AuthInputProps) {
 
-  // const router = useRouter()
-
-  const handleForgetPassword = () => {
-
-  }
-
   return (
     <div className="flex flex-col gap-2 gap-y-2 mb-5">
       <label
@@ -55,11 +48,11 @@ export function AuthInput({
       />
 
       { isForgetPassword && (
-        <p className="text-white cursor-pointer">Forget Password?</p>
+        <Link href={"/auth/forget-password/enter-email"} className="text-white cursor-pointer">Forget Password?</Link>
       )}
 
       {error && (
-        <div onClick={handleForgetPassword} className="mt-1 text-xs text-red-500">
+        <div className="mt-1 text-xs text-red-500">
           {error}
         </div>
       )}
