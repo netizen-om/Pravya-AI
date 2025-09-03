@@ -4,15 +4,12 @@ import React, { useCallback, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { AuthInput } from "@/components/ui/auth-input";
 import { AuthButton } from "@/components/ui/auth-button";
-import { z } from "zod";
 import { toast } from "sonner";
-import { signOut } from "next-auth/react";
 
 const TITLE_CLASSES = "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

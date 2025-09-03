@@ -48,7 +48,7 @@ export function AuthInput({
       />
 
       { isForgetPassword && (
-        <Link href={"/auth/forget-password/enter-email"} className="text-white cursor-pointer">Forget Password?</Link>
+        <Link href={"/auth/forget-password/email"} className="text-white cursor-pointer">Forget Password?</Link>
       )}
 
       {error && (
