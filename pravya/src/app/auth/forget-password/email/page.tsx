@@ -8,10 +8,6 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
 
-const resetPasswordSchema = z.object({
-  password: z.string().min(8, { message: "Password must be at least 8 characters long." }),
-});
-
 const TITLE_CLASSES = "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
 
 function ForgotPassword() {

@@ -6,19 +6,18 @@ import { AuthInput } from "@/components/ui/auth-input";
 import { AuthButton } from "@/components/ui/auth-button";
 import { z } from "zod";
 import { toast } from "sonner";
-import { signOut } from "next-auth/react";
-
-const resetPasswordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters long." }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords must match.",
-    path: ["confirmPassword"],
-  });
+import { passwordSchema } from "@/utlis/zod";
+// const resetPasswordSchema = z
+//   .object({
+//     password: z
+//       .string()
+//       .min(8, { message: "Password must be at least 8 characters long." }),
+//     confirmPassword: z.string(),
+//   })
+//   .refine((data) => data.password === data.confirmPassword, {
+//     message: "Passwords must match.",
+//     path: ["confirmPassword"],
+//   });
 
 const TITLE_CLASSES =
   "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
@@ -40,7 +39,7 @@ function ForgotPassword() {
       console.log("Password : ", password);
           console.log("Confirm Password : ", confirmPassword);
       try {
-        resetPasswordSchema.parse({ password, confirmPassword });
+        passwordSchema.parse({ password, confirmPassword });
       } catch (err) {
         if (err instanceof z.ZodError) {
           
