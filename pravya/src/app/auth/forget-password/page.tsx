@@ -6,25 +6,7 @@ import { AuthInput } from "@/components/ui/auth-input";
 import { AuthButton } from "@/components/ui/auth-button";
 import { z } from "zod";
 import { toast } from "sonner";
-// import { passwordSchema } from "@/utlis/zod";
-const resetPasswordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters long")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number")
-      .regex(
-        /[^A-Za-z0-9]/,
-        "Password must contain at least one special character"
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords must match.",
-    path: ["confirmPassword"],
-  });
+import { forgetPasswordSchema } from "@/utlis/zod";
 
 const TITLE_CLASSES =
   "text-2xl font-semibold text-white mb-6 font-['ABCFavorit',ui-sans-serif,system-ui,sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] tracking-tight";
@@ -46,7 +28,7 @@ function ForgotPassword() {
       console.log("Password : ", password);
       console.log("Confirm Password : ", confirmPassword);
       try {
-        resetPasswordSchema.parse({ password, confirmPassword });
+        forgetPasswordSchema.parse({ password, confirmPassword });
       } catch (err) {
         if (err instanceof z.ZodError) {
           const validationError = err.errors[0].message;
@@ -84,7 +66,7 @@ function ForgotPassword() {
         setIsLoading(false);
       }
     },
-    [password, token, router]
+    [password, confirmPassword, token, router]
   );
 
   const handlePasswordChange = useCallback(
@@ -133,7 +115,7 @@ function ForgotPassword() {
           placeholder=" "
           value={confirmPassword}
           // onChange={handleConfirmPasswordChange}
-          onChange={(e: any) => setConfirmPassword(e.target.value)}
+          onChange={handleConfirmPasswordChange}
           required
         />
 
