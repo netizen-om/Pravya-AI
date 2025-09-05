@@ -1,5 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { rateLimit } from "./lib/rateLimiter";
 
 // Define public (unprotected) routes
 const PUBLIC_ROUTES = ["/", "/auth/sign-in", "/auth/sign-up", "/auth/verify-email", "/auth/forget-password", "/auth/forget-password/email", "/about", "/contact"];
@@ -7,7 +8,7 @@ const ONBOARDING_ROUTE = "/auth/onboarding";
 const DASHBOARD_ROUTE = "/dashboard"
 
 export default withAuth(
-  function middleware(req) {
+  function middleware(req) {  
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 
