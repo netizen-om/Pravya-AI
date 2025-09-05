@@ -6,7 +6,7 @@ import Image from "next/image"
 import { Brain, MessageCircle, Target, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation';
 import { useEffect } from "react"
-
+import { LandingFooter } from "./Footer"
 
 export default function HeroSection() {
     
@@ -362,6 +362,7 @@ export default function HeroSection() {
             }}
           />
         </section>
+        <LandingFooter />
       </div>
     </>
   )

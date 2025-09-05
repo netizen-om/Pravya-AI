@@ -14,7 +14,7 @@ function page() {
       {/* page
       <Appbar/> */}
       <HeroSection />
-
+        
     </div>
   )
 }
