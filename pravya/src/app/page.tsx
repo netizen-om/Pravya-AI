@@ -10,14 +10,12 @@ import ContactPage from '@/components/ContactPage';
 
 function page() {
 
-
   return (
     <div>
       {/* page
       <Appbar/> */}
       <HeroSection />
       <LandingFooter />
-      <ContactPage />
     </div>
   )
 }

@@ -191,7 +191,7 @@ export default function UserSettingsPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       {/* Navigation Header */}
-      <div className="sticky top-0 z-10 bg-neutral-950/80 backdrop-blur-sm border-b border-neutral-800 md:hidden">
+      <div className="sticky top-0 z-10 bg-neutral-950/80 backdrop-blur-sm border-b ">
         <div className="flex items-center justify-between px-4 py-3">
           <Link
             href="/dashboard"
