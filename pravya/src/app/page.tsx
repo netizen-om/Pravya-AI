@@ -5,6 +5,7 @@ import axios from 'axios';
 import HeroSection from '@/components/HeroSection';
 import { Drawer } from '@/components/ui/drawer';
 import { Card } from '@/components/ui/card';
+import { LandingFooter } from '@/components/Footer';
 
 function page() {
 
@@ -14,7 +15,7 @@ function page() {
       {/* page
       <Appbar/> */}
       <HeroSection />
-        
+      <LandingFooter />
     </div>
   )
 }
