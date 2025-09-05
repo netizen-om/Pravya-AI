@@ -6,6 +6,7 @@ import HeroSection from '@/components/HeroSection';
 import { Drawer } from '@/components/ui/drawer';
 import { Card } from '@/components/ui/card';
 import { LandingFooter } from '@/components/Footer';
+import ContactPage from '@/components/ContactPage';
 
 function page() {
 
@@ -16,6 +17,7 @@ function page() {
       <Appbar/> */}
       <HeroSection />
       <LandingFooter />
+      <ContactPage />
     </div>
   )
 }
