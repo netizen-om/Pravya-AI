@@ -9,6 +9,7 @@ import { qdrantClient } from "./lib/qdrant";
 import { google } from "./lib/googleForAISDK";
 import { prisma } from "./lib/prisma";
 import { generateText } from "ai";
+import { openrouter } from "./lib/openRouter";
 
 const app = express();
 
@@ -34,7 +35,7 @@ type AnalysisJson = {
 app.post("/chat/:resumeId", async (req, res) => {
   const { resumeId } = req.params;
   const { question } = req.body;
-  const { model = "Gemini-2.5-flash" } = req.body;
+  const { model = "gpt-oss-20b" } = req.body;
 
   if (!resumeId || !question) {
     return res
@@ -72,7 +73,6 @@ app.post("/chat/:resumeId", async (req, res) => {
       return res.status(500).json({ message: "analysis Record not found" });
     }
     const fullAnalysis = analysisRecord!.analysis as AnalysisJson;
-    console.log("FULL ANALYSUIS : ", fullAnalysis);
     
     // return { analysisContext: fullAnalysis };
 
@@ -101,8 +101,13 @@ app.post("/chat/:resumeId", async (req, res) => {
         prompt: question,
       });
       resText = text
-    } else if (model === "Gemini-2.5-flash"){
-
+    } else if (model === "gpt-oss-20b"){
+      const { text } = await generateText({
+        model: openrouter.chat("openai/gpt-oss-20b:free"),
+        system: prompt,
+        prompt: question,
+      });
+      resText = text;
     }
 
     res.status(200).json({ answer: resText });
