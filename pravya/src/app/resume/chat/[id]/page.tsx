@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useParams } from "next/navigation"
+import { toast } from "sonner"
 
 interface Message {
   id: string
@@ -26,7 +27,21 @@ interface Conversation {
   timestamp: Date
 }
 
-const statusMessages = ["Analyzing resume…", "Extracting insights…", "Optimizing response…", "Formatting answer…"]
+const statusMessages = [
+  "Processing request…",
+  "Gathering data…",
+  "Analyzing input…",
+  "Running checks…",
+  "Applying logic…",
+  "Generating output…",
+  "Optimizing results…",
+  "Reviewing details…",
+  "Formatting content…",
+  "Ensuring accuracy…",
+  "Finalizing response…",
+  "Completing process…",
+  "Almost there!"
+]
 
 const smartPrompts = [
   "How can I tailor my resume for Meta?",
@@ -81,7 +96,7 @@ export default function ResumeChatbot() {
 
     const interval = setInterval(() => {
       setCurrentStatusIndex((prev) => (prev + 1) % statusMessages.length)
-    }, 800) // Average of 700-900ms
+    }, 3000)
 
     return () => clearInterval(interval)
   }, [isLoading])
@@ -172,6 +187,7 @@ export default function ResumeChatbot() {
   }
 
   const copyToClipboard = (text: string) => {
+    toast.success("Text copyed to clickboard")
     navigator.clipboard.writeText(text)
   }
 

@@ -40,11 +40,11 @@
     export const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
         <SessionProvider>
-        {/* PostHogProvider wraps your app, making PostHog available everywhere */}
+        {/* PostHogProvider wraps your app, making PostHog available everywhere  */}
         {/* <PostHogProvider client={posthog}> */}
             {/* <PostHogPageview /> */}
             {children}
-            <Toaster richColors theme="dark" />
+            <Toaster richColors theme="dark" expand closeButton/>
         {/* </PostHogProvider> */}
         </SessionProvider>
     );

@@ -206,13 +206,7 @@ export default function UserSettingsPage() {
       </div>
 
       {/* Desktop Back Button */}
-      <Link
-        href="/dashboard"
-        className="hidden md:flex absolute top-6 left-6 z-10 gap-2 justify-center items-center px-4 h-10 text-sm font-semibold leading-5 rounded-2xl border border-neutral-700 hover:border-neutral-600 text-neutral-400 hover:text-white transition-all duration-200"
-      >
-        <LeftArrow />
-        Home
-      </Link>
+      
 
       {/* Main Content */}
       <div className="px-4 md:pl-16 md:pt-4">

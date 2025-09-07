@@ -33,6 +33,11 @@ export default function Dashboard() {
     if(activeTab === "Resume") {
       router.push("/resume/upload")
     }
+    
+    if(activeTab === "Settings") {
+      router.push("/user/settings")
+    }
+    
   }, [activeTab])
 
   const practiceTopics = [
@@ -202,7 +207,7 @@ export default function Dashboard() {
 
             {/* Navigation Items */}
             <div className="hidden md:flex items-center space-x-8">
-              {["Dashboard", "Practice", "Resume", "Profile"].map((item) => (
+              {["Dashboard", "Practice", "Resume", "Settings"].map((item) => (
                 <button
                   key={item}
                   onClick={() => setActiveTab(item)}

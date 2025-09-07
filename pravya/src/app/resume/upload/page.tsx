@@ -22,6 +22,7 @@ import {
   Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface UploadedFile {
   name: string;
@@ -646,13 +647,16 @@ export default function ResumeUploadPage() {
                 )}
               </Button>
 
-              <Button
+              <Link href="/dashboard">             
+               <Button
                 variant="ghost"
                 className="h-12 text-base transition-all duration-300 hover:scale-[1.02] hover:bg-muted/80"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Dashboard
               </Button>
+              </Link>
+
             </div>
           </div>
         </Card>
