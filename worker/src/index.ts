@@ -34,6 +34,7 @@ type AnalysisJson = {
 app.post("/chat/:resumeId", async (req, res) => {
   const { resumeId } = req.params;
   const { question } = req.body;
+  const { model = "Gemini-2.5-flash" } = req.body;
 
   if (!resumeId || !question) {
     return res
@@ -91,13 +92,20 @@ app.post("/chat/:resumeId", async (req, res) => {
     // const generation = await model.invoke(prompt);
     // return { generation: generation.content.toString() };
 
-    const { text } = await generateText({
-      model: google('gemini-2.5-flash'),
-      system: prompt,
-      prompt: question,
-    });
+    let resText;
 
-    res.status(200).json({ answer: text });
+    if(model === "Gemini-2.5-flash") {
+      const { text } = await generateText({
+        model: google('gemini-2.5-flash'),
+        system: prompt,
+        prompt: question,
+      });
+      resText = text
+    } else if (model === "Gemini-2.5-flash"){
+
+    }
+
+    res.status(200).json({ answer: resText });
 
   } catch (error) {
     console.error("Error during chat processing:", error);
