@@ -35,7 +35,7 @@ type AnalysisJson = {
 app.post("/chat/:resumeId", async (req, res) => {
   const { resumeId } = req.params;
   const { question } = req.body;
-  const { model = "gpt-oss-20b" } = req.body;
+  const { model = "gpt-oss-120b" } = req.body;
 
   if (!resumeId || !question) {
     return res
@@ -73,7 +73,7 @@ app.post("/chat/:resumeId", async (req, res) => {
       return res.status(500).json({ message: "analysis Record not found" });
     }
     const fullAnalysis = analysisRecord!.analysis as AnalysisJson;
-    
+
     // return { analysisContext: fullAnalysis };
 
     const prompt = `You are a helpful and encouraging resume assistant. Answer the user's question based on the provided context.
@@ -89,29 +89,37 @@ app.post("/chat/:resumeId", async (req, res) => {
     ${JSON.stringify(searchResult, null, 2)}
     
     Answer:`;
-    // const generation = await model.invoke(prompt);
-    // return { generation: generation.content.toString() };
 
     let resText;
 
-    if(model === "Gemini-2.5-flash") {
+    if (model === "Gemini-2.5-flash") {
       const { text } = await generateText({
-        model: google('gemini-2.5-flash'),
+        model: google("gemini-2.5-flash"),
         system: prompt,
         prompt: question,
       });
-      resText = text
-    } else if (model === "gpt-oss-20b"){
+      resText = text;
+    } else if (model === "gpt-oss-20b") {
       const { text } = await generateText({
         model: openrouter.chat("openai/gpt-oss-20b:free"),
         system: prompt,
         prompt: question,
       });
       resText = text;
+    } else if (model === "gpt-oss-120b") {
+      console.log("USING 120B");
+      
+      const { text } = await generateText({
+        model: openrouter.chat("openai/gpt-oss-120b:free"),
+        system: prompt,
+        prompt: question,
+      });
+      resText = text;
+    } else if (model === "gpt-oss-120b") {
+
     }
 
     res.status(200).json({ answer: resText });
-
   } catch (error) {
     console.error("Error during chat processing:", error);
     res.status(500).json({ error: "An internal error occurred." });
