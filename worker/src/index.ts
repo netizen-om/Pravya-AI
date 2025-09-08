@@ -133,6 +133,14 @@ app.post("/chat/:resumeId", async (req, res) => {
         prompt: question,
       });
       resText = text;
+    } else if (model === "deepseek-r1t") {
+      console.log("USING DEEPSEAK r1t");
+      const { text } = await generateText({
+        model: openrouter.chat("tngtech/deepseek-r1t-chimera:free"),
+        system: prompt,
+        prompt: question,
+      });
+      resText = text;
     }
 
     res.status(200).json({ answer: resText });

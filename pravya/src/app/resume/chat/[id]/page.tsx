@@ -554,6 +554,7 @@ export default function ResumeChatbot() {
                   <SelectItem value="gpt-oss-120b">gpt-oss-120b</SelectItem>
                   <SelectItem value="mistral-nemo">mistral-nemo</SelectItem>
                   <SelectItem value="deepseek-r1-0528">deepseek-r1-0528</SelectItem>
+                  <SelectItem value="deepseek-r1t">deepseek-r1t</SelectItem>
                 </SelectContent>
               </Select>
 
