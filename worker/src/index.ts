@@ -35,7 +35,7 @@ type AnalysisJson = {
 app.post("/chat/:resumeId", async (req, res) => {
   const { resumeId } = req.params;
   const { question } = req.body;
-  const { model = "gpt-oss-120b" } = req.body;
+  const { model = "gemini-2.5-flash" } = req.body;
 
   if (!resumeId || !question) {
     return res
@@ -92,7 +92,8 @@ app.post("/chat/:resumeId", async (req, res) => {
 
     let resText;
 
-    if (model === "Gemini-2.5-flash") {
+    if (model === "gemini-2.5-flash") {
+      console.log("USING 2.5");
       const { text } = await generateText({
         model: google("gemini-2.5-flash"),
         system: prompt,
@@ -100,6 +101,7 @@ app.post("/chat/:resumeId", async (req, res) => {
       });
       resText = text;
     } else if (model === "gpt-oss-20b") {
+      console.log("USING 20B");
       const { text } = await generateText({
         model: openrouter.chat("openai/gpt-oss-20b:free"),
         system: prompt,
@@ -115,8 +117,22 @@ app.post("/chat/:resumeId", async (req, res) => {
         prompt: question,
       });
       resText = text;
-    } else if (model === "gpt-oss-120b") {
-
+    } else if (model === "mistral-nemo") {
+      console.log("USING NEMO");
+      const { text } = await generateText({
+        model: openrouter.chat("mistralai/mistral-nemo:free"),
+        system: prompt,
+        prompt: question,
+      });
+      resText = text;
+    } else if (model === "deepseek-r1-0528") {
+      console.log("USING DEEPSEAK");
+      const { text } = await generateText({
+        model: openrouter.chat("deepseek/deepseek-r1-0528-qwen3-8b:free"),
+        system: prompt,
+        prompt: question,
+      });
+      resText = text;
     }
 
     res.status(200).json({ answer: resText });
