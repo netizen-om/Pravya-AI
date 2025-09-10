@@ -51,16 +51,6 @@ const worker = new Worker(
 
       const store = await getVectorStore();
 
-      const nonEmptyDocs = docsWithMetadata.filter(
-        (doc) => doc.pageContent && doc.pageContent.trim() !== ""
-      );
-
-      console.log(`Adding ${nonEmptyDocs.length} non-empty chunks to Qdrant`);
-
-      if (nonEmptyDocs.length > 0) {
-        await store.addDocuments(nonEmptyDocs);
-      }
-
       await store.addDocuments(docsWithMetadata);
 
       console.log("All docs added to Qdrant with metadata");
