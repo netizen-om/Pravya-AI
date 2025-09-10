@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "dev:parser": "ts-node-dev --respawn --transpile-only src/parseResume.ts",
-    "dev:analyse": "ts-node-dev --respawn --transpile-only src/analyseResume.ts"
+    "dev:analyse": "ts-node-dev --respawn --transpile-only src/analyseResume.ts",
+    "test:embedding": "ts-node-dev --respawn --transpile-only src/test-embedding.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +23,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.6",
-    "@langchain/community": "^0.3.50",
+    "@langchain/community": "^0.3.55",
     "@langchain/core": "^0.3.70",
     "@langchain/google-genai": "^0.2.16",
     "@langchain/langgraph": "^0.4.5",
