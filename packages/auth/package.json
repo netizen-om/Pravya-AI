@@ -1,0 +1,19 @@
+{
+  "name": "@repo/auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.14.0",
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
+    "@repo/db": "workspace:*",
+    "bcryptjs": "^3.0.2",
+    "next-auth": "^4.24.11"
+  }
+}
