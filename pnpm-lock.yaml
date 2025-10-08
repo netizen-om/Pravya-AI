@@ -215,6 +215,9 @@ importers:
       '@qdrant/js-client-rest':
         specifier: ^1.15.0
         version: 1.15.1(typescript@5.9.3)
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       ai:
         specifier: ^5.0.14
         version: 5.0.60(zod@3.25.76)
