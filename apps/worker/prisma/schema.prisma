@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified Boolean?
+  image         String?
+  imagePublicId String?
+  password      String?
+  isSubscribed  Boolean  @default(false)
+  isDeleted     Boolean  @default(false)
+  bio           String?
+
+  accounts   Account[]
+  interviews Interview[]
+  payment    Payment[]
+  Resume     Resume[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Interview {
+  interviewId String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id]) // changed to reference id
+  role        String
+  level       String
+  amount      Int
+  techstack   String
+  type        String
+  createdAt   DateTime @default(now())
+  status      String   @default("pending")
+  isDeleted   Boolean  @default(false)
+
+  questions Question[]
+  feedback  Feedback?
+  audio     InterviewAudio?
+}
+
+model Question {
+  questionId   String    @id @default(uuid())
+  interviewId  String
+  interview    Interview @relation(fields: [interviewId], references: [interviewId])
+  questionText String
+  answer       String?
+  score        Int?
+  feedback     String?
+}
+
+model Feedback {
+  feedbackId       String    @id @default(uuid())
+  interviewId      String    @unique
+  interview        Interview @relation(fields: [interviewId], references: [interviewId])
+  summary          String
+  improvementAreas String[]
+  confidenceScore  Int
+}
+
+model InterviewAudio {
+  audioId     String    @id @default(uuid())
+  interviewId String    @unique
+  interview   Interview @relation(fields: [interviewId], references: [interviewId])
+
+  isDeleted  Boolean  @default(false)
+  startTime  DateTime
+  endTime    DateTime
+  transcript String[]
+  audioUrl   String
+}
+
+model Payment {
+  paymentId         String   @id @default(uuid())
+  createdAt         DateTime @default(now())
+  userId            String
+  amount            Int
+  paymentMethod     String
+  razorpayOrderId   String
+  razorpayPaymentId String
+  metadata          Json?
+  currency          String   @default("INR")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Resume {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  fileName       String
+  isDeleted      Boolean         @default(false)
+  publicId       String
+  fileUrl        String
+  QdrantStatus   String          @default("uploadeding")
+  AnalysisStatus String          @default("pending")
+  qdrantFileId   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  ResumeAnalysis ResumeAnalysis?
+}
+
+model ResumeAnalysis {
+  resumeAnalysisId String   @id @default(cuid())
+  resumeId         String   @unique
+  resume           Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  atsScore         Int?
+  analysis         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
