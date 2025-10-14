@@ -4,10 +4,7 @@
   "description": "",
   "main": "index1.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "dev2": "ts-node-dev --respawn --transpile-only src/index2.ts",
-    "dev3": "ts-node-dev --respawn --transpile-only src/index3.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
   },
   "keywords": [],
   "author": "",
