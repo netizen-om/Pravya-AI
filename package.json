@@ -5,7 +5,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:pravya" : "pnpm -F @repo/pravya run dev",
+    "dev:ws-server" : "pnpm -F @repo/ws-server run dev",
+    "dev:worker" : "pnpm -F @repo/worker run dev"
   },
   "keywords": [],
   "author": "",
