@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PhoneIcon } from "lucide-react";
+import { MessageCircle, PhoneIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
@@ -22,6 +22,17 @@ interface Message {
   content: string;
 }
 
+// A new component for the "Listening..." animation
+const ListeningIndicator = () => {
+  return (
+    <div className="flex items-center justify-center space-x-1.5 p-2">
+      <span className="h-2 w-2 rounded-full bg-white animate-pulse [animation-delay:-0.3s]"></span>
+      <span className="h-2 w-2 rounded-full bg-white animate-pulse [animation-delay:-0.15s]"></span>
+      <span className="h-2 w-2 rounded-full bg-white animate-pulse"></span>
+    </div>
+  );
+};
+
 const page = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -34,6 +45,7 @@ const page = () => {
     }[]
   >([]);
   const interimUserIdRef = useRef<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Refs to hold socket, media recorder, and media source without causing re-renders
   const socketRef = useRef<Socket | null>(null);
@@ -42,6 +54,10 @@ const page = () => {
   const sourceBufferRef = useRef<SourceBuffer | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const pendingChunksRef = useRef<Uint8Array[]>([]);
+
+  const lastMessage = messages[messages.length - 1];
+  const showListeningIndicator =
+    lastMessage?.role === "user" && lastMessage?.interim;
 
   useEffect(() => {
     // Initialize Socket.IO connection
@@ -231,16 +247,20 @@ const page = () => {
   };
 
   // Auto-scroll to the latest message
-  // const scrollToBottom = () => {
-  //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  // };
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  // useEffect(() => {
-  //   scrollToBottom();
-  // }, [messages]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const userAvatar = "https://placehold.co/40x40/16a34a/ffffff?text=Y";
   const assistantAvatar = "https://placehold.co/40x40/7c3aed/ffffff?text=A";
+
+  const filteredMessages = messages.filter(
+    (msg) => !(msg.role === "user" && msg.interim)
+  );
 
   return (
     <>
@@ -256,7 +276,13 @@ const page = () => {
               <div className="w-auto h-[450] bg-zinc-800 rounded-lg">
                 <div className="flex flex-col justify-center items-center h-full w-full">
                   <div className="w-[110] h-[110] rounded-full bg-white"></div>
-                  <div className="bg-zinc-600 px-5 py-1 rounded-3xl mt-3 text-white">{isRecording ? (isReady ? "Listening..." : "Connecting...") : "Idle"}</div>
+                  <div className="bg-zinc-600 px-5 py-1 rounded-3xl mt-3 text-white">
+                    {isRecording
+                      ? isReady
+                        ? "Listening..."
+                        : "Connecting..."
+                      : "Idle"}
+                  </div>
                 </div>
               </div>
               <div className="w-auto h-[450] bg-zinc-800 rounded-lg">
@@ -275,42 +301,64 @@ const page = () => {
                   <div className="flex flex-col h-full bg-transparent font-sans">
                     {/* Messages Area */}
                     <div className="flex-1 p-4 overflow-y-auto">
-                      <div className="flex flex-col space-y-4">
-                        {messages.map((msg) => (
-                          <div
-                            key={msg.id}
-                            className={`flex items-end gap-3 ${
-                              msg.role === "user"
-                                ? "justify-end"
-                                : "justify-start"
-                            }`}
-                          >
-                            {msg.role === "assistant" && (
-                              <img
-                                className="w-8 h-8 rounded-full"
-                                src={assistantAvatar}
-                                alt="Assistant's Avatar"
-                              />
-                            )}
+                      {messages.length === 0 ? (
+                        // ✨ NEW: Placeholder for when the chat is empty
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <MessageCircle className="h-16 w-16 text-zinc-600" />
+                          <p className="mt-4 text-zinc-400">
+                            Your interview chat will appear here.
+                            <br />
+                            Click the "Start" button below to begin.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col space-y-4">
+                          {filteredMessages.map((msg) => (
                             <div
-                              className={`max-w-xs md:max-w-sm p-3 rounded-2xl ${
+                              key={msg.id}
+                              className={`flex items-end gap-3 ${
                                 msg.role === "user"
-                                  ? "bg-slate-200 !text-zinc-900 rounded-br-none z-10"
-                                  : "bg-zinc-700 text-white rounded-bl-none" // AI message style
+                                  ? "justify-end"
+                                  : "justify-start"
                               }`}
                             >
-                              <p className="text-sm">{msg.text}</p>
+                              {msg.role === "assistant" && (
+                                <img
+                                  className="w-8 h-8 rounded-full"
+                                  src={assistantAvatar}
+                                  alt="Assistant's Avatar"
+                                />
+                              )}
+                              <div
+                                className={`max-w-xs md:max-w-sm p-3 rounded-2xl ${
+                                  msg.role === "user"
+                                    ? "bg-slate-200 !text-zinc-900 rounded-br-none z-10"
+                                    : "bg-zinc-700 text-white rounded-bl-none" // AI message style
+                                }`}
+                              >
+                                <p className="text-sm">{msg.text}</p>
+                              </div>
+                              {msg.role === "user" && (
+                                <img
+                                  className="w-8 h-8 rounded-full"
+                                  src={userAvatar}
+                                  alt="User's Avatar"
+                                />
+                              )}
                             </div>
-                            {msg.role === "user" && (
-                              <img
-                                className="w-8 h-8 rounded-full"
-                                src={userAvatar}
-                                alt="User's Avatar"
-                              />
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                          {/* ✨ NEW: Conditionally render the listening indicator here ✨ */}
+                          {showListeningIndicator && (
+                            <div className="flex justify-end pr-12">
+                              <div className="text-sm flec flex text-zinc-400 animate-pulse">
+                                <ListeningIndicator />
+                                Listening...
+                              </div>
+                            </div>
+                          )}
+                          <div ref={messagesEndRef} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
