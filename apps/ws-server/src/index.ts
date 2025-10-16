@@ -97,6 +97,9 @@ io.on("connection", (socket) => {
     isAgentSpeaking = true;
 
     console.log("AI says:", text);
+
+    socket.emit("agent-transcript", { text, timestamp: new Date().toISOString() });
+
     interviewState.conversationHistory.push({
       role: "assistant",
       content: text,
@@ -327,6 +330,8 @@ io.on("connection", (socket) => {
         isUserSpeaking = true;
         console.log("User said (interim):", transcript);
 
+        socket.emit("user-transcript-interim", { text: transcript, timestamp: new Date().toISOString() });
+
         // Clear any pending response timeout
         if (speechTimeout) {
           clearTimeout(speechTimeout);
@@ -359,6 +364,7 @@ io.on("connection", (socket) => {
         speechTimeout = setTimeout(async () => {
           if (pendingTranscript && !isAIResponding) {
             console.log("Processing user response after silence...");
+            socket.emit("user-transcript-final", { text: pendingTranscript, timestamp: new Date().toISOString() });
             await handleUserResponse(pendingTranscript);
             pendingTranscript = "";
             isUserSpeaking = false;
@@ -388,6 +394,7 @@ io.on("connection", (socket) => {
         speechTimeout = setTimeout(async () => {
           if (pendingTranscript && !isAIResponding) {
             console.log("Processing user response after utterance end...");
+            socket.emit("user-transcript-final", { text: pendingTranscript, timestamp: new Date().toISOString() });
             await handleUserResponse(pendingTranscript);
             pendingTranscript = "";
             isUserSpeaking = false;
