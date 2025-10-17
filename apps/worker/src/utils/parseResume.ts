@@ -1,17 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { Worker } from "bullmq";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import fetch from "node-fetch";
 import { Blob } from "buffer";
-import { getVectorStore } from "./lib/vectorStore";
-import { prisma } from "./lib/prisma";
-import { publishResumeUpdate } from "./lib/redis";
+import { getVectorStore } from "../lib/vectorStore";
+import { prisma } from "../lib/prisma";
+import { publishResumeUpdate } from "../lib/redis";
 
-const worker = new Worker(
-  "resume-processing",
-  async (job) => {
+export const resumeParser = async (job) => {
     const { fileUrl, userId, resumeId } = job.data;
 
     try {
@@ -75,12 +72,4 @@ const worker = new Worker(
       // Publish error status
       await publishResumeUpdate(resumeId, { QdrantStatus: "error" });
     }
-  },
-  {
-    concurrency: 100,
-    connection: {
-      host: "localhost",
-      port: 6379,
-    },
   }
-);

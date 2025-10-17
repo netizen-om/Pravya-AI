@@ -2,14 +2,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import { Worker } from "bullmq";
 import express from "express";
 import cors from "cors";
-import { embedding } from "./lib/embedding";
-import { qdrantClient } from "./lib/qdrant";
-import { google } from "./lib/googleForAISDK";
-import { prisma } from "./lib/prisma";
-import { generateText } from "ai";
-import { openrouter } from "./lib/openRouter";
 
 const app = express();
 
@@ -24,9 +19,28 @@ app.use(
 
 const PORT = 8000;
 
-import resumeRouter from "./routes/resume.routes"
+// Routes
+import resumeRouter from "./routes/resume.routes";
+import { resumeParser } from "./utils/parseResume";
+import { resumeAnalysis } from "./utils/analyseResume";
 
-app.use("/api/v1/resume", resumeRouter)
+app.use("/api/v1/resume", resumeRouter);
+
+const ParseingWorker = new Worker("resume-processing", resumeParser, {
+  concurrency: 100,
+  connection: {
+    host: "localhost",
+    port: 6379,
+  },
+});
+
+const AnalysingWorker = new Worker("resume-analyse", resumeAnalysis, {
+  concurrency: 5,
+  connection: {
+    host: "localhost",
+    port: 6379,
+  },
+});
 
 app.listen(PORT, () => {
   console.log(`✨ Server is running on http://localhost:${PORT}`);

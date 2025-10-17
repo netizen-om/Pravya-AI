@@ -6,10 +6,10 @@ import fetch from "node-fetch";
 import { z } from "zod";
 import pdfParse from "pdf-parse";
 import { generateObject } from "ai";
-import { prisma } from "./lib/prisma";
-import { google } from "./lib/googleForAISDK";
-import { AnalysisSchema } from "./lib/zod"
-import { publishResumeUpdate } from "./lib/redis";
+import { prisma } from "../lib/prisma";
+import { google } from "../lib/googleForAISDK";
+import { AnalysisSchema } from "../lib/zod"
+import { publishResumeUpdate } from "../lib/redis";
 
 // ----- Job Data Interface -----
 interface ResumeAnalyseJobData {
@@ -22,9 +22,7 @@ interface ResumeAnalyseJobData {
 type ResumeAnalysisType = z.infer<typeof AnalysisSchema>;
 
 // ----- Worker -----
-const worker = new Worker<ResumeAnalyseJobData>(
-  "resume-analyse",
-  async (job: Job<ResumeAnalyseJobData>) => {
+export const resumeAnalysis = async (job: Job<ResumeAnalyseJobData>) => {
     const { fileUrl, resumeId } = job.data;
     
     try {
@@ -117,12 +115,4 @@ const worker = new Worker<ResumeAnalyseJobData>(
       
       throw error;
     }
-  },
-  {
-    concurrency: 5,
-    connection: {
-      host: "localhost",
-      port: 6379,
-    },
   }
-);
