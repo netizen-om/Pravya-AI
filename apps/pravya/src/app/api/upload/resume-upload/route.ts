@@ -75,13 +75,13 @@ export async function POST(req: Request) {
       fileName : resume.fileName
     });
 
-    // await resumeAnalyseQueue.add("resume-analyse", {
-    //   resumeId: resume.id,
-    //   fileUrl: resume.fileUrl,
-    //   userId: resume.userId,
-    //   publicId : resume.publicId,
-    //   fileName : resume.fileName
-    // });
+    await resumeAnalyseQueue.add("resume-analyse", {
+      resumeId: resume.id,
+      fileUrl: resume.fileUrl,
+      userId: resume.userId,
+      publicId : resume.publicId,
+      fileName : resume.fileName
+    });
 
     return NextResponse.json({ success: true, resume: resume });
   } catch (error: any) {

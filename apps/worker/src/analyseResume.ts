@@ -52,8 +52,6 @@ const worker = new Worker<ResumeAnalyseJobData>(
       const pdfData = await pdfParse(buffer);
       const resumeText = pdfData.text.trim();
 
-      console.log("RESUME TEXT : ", resumeText);
-
       if (!resumeText || resumeText.length < 50) {
         throw new Error("Resume text is too short or unreadable");
       }
@@ -74,13 +72,10 @@ const worker = new Worker<ResumeAnalyseJobData>(
           },
         ],
       });
-      console.log("RESPONSE BEFORE VALIDATION : ", object);
 
       // 4) Parse again to be 100% type-safe at runtime
       const validatedAnalysis: ResumeAnalysisType =
         AnalysisSchema.parse(object);
-
-      console.log("RESPONSE AFTER VALIDATION : ", validatedAnalysis);
 
       // 5) Save to Postgres (upsert)
       await prisma.resumeAnalysis.upsert({

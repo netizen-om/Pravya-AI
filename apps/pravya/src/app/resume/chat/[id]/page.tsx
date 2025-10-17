@@ -84,18 +84,7 @@ const mockConversations: Conversation[] = [
 ];
 
 export default function ResumeChatbot() {
-  const [messages, setMessages] = useState<Message[]>([{
-    id: "1",
-    type: "user",
-    content: "Can you analyze my resume and give feedback?",
-    timestamp: new Date("2025-09-08T10:15:00"),
-  },
-  {
-    id: "2",
-    type: "bot",
-    content: "Sure! Please upload your resume, and I’ll analyze it for skills, experience, and improvements.",
-    timestamp: new Date("2025-09-08T10:15:05"),
-  },]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash"); // default value
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -178,7 +167,7 @@ export default function ResumeChatbot() {
     setCurrentStatusIndex(0);
 
     try {
-      const res = await fetch(`http://localhost:8000/chat/${resumeId}`, {
+      const res = await fetch(`http://localhost:8000/api/v1/resume/chat/${resumeId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: textToSend, model : selectedModel }),
