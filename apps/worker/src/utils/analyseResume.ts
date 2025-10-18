@@ -1,25 +1,15 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { Worker, Job } from "bullmq";
+import { Job } from "bullmq";
 import fetch from "node-fetch";
-import { z } from "zod";
 import pdfParse from "pdf-parse";
 import { generateObject } from "ai";
 import { prisma } from "../lib/prisma";
 import { google } from "../lib/googleForAISDK";
 import { AnalysisSchema } from "../lib/zod"
 import { publishResumeUpdate } from "../lib/redis";
-
-// ----- Job Data Interface -----
-interface ResumeAnalyseJobData {
-  fileUrl: string;
-  userId: string;
-  resumeId: string;
-}
-
-// ----- Inferred type -----
-type ResumeAnalysisType = z.infer<typeof AnalysisSchema>;
+import { ResumeAnalyseJobData, ResumeAnalysisType } from "../types";
 
 // ----- Worker -----
 export const resumeAnalysis = async (job: Job<ResumeAnalyseJobData>) => {

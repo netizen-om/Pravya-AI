@@ -7,8 +7,10 @@ import { Blob } from "buffer";
 import { getVectorStore } from "../lib/vectorStore";
 import { prisma } from "../lib/prisma";
 import { publishResumeUpdate } from "../lib/redis";
+import { ResumeAnalyseJobData } from "../types";
+import { Job } from "bullmq";
 
-export const resumeParser = async (job) => {
+export const resumeParser = async (job : Job<ResumeAnalyseJobData>) => {
     const { fileUrl, userId, resumeId } = job.data;
 
     try {
