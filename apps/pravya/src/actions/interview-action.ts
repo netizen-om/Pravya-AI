@@ -1,99 +1,114 @@
 "use server"
 
 import { prisma } from "@repo/db";
+import { unstable_cache as cache } from "next/cache"; // 1. Import the cache function
+
 /**
  * Fetches all main categories and includes a preview of their associated templates.
+ * The result is cached for 1 hour (3600 seconds).
  */
-export async function getMainCategoriesWithTemplates() {
-  try {
-    const categories = await prisma.mainCategory.findMany({
-      // Include the nested relations to get all the data we need in one query
-      include: {
-        subCategories: {
-          include: {
-            templates: {
-              // Limit the number of templates per sub-category for the preview
-              take: 4, 
-              include: {
-                tags: true, // Also fetch the tags for each template
+export const getMainCategoriesWithTemplates = cache(
+  async () => {
+    try {
+      // This log will only appear in your console when the cache is empty or stale.
+      console.log("CACHE MISS: Fetching main categories from the database.");
+
+      const categories = await prisma.mainCategory.findMany({
+        include: {
+          subCategories: {
+            include: {
+              templates: {
+                take: 4,
+                include: {
+                  tags: true,
+                },
               },
             },
           },
         },
-      },
-    })
+      });
 
-    // Transform the raw database data to match the shape your frontend expects
-    const formattedData = categories.map((mainCat) => {
-      // Flatten the templates from all sub-categories into a single array
-      const allTemplates = mainCat.subCategories.flatMap((subCat) => subCat.templates);
-
-      return {
-        mainCategoryId: mainCat.mainCategoryId,
-        name: mainCat.name,
-        // Take the first 4-5 templates as a preview for the main page
-        templates: allTemplates.slice(0, 4).map((template) => ({
-          id: template.interviewTemplateId,
-          title: template.title,
-          description: template.description,
-          // Convert the array of Tag objects to an array of strings
-          tags: template.tags.map((tag) => tag.name),
-        })),
-      }
-    })
-
-    return formattedData
-  } catch (error) {
-    console.error("Failed to fetch main categories:", error)
-    return [] // Return an empty array on error
+      const formattedData = categories.map((mainCat) => {
+        const allTemplates = mainCat.subCategories.flatMap(
+          (subCat) => subCat.templates
+        );
+        return {
+          mainCategoryId: mainCat.mainCategoryId,
+          name: mainCat.name,
+          templates: allTemplates.slice(0, 4).map((template) => ({
+            id: template.interviewTemplateId,
+            title: template.title,
+            description: template.description,
+            tags: template.tags.map((tag) => tag.name),
+          })),
+        };
+      });
+      return formattedData;
+    } catch (error) {
+      console.error("Failed to fetch main categories:", error);
+      return [];
+    }
+  },
+  ["main-categories-with-templates"], // 2. A unique key for this specific cache.
+  {
+    revalidate: 3600, // 3. Cache duration in seconds (1 hour).
   }
-}
+);
 
 /**
- * Fetches the detailed view for a single main category, including all its
- * sub-categories and their respective templates.
+ * Fetches the detailed view for a single main category.
+ * The result is cached for 1 hour (3600 seconds).
  * @param categoryId The ID of the main category to fetch.
  */
 export async function getCategoryDetails(categoryId: string) {
-  try {
-    const category = await prisma.mainCategory.findUnique({
-      where: {
-        mainCategoryId: categoryId,
-      },
-      include: {
-        // Include all sub-categories belonging to this main category
-        subCategories: {
+  // The cache key is dynamic, including the categoryId to ensure
+  // each category's data is cached separately.
+  return cache(
+    async () => {
+      try {
+        console.log(`CACHE MISS: Fetching details for category ${categoryId} from DB.`);
+        
+        const category = await prisma.mainCategory.findUnique({
+          where: {
+            mainCategoryId: categoryId,
+          },
           include: {
-            // Include all templates within each sub-category
-            templates: {
+            subCategories: {
               include: {
-                tags: true, // And their tags
+                templates: {
+                  include: {
+                    tags: true,
+                  },
+                },
               },
             },
           },
-        },
-      },
-    })
+        });
 
-    if (!category) {
-      return null // Or handle the "not found" case as needed
-    }
+        if (!category) {
+          return null;
+        }
 
-    // Transform the data to match the expected shape
-    return {
-      mainCategoryName: category.name,
-      subCategories: category.subCategories.map((subCat) => ({
-        name: subCat.name,
-        templates: subCat.templates.map((template) => ({
-          id: template.interviewTemplateId,
-          title: template.title,
-          description: template.description,
-          tags: template.tags.map((tag) => tag.name),
-        })),
-      })),
+        return {
+          mainCategoryName: category.name,
+          subCategories: category.subCategories.map((subCat) => ({
+            name: subCat.name,
+            templates: subCat.templates.map((template) => ({
+              id: template.interviewTemplateId,
+              title: template.title,
+              description: template.description,
+              tags: template.tags.map((tag) => tag.name),
+            })),
+          })),
+        };
+      } catch (error) {
+        console.error(`Failed to fetch details for category ${categoryId}:`, error);
+        return null;
+      }
+    },
+    ["category-details", categoryId], // Note the dynamic key part.
+    {
+      revalidate: 3600,
     }
-  } catch (error) {
-    console.error(`Failed to fetch details for category ${categoryId}:`, error)
-    return null // Return null on error
-  }
+  )(); // We invoke the wrapped function immediately.
 }

@@ -28,6 +28,12 @@ const seedData = [
             estimatedDuration: 50,
             tags: ['Vue.js', 'Mid-Level', 'Technical'],
           },
+           {
+            title: 'Next.js & Vercel Pro',
+            description: 'Interview covering Next.js App Router, Server Actions, and Vercel deployment strategies.',
+            estimatedDuration: 55,
+            tags: ['Next.js', 'React', 'Vercel', 'Mid-Level', 'Technical'],
+          },
         ],
       },
       {
@@ -45,6 +51,18 @@ const seedData = [
             estimatedDuration: 75,
             tags: ['Java', 'Spring Boot', 'Senior', 'Technical'],
           },
+          {
+            title: 'PHP (Laravel) Developer',
+            description: 'Covers core Laravel concepts, Eloquent ORM, and Blade templating.',
+            estimatedDuration: 50,
+            tags: ['PHP', 'Laravel', 'Mid-Level', 'Technical'],
+          },
+          {
+            title: 'Senior .NET Core Engineer',
+            description: 'Focuses on C#, ASP.NET Core, Entity Framework, and Azure services.',
+            estimatedDuration: 70,
+            tags: ['.NET', 'C#', 'Azure', 'Senior', 'Technical'],
+          },
         ],
       },
       {
@@ -61,6 +79,63 @@ const seedData = [
             description: 'Focuses on K8s architecture, pod management, networking, and troubleshooting.',
             estimatedDuration: 50,
             tags: ['Kubernetes', 'Docker', 'Senior', 'Technical'],
+          },
+        ],
+      },
+      {
+        subCategoryName: 'Mobile Development',
+        templates: [
+          {
+            title: 'iOS Developer (SwiftUI)',
+            description: 'Focuses on Swift, SwiftUI, Combine, and Core Data for native iOS app development.',
+            estimatedDuration: 60,
+            tags: ['iOS', 'Swift', 'SwiftUI', 'Mid-Level', 'Mobile'],
+          },
+          {
+            title: 'Android Developer (Kotlin)',
+            description: 'Covers Kotlin, Jetpack Compose, Coroutines, and MVVM architecture.',
+            estimatedDuration: 60,
+            tags: ['Android', 'Kotlin', 'Compose', 'Mid-Level', 'Mobile'],
+          },
+          {
+            title: 'React Native Developer',
+            description: 'Assesses skills in building cross-platform applications with React Native.',
+            estimatedDuration: 55,
+            tags: ['React Native', 'Mobile', 'JavaScript', 'Mid-Level'],
+          },
+        ],
+      },
+      {
+        subCategoryName: 'AI & Machine Learning',
+        templates: [
+          {
+            title: 'Machine Learning Engineer',
+            description: 'Covers fundamental ML algorithms, model training, evaluation, and deployment with Python.',
+            estimatedDuration: 75,
+            tags: ['Python', 'Scikit-learn', 'TensorFlow', 'Mid-Level', 'AI/ML'],
+          },
+          {
+            title: 'Natural Language Processing (NLP) Specialist',
+            description: 'Deep dive into text processing, transformers, and libraries like Hugging Face.',
+            estimatedDuration: 65,
+            tags: ['NLP', 'Python', 'PyTorch', 'Senior', 'AI/ML'],
+          },
+        ],
+      },
+      {
+        subCategoryName: 'Data Science',
+        templates: [
+          {
+            title: 'Data Analyst Interview',
+            description: 'Focuses on SQL, data visualization (Tableau/Power BI), and statistical analysis.',
+            estimatedDuration: 60,
+            tags: ['SQL', 'Tableau', 'Excel', 'Junior', 'Data'],
+          },
+          {
+            title: 'Data Scientist (Python)',
+            description: 'Covers data manipulation with Pandas, statistical modeling, and machine learning principles.',
+            estimatedDuration: 80,
+            tags: ['Python', 'Pandas', 'SQL', 'Statistics', 'Mid-Level', 'Data'],
           },
         ],
       },
@@ -103,6 +178,17 @@ const seedData = [
           },
         ],
       },
+      {
+        subCategoryName: 'Customer Success',
+        templates: [
+           {
+            title: 'Customer Success Manager Onboarding',
+            description: 'Scenario-based interview on handling client onboarding, renewals, and escalations.',
+            estimatedDuration: 40,
+            tags: ['Customer Success', 'SaaS', 'Behavioral', 'Mid-Level'],
+          },
+        ]
+      }
     ],
   },
   {
@@ -122,6 +208,12 @@ const seedData = [
             description: 'Create and optimize a mock Google Ads campaign based on a given budget and goals.',
             estimatedDuration: 45,
             tags: ['Marketing', 'PPC', 'Google Ads', 'Junior'],
+          },
+          {
+            title: 'Social Media Manager Strategy',
+            description: 'Develop a social media content calendar and engagement strategy for a new brand.',
+            estimatedDuration: 40,
+            tags: ['Marketing', 'Social Media', 'Content', 'Mid-Level'],
           },
         ],
       },
