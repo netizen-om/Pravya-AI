@@ -135,32 +135,13 @@ export default function InterviewsPage() {
 
                 {/* Scrollable Cards Container */}
                 <div className="group relative">
-                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide hover:scrollbar-show">
+                  <div className="flex gap-4 overflow-x-hidden pb-4 ">
                     {category.templates.map((template) => (
                       <div key={template.id} className="flex-shrink-0 w-80">
                         <InterviewTemplateCard template={template} />
                       </div>
                     ))}
                   </div>
-                  {/* Subtle scrollbar styling */}
-                  <style jsx>{`
-                    .scrollbar-hide::-webkit-scrollbar {
-                      display: none;
-                    }
-                    .scrollbar-show::-webkit-scrollbar {
-                      height: 6px;
-                    }
-                    .scrollbar-show::-webkit-scrollbar-track {
-                      background: transparent;
-                    }
-                    .scrollbar-show::-webkit-scrollbar-thumb {
-                      background: rgba(255, 255, 255, 0.2);
-                      border-radius: 3px;
-                    }
-                    .scrollbar-show::-webkit-scrollbar-thumb:hover {
-                      background: rgba(255, 255, 255, 0.3);
-                    }
-                  `}</style>
                 </div>
               </motion.div>
             ))}

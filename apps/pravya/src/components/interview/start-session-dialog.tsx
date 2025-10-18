@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Brain } from "lucide-react"
+import { useState } from "react";
+import { Brain } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,32 +9,48 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "../ui/badge";
 
 interface StartSessionDialogProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  templateTitle: string
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  template: {
+    id: string;
+    title: string;
+    description: string;
+    tags: string[];
+  };
 }
 
-export function StartSessionDialog({ isOpen, onOpenChange, templateTitle }: StartSessionDialogProps) {
-  const [level, setLevel] = useState("intermediate")
-  const [questionCount, setQuestionCount] = useState("5")
-  const [interviewType, setInterviewType] = useState("mix")
+export function StartSessionDialog({
+  isOpen,
+  onOpenChange,
+  template,
+}: StartSessionDialogProps) {
+  const [level, setLevel] = useState("intermediate");
+  const [questionCount, setQuestionCount] = useState("3");
+  const [interviewType, setInterviewType] = useState("mix");
 
   const handleBeginInterview = () => {
     console.log({
-      template: templateTitle,
+      template: template.title,
       level,
       questionCount,
       interviewType,
-    })
-    onOpenChange(false)
-  }
+    });
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -47,9 +63,23 @@ export function StartSessionDialog({ isOpen, onOpenChange, templateTitle }: Star
         </div>
 
         <DialogHeader>
-          <DialogTitle className="text-xl">{templateTitle}</DialogTitle>
-          <DialogDescription className="text-zinc-400">Customize your session settings below.</DialogDescription>
+          <DialogTitle className="text-xl">{template.title}</DialogTitle>
+          <DialogDescription className="text-zinc-400">
+            {template.description}
+          </DialogDescription>
         </DialogHeader>
+
+        <div className="flex flex-wrap gap-2 w-full">
+          {template.tags.slice(0, 3).map((tag) => (
+            <Badge
+              key={tag}
+              variant="secondary"
+              className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
 
         {/* Configuration Form */}
         <div className="space-y-6 py-4">
@@ -59,13 +89,19 @@ export function StartSessionDialog({ isOpen, onOpenChange, templateTitle }: Star
             <RadioGroup value={level} onValueChange={setLevel}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="beginner" id="beginner" />
-                <Label htmlFor="beginner" className="font-normal cursor-pointer">
+                <Label
+                  htmlFor="beginner"
+                  className="font-normal cursor-pointer"
+                >
                   Beginner
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="intermediate" id="intermediate" />
-                <Label htmlFor="intermediate" className="font-normal cursor-pointer">
+                <Label
+                  htmlFor="intermediate"
+                  className="font-normal cursor-pointer"
+                >
                   Intermediate
                 </Label>
               </div>
@@ -84,7 +120,10 @@ export function StartSessionDialog({ isOpen, onOpenChange, templateTitle }: Star
               Number of Questions
             </Label>
             <Select value={questionCount} onValueChange={setQuestionCount}>
-              <SelectTrigger id="question-count" className="border-zinc-800 bg-zinc-800 text-white">
+              <SelectTrigger
+                id="question-count"
+                className="border-zinc-800 bg-zinc-800 text-white"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="border-zinc-800 bg-zinc-900 text-white">
@@ -103,13 +142,19 @@ export function StartSessionDialog({ isOpen, onOpenChange, templateTitle }: Star
             <RadioGroup value={interviewType} onValueChange={setInterviewType}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="technical" id="technical" />
-                <Label htmlFor="technical" className="font-normal cursor-pointer">
+                <Label
+                  htmlFor="technical"
+                  className="font-normal cursor-pointer"
+                >
                   Technical
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="behavioral" id="behavioral" />
-                <Label htmlFor="behavioral" className="font-normal cursor-pointer">
+                <Label
+                  htmlFor="behavioral"
+                  className="font-normal cursor-pointer"
+                >
                   Behavioral
                 </Label>
               </div>
@@ -124,11 +169,14 @@ export function StartSessionDialog({ isOpen, onOpenChange, templateTitle }: Star
         </div>
 
         <DialogFooter>
-          <Button onClick={handleBeginInterview} className="w-full bg-white text-zinc-950 hover:bg-zinc-100">
+          <Button
+            onClick={handleBeginInterview}
+            className="w-full bg-white text-zinc-950 hover:bg-zinc-100"
+          >
             Begin Interview
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

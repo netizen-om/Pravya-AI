@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, useState, Suspense, use } from "react"
 import { motion } from "framer-motion"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -47,6 +47,8 @@ function CategoryContent({
 }: {
   params: { category: string }
 }) {
+  const resolvedParams = use(params);
+  const categoryId = resolvedParams.category;
   const [categoryData, setCategoryData] = useState<CategoryData | null>(null)
   const [filteredData, setFilteredData] = useState<CategoryData | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -55,7 +57,7 @@ function CategoryContent({
   useEffect(() => {
     const fetchCategoryDetails = async () => {
       try {
-        const data = await getCategoryDetails(params.category)
+        const data = await getCategoryDetails(categoryId)
         setCategoryData(data)
         setFilteredData(data)
       } catch (error) {
@@ -66,7 +68,7 @@ function CategoryContent({
     }
 
     fetchCategoryDetails()
-  }, [params.category])
+  }, [categoryId])
 
   useEffect(() => {
     if (!categoryData) return
