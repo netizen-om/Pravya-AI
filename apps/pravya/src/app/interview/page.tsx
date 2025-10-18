@@ -127,7 +127,7 @@ export default function InterviewsPage() {
                 <div className="mb-6 flex items-center justify-between">
                   <h2 className="text-2xl font-semibold">{category.name}</h2>
                   <Button variant="ghost" className="text-zinc-400 hover:text-white" asChild>
-                    <Link href={`/interviews/${category.mainCategoryId}`} prefetch={true}>
+                    <Link href={`/interview/${category.mainCategoryId}`} prefetch={true}>
                       View All
                     </Link>
                   </Button>
