@@ -265,12 +265,14 @@ const page = () => {
   return (
     <>
       <div className="min-h-screen w-full bg-neutral-950 flex items-center p-4">
-        <div className="bg-neutral-950 border border-neutral-800 p-2 rou w-full flex flex-col">
+        <div className="bg-neutral-950 border border-neutral-800 p-2 rou w-full flex flex-col shadow-neutral-900 shadow-2xl">
           <div>
             <h2 className="text-2xl px-4 py-2 pt-4 text-white">
               Senior IT Engineer - Live Interview
             </h2>
-            <p className="text-l px-4 py-2 text-white">Al Interview session for Fun Ltd</p>
+            <p className="text-l px-4 py-2 text-white">
+              Al Interview session for Fun Ltd
+            </p>
 
             <div className="grid grid-cols-3 gap-3 w-full py-2">
               <div className="w-auto h-[450] bg-neutral-900 rounded-lg">
@@ -306,9 +308,8 @@ const page = () => {
                         <div className="flex flex-col items-center justify-center h-full text-center">
                           <MessageCircle className="h-16 w-16 text-neutral-600" />
                           <p className="mt-4 text-neutral-400">
-                            Your interview chat will appear here.
-                            <br />
-                            Click the "Start" button below to begin.
+                            <div>Your interview chat will appear here.</div>
+                            <div>Click the "Start" button below to begin.</div>
                           </p>
                         </div>
                       ) : (
@@ -323,7 +324,7 @@ const page = () => {
                               }`}
                             >
                               {msg.role === "assistant" && (
-                                <img
+                                <Image
                                   className="w-8 h-8 rounded-full"
                                   src={assistantAvatar}
                                   alt="Assistant's Avatar"
@@ -339,7 +340,7 @@ const page = () => {
                                 <p className="text-sm">{msg.text}</p>
                               </div>
                               {msg.role === "user" && (
-                                <img
+                                <Image
                                   className="w-8 h-8 rounded-full"
                                   src={userAvatar}
                                   alt="User's Avatar"
