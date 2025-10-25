@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Brain } from "lucide-react";
+import { motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "../ui/badge";
+import { toast } from "sonner";
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface StartSessionDialogProps {
   isOpen: boolean;
@@ -41,20 +46,77 @@ export function StartSessionDialog({
   const [level, setLevel] = useState("intermediate");
   const [questionCount, setQuestionCount] = useState("3");
   const [interviewType, setInterviewType] = useState("mix");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleBeginInterview = () => {
-    console.log({
-      template: template.title,
-      level,
-      questionCount,
-      interviewType,
-    });
-    onOpenChange(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleBeginInterview = async () => {
+    try {
+      if (!session?.user?.id) {
+        toast.error("You must be logged in to start a session");
+        return;
+      }
+
+      setIsLoading(true);
+
+      const body = {
+        userId: session.user.id,
+        description: template.description,
+        title: template.title,
+        interviewTemplateId: template.id,
+        tags: template.tags.join(","),
+        level: level.charAt(0).toUpperCase() + level.slice(1),
+        noOfQuestions: parseInt(questionCount, 10),
+        type:
+          interviewType === "mix"
+            ? "Technical"
+            : interviewType.charAt(0).toUpperCase() + interviewType.slice(1),
+      };
+
+      const res = await axios.post(
+        "http://localhost:8000/api/v1/interview/questions/generate",
+        body
+      );
+
+      if (res.status === 200 || res.status === 201) {
+        toast.success("Interview session created successfully!");
+        onOpenChange(false);
+        router.push("/interview/session");
+      } else {
+        toast.error("Failed to start interview session");
+      }
+    } catch (error: any) {
+      console.error(error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong!";
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!isLoading) onOpenChange(open); // prevent closing while loading
+      }}
+    >
+      <DialogContent className="relative border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
+            <motion.div
+              className="w-12 h-12 rounded-full border-4 border-white border-t-transparent border-b-transparent"
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            />
+          </div>
+        )}
+
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
             <Brain className="h-6 w-6 text-zinc-950" />
@@ -69,7 +131,7 @@ export function StartSessionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap gap-2 w-full">
+        <div className="flex flex-wrap gap-2 w-full mb-4">
           {template.tags.slice(0, 3).map((tag) => (
             <Badge
               key={tag}
@@ -172,8 +234,9 @@ export function StartSessionDialog({
           <Button
             onClick={handleBeginInterview}
             className="w-full bg-white text-zinc-950 hover:bg-zinc-100"
+            disabled={isLoading}
           >
-            Begin Interview
+            {isLoading ? "Starting..." : "Begin Interview"}
           </Button>
         </DialogFooter>
       </DialogContent>
