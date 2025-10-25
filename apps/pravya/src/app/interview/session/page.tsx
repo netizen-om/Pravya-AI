@@ -264,19 +264,19 @@ const page = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full bg-zinc-950 flex items-center p-4">
-        <div className="bg-zinc-900 border border-neutral-800 p-2 rou w-full flex flex-col">
+      <div className="min-h-screen w-full bg-neutral-950 flex items-center p-4">
+        <div className="bg-neutral-950 border border-neutral-800 p-2 rou w-full flex flex-col">
           <div>
-            <h2 className="text-2xl px-4 py-2 pt-4">
+            <h2 className="text-2xl px-4 py-2 pt-4 text-white">
               Senior IT Engineer - Live Interview
             </h2>
-            <p className="text-l px-4 py-2">Al Interview session for Fun Ltd</p>
+            <p className="text-l px-4 py-2 text-white">Al Interview session for Fun Ltd</p>
 
             <div className="grid grid-cols-3 gap-3 w-full py-2">
-              <div className="w-auto h-[450] bg-zinc-800 rounded-lg">
+              <div className="w-auto h-[450] bg-neutral-900 rounded-lg">
                 <div className="flex flex-col justify-center items-center h-full w-full">
                   <div className="w-[110] h-[110] rounded-full bg-white"></div>
-                  <div className="bg-zinc-600 px-5 py-1 rounded-3xl mt-3 text-white">
+                  <div className="bg-neutral-700 px-5 py-1 rounded-3xl mt-3 text-white">
                     {isRecording
                       ? isReady
                         ? "Listening..."
@@ -285,7 +285,7 @@ const page = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-auto h-[450] bg-zinc-800 rounded-lg">
+              <div className="w-auto h-[450] bg-neutral-900 rounded-lg">
                 <div className="flex justify-center items-center h-full w-full">
                   <Image
                     src="/user-avatar.png"
@@ -296,16 +296,16 @@ const page = () => {
                   />
                 </div>
               </div>
-              <div className="w-auto h-[450] bg-zinc-800 rounded-lg">
-                <div className="w-full h-full bg-zinc-800 rounded-lg">
+              <div className="w-auto h-[450] bg-neutral-900 rounded-lg">
+                <div className="w-full h-full bg-neutral-900 rounded-lg">
                   <div className="flex flex-col h-full bg-transparent font-sans">
                     {/* Messages Area */}
                     <div className="flex-1 p-4 overflow-y-auto">
                       {messages.length === 0 ? (
                         // ✨ NEW: Placeholder for when the chat is empty
                         <div className="flex flex-col items-center justify-center h-full text-center">
-                          <MessageCircle className="h-16 w-16 text-zinc-600" />
-                          <p className="mt-4 text-zinc-400">
+                          <MessageCircle className="h-16 w-16 text-neutral-600" />
+                          <p className="mt-4 text-neutral-400">
                             Your interview chat will appear here.
                             <br />
                             Click the "Start" button below to begin.
@@ -332,8 +332,8 @@ const page = () => {
                               <div
                                 className={`max-w-xs md:max-w-sm p-3 rounded-2xl ${
                                   msg.role === "user"
-                                    ? "bg-slate-200 !text-zinc-900 rounded-br-none z-10"
-                                    : "bg-zinc-700 text-white rounded-bl-none" // AI message style
+                                    ? "bg-slate-200 !text-neutral-900 rounded-br-none z-10"
+                                    : "bg-neutral-700 text-white rounded-bl-none" // AI message style
                                 }`}
                               >
                                 <p className="text-sm">{msg.text}</p>
@@ -350,7 +350,7 @@ const page = () => {
                           {/* ✨ NEW: Conditionally render the listening indicator here ✨ */}
                           {showListeningIndicator && (
                             <div className="flex justify-end pr-12">
-                              <div className="text-sm flec flex text-zinc-400 animate-pulse">
+                              <div className="text-sm flec flex text-neutral-400 animate-pulse">
                                 <ListeningIndicator />
                                 Listening...
                               </div>
