@@ -110,5 +110,5 @@ export async function getCategoryDetails(categoryId: string) {
     {
       revalidate: 3600,
     }
-  )(); // We invoke the wrapped function immediately.
+  )();
 }

@@ -74,10 +74,12 @@ io.on("connection", (socket) => {
   const MIN_SPEECH_LENGTH = 10; // Minimum transcript length to consider valid speech
   const THINKING_DELAY_MIN = 800; // Minimum thinking delay
   const THINKING_DELAY_MAX = 1200; // Maximum thinking delay
-
   const interviewQuestions = [
-    "How does the virtual DOM work and how does React use it to improve performance?",
-    "What are React hooks and why are they used instead of class lifecycle methods?",
+    "How do you identify and understand a potential customer’s needs before making a sales pitch?",
+    "Can you describe a time when you turned a ‘no’ into a ‘yes’? What negotiation strategies did you use?",
+    "How do you handle price objections from clients while maintaining profitability?",
+    "What techniques do you use to build long-term relationships with customers after closing a deal?",
+    "How do you prepare for a negotiation to ensure both parties achieve a win-win outcome?",
   ];
 
   // Helper function to clean up speech detection state
@@ -98,7 +100,10 @@ io.on("connection", (socket) => {
 
     console.log("AI says:", text);
 
-    socket.emit("agent-transcript", { text, timestamp: new Date().toISOString() });
+    socket.emit("agent-transcript", {
+      text,
+      timestamp: new Date().toISOString(),
+    });
 
     interviewState.conversationHistory.push({
       role: "assistant",
@@ -320,8 +325,7 @@ io.on("connection", (socket) => {
     });
 
     deepgramLive.on(LiveTranscriptionEvents.Transcript, (data: any) => {
-
-      if(isAIResponding || isAgentSpeaking) return
+      if (isAIResponding || isAgentSpeaking) return;
 
       const transcript = data.channel.alternatives[0].transcript;
 
@@ -330,7 +334,10 @@ io.on("connection", (socket) => {
         isUserSpeaking = true;
         console.log("User said (interim):", transcript);
 
-        socket.emit("user-transcript-interim", { text: transcript, timestamp: new Date().toISOString() });
+        socket.emit("user-transcript-interim", {
+          text: transcript,
+          timestamp: new Date().toISOString(),
+        });
 
         // Clear any pending response timeout
         if (speechTimeout) {
@@ -364,7 +371,10 @@ io.on("connection", (socket) => {
         speechTimeout = setTimeout(async () => {
           if (pendingTranscript && !isAIResponding) {
             console.log("Processing user response after silence...");
-            socket.emit("user-transcript-final", { text: pendingTranscript, timestamp: new Date().toISOString() });
+            socket.emit("user-transcript-final", {
+              text: pendingTranscript,
+              timestamp: new Date().toISOString(),
+            });
             await handleUserResponse(pendingTranscript);
             pendingTranscript = "";
             isUserSpeaking = false;
@@ -394,7 +404,10 @@ io.on("connection", (socket) => {
         speechTimeout = setTimeout(async () => {
           if (pendingTranscript && !isAIResponding) {
             console.log("Processing user response after utterance end...");
-            socket.emit("user-transcript-final", { text: pendingTranscript, timestamp: new Date().toISOString() });
+            socket.emit("user-transcript-final", {
+              text: pendingTranscript,
+              timestamp: new Date().toISOString(),
+            });
             await handleUserResponse(pendingTranscript);
             pendingTranscript = "";
             isUserSpeaking = false;
