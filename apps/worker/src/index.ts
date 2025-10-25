@@ -21,10 +21,12 @@ const PORT = 8000;
 
 // Routes
 import resumeRouter from "./routes/resume.routes";
+import interviewRouter from "./routes/interview.routes";
 import { resumeParser } from "./utils/parseResume";
 import { resumeAnalysis } from "./utils/analyseResume";
 
 app.use("/api/v1/resume", resumeRouter);
+app.use("/api/v1/interview", interviewRouter);
 
 const ParseingWorker = new Worker("resume-processing", resumeParser, {
   concurrency: 100,
