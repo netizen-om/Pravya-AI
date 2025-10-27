@@ -1,4 +1,5 @@
 "use client";
+import Agent from "@/components/interview/agent";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -44,6 +45,9 @@ const page = () => {
       interim?: boolean;
     }[]
   >([]);
+
+  const [isAgentSpeaking, setIsAgentSpeaking] = useState<Boolean>(false);
+  const [isAgentThinking, setIsAgentThinking] = useState<Boolean>(false);
   const interimUserIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -178,6 +182,7 @@ const page = () => {
   }, []);
 
   function appendChunk(chunk: Uint8Array) {
+
     const sb = sourceBufferRef.current;
     if (!sb) {
       // Buffer until SourceBuffer is ready
@@ -277,7 +282,13 @@ const page = () => {
             <div className="grid grid-cols-3 gap-3 w-full py-2">
               <div className="w-auto h-[450] bg-neutral-900 rounded-lg">
                 <div className="flex flex-col justify-center items-center h-full w-full">
-                  <div className="w-[110] h-[110] rounded-full bg-white"></div>
+                  <div className="w-[110] h-[110] rounded-full">
+                    <Agent 
+                      isListening={showListeningIndicator}
+                      isSpeaking={false}
+                      isThinking={false}
+                    />
+                  </div>
                   <div className="bg-neutral-700 px-5 py-1 rounded-3xl mt-3 text-white">
                     {isRecording
                       ? isReady
