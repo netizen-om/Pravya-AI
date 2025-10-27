@@ -307,10 +307,10 @@ const page = () => {
                         // ✨ NEW: Placeholder for when the chat is empty
                         <div className="flex flex-col items-center justify-center h-full text-center">
                           <MessageCircle className="h-16 w-16 text-neutral-600" />
-                          <p className="mt-4 text-neutral-400">
+                          <div className="mt-4 text-neutral-400">
                             <div>Your interview chat will appear here.</div>
                             <div>Click the "Start" button below to begin.</div>
-                          </p>
+                          </div>
                         </div>
                       ) : (
                         <div className="flex flex-col space-y-4">
@@ -324,7 +324,7 @@ const page = () => {
                               }`}
                             >
                               {msg.role === "assistant" && (
-                                <Image
+                                <img
                                   className="w-8 h-8 rounded-full"
                                   src={assistantAvatar}
                                   alt="Assistant's Avatar"
@@ -340,7 +340,7 @@ const page = () => {
                                 <p className="text-sm">{msg.text}</p>
                               </div>
                               {msg.role === "user" && (
-                                <Image
+                                <img
                                   className="w-8 h-8 rounded-full"
                                   src={userAvatar}
                                   alt="User's Avatar"
