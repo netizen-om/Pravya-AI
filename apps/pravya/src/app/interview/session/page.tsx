@@ -46,8 +46,8 @@ const page = () => {
     }[]
   >([]);
 
-  const [isAgentSpeaking, setIsAgentSpeaking] = useState<Boolean>(false);
-  const [isAgentThinking, setIsAgentThinking] = useState<Boolean>(false);
+  const [isAgentSpeaking, setIsAgentSpeaking] = useState<boolean>(false);
+  const [isAgentThinking, setIsAgentThinking] = useState<boolean>(false);
   const interimUserIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -60,8 +60,20 @@ const page = () => {
   const pendingChunksRef = useRef<Uint8Array[]>([]);
 
   const lastMessage = messages[messages.length - 1];
-  const showListeningIndicator =
+  const isAgentListening =
     lastMessage?.role === "user" && lastMessage?.interim;
+
+  useEffect(() => {
+    if(isAgentSpeaking && isAgentThinking) {
+      setIsAgentSpeaking(false);
+    }
+    if(isAgentSpeaking && isAgentListening) {
+      setIsAgentSpeaking(false);
+    }
+    if(isRecording) {
+      setIsAgentSpeaking(false);
+    }
+  }, [isAgentSpeaking, isAgentThinking, isAgentListening, isRecording])
 
   useEffect(() => {
     // Initialize Socket.IO connection
@@ -107,15 +119,20 @@ const page = () => {
         }
         return [...prev, { id, role: "user", text, interim: false }];
       });
+
+      setIsAgentThinking(true);
     });
     // Agent transcript (text that AI will speak)
     socket.on("agent-transcript", ({ text }: { text: string }) => {
       const id = `a-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       setMessages((prev) => [...prev, { id, role: "assistant", text }]);
+
+      setIsAgentThinking(false);
     });
     // Streamed audio begin -> create MediaSource and SourceBuffer
     socket.on("ai-audio-begin", ({ mimeType }: { mimeType: string }) => {
       console.log("AI audio begin", mimeType);
+      setIsAgentSpeaking(true);
       if (!audioElementRef.current) {
         audioElementRef.current = new Audio();
         audioElementRef.current.autoplay = true;
@@ -178,6 +195,8 @@ const page = () => {
         audioElementRef.current = null;
       }
       setIsRecording(false);
+      setIsAgentSpeaking(false)
+      setIsAgentThinking(false)
     };
   }, []);
 
@@ -284,9 +303,9 @@ const page = () => {
                 <div className="flex flex-col justify-center items-center h-full w-full">
                   <div className="w-[110] h-[110] rounded-full">
                     <Agent 
-                      isListening={showListeningIndicator}
-                      isSpeaking={false}
-                      isThinking={false}
+                      isListening={isAgentListening}
+                      isSpeaking={isAgentSpeaking}
+                      isThinking={isAgentThinking}
                     />
                   </div>
                   <div className="bg-neutral-700 px-5 py-1 rounded-3xl mt-3 text-white">
@@ -360,7 +379,7 @@ const page = () => {
                             </div>
                           ))}
                           {/* ✨ NEW: Conditionally render the listening indicator here ✨ */}
-                          {showListeningIndicator && (
+                          {isAgentListening && (
                             <div className="flex justify-end pr-12">
                               <div className="text-sm flec flex text-neutral-400 animate-pulse">
                                 <ListeningIndicator />
