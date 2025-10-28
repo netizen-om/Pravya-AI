@@ -113,6 +113,25 @@ export async function getCategoryDetails(categoryId: string) {
   )();
 }
 
-export async function getIntrviewDetails(interviewId : string) {
-  
+export async function getInterviewDetails(interviewId: string) {
+    const interview = await prisma.interview.findUnique({
+    where: { interviewId },
+    select: {
+      role: true, // or 'title' if your field name is title
+      questions: {
+        orderBy: {
+          order: "asc",
+        },
+        select: {
+          questionText: true,
+        },
+      },
+    },
+  })
+
+  // Return a clean structure
+  return {
+    title: interview?.role || "", // or interview?.title
+    questions: interview?.questions.map((q) => q.questionText) || [],
+  }
 }

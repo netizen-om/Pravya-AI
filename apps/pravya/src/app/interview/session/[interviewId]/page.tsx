@@ -1,5 +1,7 @@
 "use client";
+import { getInterviewDetails } from "@/actions/interview-action";
 import Agent from "@/components/interview/agent";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -9,8 +11,11 @@ import {
 } from "@/components/ui/tooltip";
 import { MessageCircle, PhoneIcon } from "lucide-react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { string } from "zod";
+import Loader from "@/components/loader/loader";
 
 // A new component for the "Listening..." animation
 const ListeningIndicator = () => {
@@ -35,6 +40,13 @@ const page = () => {
     }[]
   >([]);
 
+  const params = useParams<{ interviewId: string }>();
+  const interviewId = params.interviewId;
+
+  const [interviewData, setInterviewData] = useState<{
+    title: string;
+    questions: string[];
+  } | null>(null);
   const [isAgentSpeaking, setIsAgentSpeaking] = useState<boolean>(false);
   const [isAgentThinking, setIsAgentThinking] = useState<boolean>(false);
   const interimUserIdRef = useRef<string | null>(null);
@@ -50,6 +62,16 @@ const page = () => {
 
   const lastMessage = messages[messages.length - 1];
   const isAgentListening = lastMessage?.role === "user" && lastMessage?.interim;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getInterviewDetails(interviewId);
+      console.log(data);
+      setInterviewData(data)
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (isAgentSpeaking && isAgentThinking) {
@@ -273,17 +295,31 @@ const page = () => {
     (msg) => !(msg.role === "user" && msg.interim)
   );
 
+  if(!interviewData) {
+    return (
+      <Loader title="Interview Loading..."/>
+    )
+  }
+
   return (
     <>
       <div className="min-h-screen w-full bg-neutral-950 flex items-center p-4">
         <div className="bg-neutral-950 border border-neutral-800 p-2 rou w-full flex flex-col shadow-neutral-900 shadow-2xl">
           <div>
             <h2 className="text-2xl px-4 py-2 pt-4 text-white">
-              Senior IT Engineer - Live Interview
+              {interviewData ? (
+                interviewData?.title
+              ) : (
+                <Skeleton className="h-5 w-[350px]" />
+              )}
             </h2>
-            <p className="text-l px-4 py-2 text-white">
-              Al Interview session for Fun Ltd
-            </p>
+            <div className="text-l px-4 py-2 text-white">
+              {interviewData ? (
+                "Al Interview Powered by Pravya AI"
+              ) : (
+                <Skeleton className="h-5 w-[350px]" />
+              )}
+            </div>
 
             <div className="grid grid-cols-3 gap-3 w-full py-2">
               <div className="w-auto h-[450] bg-neutral-900 rounded-lg">
