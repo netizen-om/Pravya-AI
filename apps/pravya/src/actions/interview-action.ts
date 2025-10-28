@@ -112,3 +112,7 @@ export async function getCategoryDetails(categoryId: string) {
     }
   )();
 }
+
+export async function getIntrviewDetails(interviewId : string) {
+  
+}

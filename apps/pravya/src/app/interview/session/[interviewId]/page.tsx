@@ -12,17 +12,6 @@ import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-interface IconProps {
-  className?: string;
-}
-
-// The new message structure
-interface Message {
-  id: number;
-  role: "user" | "assistant";
-  content: string;
-}
-
 // A new component for the "Listening..." animation
 const ListeningIndicator = () => {
   return (
@@ -60,20 +49,19 @@ const page = () => {
   const pendingChunksRef = useRef<Uint8Array[]>([]);
 
   const lastMessage = messages[messages.length - 1];
-  const isAgentListening =
-    lastMessage?.role === "user" && lastMessage?.interim;
+  const isAgentListening = lastMessage?.role === "user" && lastMessage?.interim;
 
   useEffect(() => {
-    if(isAgentSpeaking && isAgentThinking) {
+    if (isAgentSpeaking && isAgentThinking) {
       setIsAgentSpeaking(false);
     }
-    if(isAgentSpeaking && isAgentListening) {
+    if (isAgentSpeaking && isAgentListening) {
       setIsAgentSpeaking(false);
     }
-    if(isRecording) {
+    if (isRecording) {
       setIsAgentSpeaking(false);
     }
-  }, [isAgentSpeaking, isAgentThinking, isAgentListening, isRecording])
+  }, [isAgentSpeaking, isAgentThinking, isAgentListening, isRecording]);
 
   useEffect(() => {
     // Initialize Socket.IO connection
@@ -195,13 +183,12 @@ const page = () => {
         audioElementRef.current = null;
       }
       setIsRecording(false);
-      setIsAgentSpeaking(false)
-      setIsAgentThinking(false)
+      setIsAgentSpeaking(false);
+      setIsAgentThinking(false);
     };
   }, []);
 
   function appendChunk(chunk: Uint8Array) {
-
     const sb = sourceBufferRef.current;
     if (!sb) {
       // Buffer until SourceBuffer is ready
@@ -302,16 +289,22 @@ const page = () => {
               <div className="w-auto h-[450] bg-neutral-900 rounded-lg">
                 <div className="flex flex-col justify-center items-center h-full w-full">
                   <div className="w-[110] h-[110] rounded-full">
-                    <Agent 
+                    <Agent
                       isListening={isAgentListening}
                       isSpeaking={isAgentSpeaking}
                       isThinking={isAgentThinking}
                     />
                   </div>
                   <div className="bg-neutral-700 px-5 py-1 rounded-3xl mt-3 text-white">
-                    {isRecording
+                    {isAgentSpeaking
+                      ? "Speaking..."
+                      : isAgentThinking
+                      ? "Thinking..."
+                      : isAgentListening
+                      ? "Listening..."
+                      : isRecording
                       ? isReady
-                        ? "Listening..."
+                        ? "Recording..."
                         : "Connecting..."
                       : "Idle"}
                   </div>
