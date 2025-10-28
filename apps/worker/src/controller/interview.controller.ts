@@ -73,7 +73,7 @@ export const generateQuestions = asyncHandler(async (req, res) => {
 
     console.log("AI Generated Questions:", object.questions);
 
-    await prisma.interview.create({
+    const createdInterview = await prisma.interview.create({
       data: {
         userId: userId,
         role: title,
@@ -96,7 +96,7 @@ export const generateQuestions = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          object.questions,
+          { interviewId: createdInterview.interviewId },
           "Interview questions generated successfully"
         )
       );

@@ -93,16 +93,16 @@ export function StartSessionDialog({
 
       const res = await apiPromise;
 
+      const interviewId = res.data.data.interviewId;
+
       const elapsed = Date.now() - startTime;
       const remaining = loaderDuration - elapsed;
 
-      // ensure loader finishes its full cycle
       setTimeout(
         () => {
           if (res.status === 200 || res.status === 201) {
             toast.success("Interview session created successfully!");
-            // 👇 keep loader until navigation starts
-            router.push(`/interview/session/cmhang90p0001wf1wfj7dvdnf`);
+            router.push(`/interview/session/${interviewId}`);
           } else {
             toast.error("Failed to start interview session");
             setIsLoading(false);
