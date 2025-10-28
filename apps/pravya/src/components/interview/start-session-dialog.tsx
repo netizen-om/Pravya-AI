@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Brain } from "lucide-react";
-import { motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +24,8 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import GlobalLoader from "../loader/GlobalLoader";
 
 interface StartSessionDialogProps {
   isOpen: boolean;
@@ -51,13 +51,22 @@ export function StartSessionDialog({
   const { data: session } = useSession();
   const router = useRouter();
 
-  const handleBeginInterview = async () => {
-    try {
-      if (!session?.user?.id) {
-        toast.error("You must be logged in to start a session");
-        return;
-      }
+  const loadingStates = [
+    { text: "Getting the AI ready for work..." },
+    { text: "Pouring a virtual espresso shot..." },
+    { text: "Cooking up some smart questions..." },
+    { text: "Checking the mic — just in case..." },
+    { text: "Boosting confidence levels..." },
+    { text: "All set! Redirecting you shortly..."},
+  ];
 
+  const handleBeginInterview = async () => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to start a session");
+      return;
+    }
+
+    try {
       setIsLoading(true);
 
       const body = {
@@ -74,18 +83,33 @@ export function StartSessionDialog({
             : interviewType.charAt(0).toUpperCase() + interviewType.slice(1),
       };
 
-      const res = await axios.post(
+      const apiPromise = axios.post(
         "http://localhost:8000/api/v1/interview/questions/generate",
         body
       );
 
-      if (res.status === 200 || res.status === 201) {
-        toast.success("Interview session created successfully!");
-        onOpenChange(false);
-        router.push("/interview/session");
-      } else {
-        toast.error("Failed to start interview session");
-      }
+      const loaderDuration = (loadingStates.length-1) * 1450; // each step 2s
+      const startTime = Date.now();
+
+      const res = await apiPromise;
+
+      const elapsed = Date.now() - startTime;
+      const remaining = loaderDuration - elapsed;
+
+      // ensure loader finishes its full cycle
+      setTimeout(
+        () => {
+          if (res.status === 200 || res.status === 201) {
+            toast.success("Interview session created successfully!");
+            // 👇 keep loader until navigation starts
+            router.push(`/interview/session/cmhang90p0001wf1wfj7dvdnf`);
+          } else {
+            toast.error("Failed to start interview session");
+            setIsLoading(false);
+          }
+        },
+        remaining > 0 ? remaining : 0
+      );
     } catch (error: any) {
       console.error(error);
       const message =
@@ -93,153 +117,165 @@ export function StartSessionDialog({
         error?.message ||
         "Something went wrong!";
       toast.error(message);
-    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!isLoading) onOpenChange(open); // prevent closing while loading
-      }}
-    >
-      <DialogContent className="relative border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
-        {/* Loading Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
-            <motion.div
-              className="w-12 h-12 rounded-full border-4 border-white border-t-transparent border-b-transparent"
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+    <div className="relative">
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!isLoading) onOpenChange(open); // prevent closing while loading
+        }}
+      >
+        <DialogContent className="border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
+          {/* Loading Overlay */}
+          {isLoading && (
+            <GlobalLoader
+              loadingStates={loadingStates}
+              loading={isLoading}
+              loop={false}
             />
-          </div>
-        )}
+          )}
 
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
-            <Brain className="h-6 w-6 text-zinc-950" />
-          </div>
-          <span className="text-xl font-bold">Pravya AI</span>
-        </div>
-
-        <DialogHeader>
-          <DialogTitle className="text-xl">{template.title}</DialogTitle>
-          <DialogDescription className="text-zinc-400">
-            {template.description}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex flex-wrap gap-2 w-full mb-4">
-          {template.tags.slice(0, 3).map((tag) => (
-            <Badge
-              key={tag}
-              variant="secondary"
-              className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Configuration Form */}
-        <div className="space-y-6 py-4">
-          {/* Level Selection */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Select Level</Label>
-            <RadioGroup value={level} onValueChange={setLevel}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="beginner" id="beginner" />
-                <Label
-                  htmlFor="beginner"
-                  className="font-normal cursor-pointer"
-                >
-                  Beginner
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="intermediate" id="intermediate" />
-                <Label
-                  htmlFor="intermediate"
-                  className="font-normal cursor-pointer"
-                >
-                  Intermediate
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="expert" id="expert" />
-                <Label htmlFor="expert" className="font-normal cursor-pointer">
-                  Expert
-                </Label>
-              </div>
-            </RadioGroup>
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-transparent">
+              {/* <Brain className="h-6 w-6 text-zinc-950" /> */}
+              <Image
+                src="/logo/pravya-logo.png"
+                width={43}
+                height={13}
+                alt="Pravya AI Logo"
+                className="rounded-xl"
+              />
+            </div>
+            <span className="text-xl font-bold">Pravya AI</span>
           </div>
 
-          {/* Number of Questions */}
-          <div className="space-y-3">
-            <Label htmlFor="question-count" className="text-base font-medium">
-              Number of Questions
-            </Label>
-            <Select value={questionCount} onValueChange={setQuestionCount}>
-              <SelectTrigger
-                id="question-count"
-                className="border-zinc-800 bg-zinc-800 text-white"
+          <DialogHeader>
+            <DialogTitle className="text-xl">{template.title}</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              {template.description}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-wrap gap-2 w-full mb-4">
+            {template.tags.slice(0, 3).map((tag) => (
+              <Badge
+                key={tag}
+                variant="secondary"
+                className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
               >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-zinc-800 bg-zinc-900 text-white">
-                {[2, 3, 4, 5, 6, 7].map((num) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num} Questions
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                {tag}
+              </Badge>
+            ))}
           </div>
 
-          {/* Interview Type */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Interview Type</Label>
-            <RadioGroup value={interviewType} onValueChange={setInterviewType}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="technical" id="technical" />
-                <Label
-                  htmlFor="technical"
-                  className="font-normal cursor-pointer"
-                >
-                  Technical
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="behavioral" id="behavioral" />
-                <Label
-                  htmlFor="behavioral"
-                  className="font-normal cursor-pointer"
-                >
-                  Behavioral
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="mix" id="mix" />
-                <Label htmlFor="mix" className="font-normal cursor-pointer">
-                  Mix
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-        </div>
+          {/* Configuration Form */}
+          <div className="space-y-6 py-4">
+            {/* Level Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Select Level</Label>
+              <RadioGroup value={level} onValueChange={setLevel}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="beginner" id="beginner" />
+                  <Label
+                    htmlFor="beginner"
+                    className="font-normal cursor-pointer"
+                  >
+                    Beginner
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="intermediate" id="intermediate" />
+                  <Label
+                    htmlFor="intermediate"
+                    className="font-normal cursor-pointer"
+                  >
+                    Intermediate
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="expert" id="expert" />
+                  <Label
+                    htmlFor="expert"
+                    className="font-normal cursor-pointer"
+                  >
+                    Expert
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
 
-        <DialogFooter>
-          <Button
-            onClick={handleBeginInterview}
-            className="w-full bg-white text-zinc-950 hover:bg-zinc-100"
-            disabled={isLoading}
-          >
-            {isLoading ? "Starting..." : "Begin Interview"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            {/* Number of Questions */}
+            <div className="space-y-3">
+              <Label htmlFor="question-count" className="text-base font-medium">
+                Number of Questions
+              </Label>
+              <Select value={questionCount} onValueChange={setQuestionCount}>
+                <SelectTrigger
+                  id="question-count"
+                  className="border-zinc-800 bg-zinc-800 text-white"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-zinc-800 bg-zinc-900 text-white">
+                  {[2, 3, 4, 5, 6, 7].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} Questions
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Interview Type */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Interview Type</Label>
+              <RadioGroup
+                value={interviewType}
+                onValueChange={setInterviewType}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="technical" id="technical" />
+                  <Label
+                    htmlFor="technical"
+                    className="font-normal cursor-pointer"
+                  >
+                    Technical
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="behavioral" id="behavioral" />
+                  <Label
+                    htmlFor="behavioral"
+                    className="font-normal cursor-pointer"
+                  >
+                    Behavioral
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="mix" id="mix" />
+                  <Label htmlFor="mix" className="font-normal cursor-pointer">
+                    Mix
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={handleBeginInterview}
+              className="w-full bg-white text-zinc-950 hover:bg-zinc-100"
+              disabled={isLoading}
+            >
+              {isLoading ? "Starting..." : "Begin Interview"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
