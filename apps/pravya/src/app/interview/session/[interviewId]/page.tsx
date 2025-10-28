@@ -12,7 +12,7 @@ import {
 import { MessageCircle, PhoneIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { string } from "zod";
 import Loader from "@/components/loader/loader";
@@ -63,15 +63,13 @@ const page = () => {
   const lastMessage = messages[messages.length - 1];
   const isAgentListening = lastMessage?.role === "user" && lastMessage?.interim;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getInterviewDetails(interviewId);
-      console.log(data);
-      setInterviewData(data)
-    };
-
-    fetchData();
-  }, []);
+useEffect(() => {
+  (async () => {
+    const data = await getInterviewDetails(interviewId);
+    setInterviewData(data);
+    console.log(data);
+  })();
+}, [interviewId]);
 
   useEffect(() => {
     if (isAgentSpeaking && isAgentThinking) {
@@ -271,7 +269,7 @@ const page = () => {
         };
 
         // Tell the server to get ready
-        socketRef.current?.emit("start-stream");
+        socketRef.current?.emit("start-stream", {questions : interviewData?.questions});
         setIsRecording(true);
       } catch (error) {
         console.error("Error accessing microphone:", error);
@@ -295,10 +293,8 @@ const page = () => {
     (msg) => !(msg.role === "user" && msg.interim)
   );
 
-  if(!interviewData) {
-    return (
-      <Loader title="Interview Loading..."/>
-    )
+  if (!interviewData) {
+    return <Loader title="Interview Loading..." />;
   }
 
   return (
@@ -315,7 +311,7 @@ const page = () => {
             </h2>
             <div className="text-l px-4 py-2 text-white">
               {interviewData ? (
-                "Al Interview Powered by Pravya AI"
+                "Al Interview Powered By Pravya AI"
               ) : (
                 <Skeleton className="h-5 w-[350px]" />
               )}

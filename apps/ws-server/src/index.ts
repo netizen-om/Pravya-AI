@@ -70,16 +70,16 @@ io.on("connection", (socket) => {
   let isAgentSpeaking = false;
 
   // Configuration constants
-  const SILENCE_THRESHOLD = 2000; // 2 seconds of silence before AI responds
+  const SILENCE_THRESHOLD = 1500; // 2 seconds of silence before AI responds
   const MIN_SPEECH_LENGTH = 10; // Minimum transcript length to consider valid speech
   const THINKING_DELAY_MIN = 800; // Minimum thinking delay
   const THINKING_DELAY_MAX = 1200; // Maximum thinking delay
-  const interviewQuestions = [
-    "How do you identify and understand a potential customer’s needs before making a sales pitch?",
-    "Can you describe a time when you turned a ‘no’ into a ‘yes’? What negotiation strategies did you use?",
-    "How do you handle price objections from clients while maintaining profitability?",
-    "What techniques do you use to build long-term relationships with customers after closing a deal?",
-    "How do you prepare for a negotiation to ensure both parties achieve a win-win outcome?",
+  let interviewQuestions = [
+    "Can you tell me a little about yourself and your professional background?",
+    "What are your greatest strengths and weaknesses?",
+    "Can you describe a challenging situation you faced at work and how you handled it?",
+    "Why are you interested in this position and our company?",
+    "Where do you see yourself in the next five years?",
   ];
 
   // Helper function to clean up speech detection state
@@ -307,10 +307,21 @@ io.on("connection", (socket) => {
 
   // --- SOCKET EVENT HANDLERS ---
 
-  socket.on("start-stream", () => {
+  socket.on("start-stream", (data: { questions: string[] }) => {
     console.log(" Client requested to start stream.");
+    if (data.questions && data.questions.length > 0) {
+      interviewQuestions = data.questions;
+    } else {
+      interviewQuestions = [
+        "Can you tell me a little about yourself and your professional background?",
+        "What are your greatest strengths and weaknesses?",
+        "Can you describe a challenging situation you faced at work and how you handled it?",
+        "Why are you interested in this position and our company?",
+        "Where do you see yourself in the next five years?",
+      ];
+    }
     deepgramLive = deepgramClient.listen.live({
-      model: "nova-2",
+      model: "nova-3",
       language: "en-US",
       smart_format: true,
       interim_results: true, // Allow faster partials
