@@ -57,7 +57,7 @@ export function StartSessionDialog({
     { text: "Cooking up some smart questions..." },
     { text: "Checking the mic — just in case..." },
     { text: "Boosting confidence levels..." },
-    { text: "All set! Redirecting you shortly..."},
+    { text: "All set! Redirecting you shortly..." },
   ];
 
   const handleBeginInterview = async () => {
@@ -88,7 +88,7 @@ export function StartSessionDialog({
         body
       );
 
-      const loaderDuration = (loadingStates.length-1) * 1450; // each step 2s
+      const loaderDuration = (loadingStates.length - 1) * 1450; // each step 2s
       const startTime = Date.now();
 
       const res = await apiPromise;
@@ -178,8 +178,9 @@ export function StartSessionDialog({
             <div className="space-y-3">
               <Label className="text-base font-medium">Select Level</Label>
               <RadioGroup value={level} onValueChange={setLevel}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="beginner" id="beginner" />
+                <div className="flex items-center justify-start space-x-2">
+                  <RadioGroupItem value="beginner" id="beginner" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
+                  />
                   <Label
                     htmlFor="beginner"
                     className="font-normal cursor-pointer"
@@ -187,8 +188,9 @@ export function StartSessionDialog({
                     Beginner
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="intermediate" id="intermediate" />
+                <div className="flex items-center justify-start space-x-2">
+                  <RadioGroupItem value="intermediate" id="intermediate" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
+                  />
                   <Label
                     htmlFor="intermediate"
                     className="font-normal cursor-pointer"
@@ -197,7 +199,8 @@ export function StartSessionDialog({
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="expert" id="expert" />
+                  <RadioGroupItem value="expert" id="expert" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
+                  />
                   <Label
                     htmlFor="expert"
                     className="font-normal cursor-pointer"
@@ -237,8 +240,9 @@ export function StartSessionDialog({
                 value={interviewType}
                 onValueChange={setInterviewType}
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="technical" id="technical" />
+                <div className="flex items-center justify-start space-x-2">
+                  <RadioGroupItem value="technical" id="technical" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
+                  />
                   <Label
                     htmlFor="technical"
                     className="font-normal cursor-pointer"
@@ -246,8 +250,13 @@ export function StartSessionDialog({
                     Technical
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="behavioral" id="behavioral" />
+                <div className="flex items-center justify-start space-x-2">
+                  <RadioGroupItem
+                    value="behavioral"
+                    id="behavioral"
+                    className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
+                  />
+                  
                   <Label
                     htmlFor="behavioral"
                     className="font-normal cursor-pointer"
@@ -256,7 +265,8 @@ export function StartSessionDialog({
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="mix" id="mix" />
+                  <RadioGroupItem value="mix" id="mix" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
+                  />
                   <Label htmlFor="mix" className="font-normal cursor-pointer">
                     Mix
                   </Label>
