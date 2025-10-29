@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { LayoutDashboard, Upload, Play, History, BarChart3, BookOpen, User, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, Upload, Play, History, BarChart3, BookOpen, User, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "./sidebar-context"

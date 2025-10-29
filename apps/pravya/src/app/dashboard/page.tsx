@@ -15,6 +15,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import Dashboard from "@/components/dashboard/Old-Dashboard"
+import NewDashboard from "@/components/new-dashboard/Dashboard"
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -69,24 +70,27 @@ export default async function DashboardPage() {
         
     //     <DashboardHeader session={session} />
     //     <div className="flex">
-    //       <DashboardSidebar />
-    //       <main className="flex-1 transition-all duration-300 ease-in-out">
-    //         <div className="mx-auto max-w-7xl px-6 md:px-8 py-8 space-y-10">
-    //           <WelcomeSection session={session} />
-    //           <QuickStats />
-    //           <RecentActivity />
-    //           <PerformanceAnalytics />
-    //           <InterviewSuggestions />
-    //           <ResumeInsights />
-    //           {/* <LearningHubPreview /> */}
-    //           <Gamification />
-    //         </div>
-    //       </main>
+          // <DashboardSidebar />
+          // <main className="flex-1 transition-all duration-300 ease-in-out">
+          //   <div className="mx-auto max-w-7xl px-6 md:px-8 py-8 space-y-10">
+          //     <WelcomeSection session={session} />
+          //     <QuickStats />
+          //     <RecentActivity />
+          //     <PerformanceAnalytics />
+          //     <InterviewSuggestions />
+          //     <ResumeInsights />
+          //     {/* <LearningHubPreview /> */}
+          //     <Gamification />
+          //   </div>
+          // </main>
     //     </div>
     //   </div>
     // </SidebarProvider>
+    // <>
+    //   <Dashboard />
+    // </>
     <>
-      <Dashboard />
+      <NewDashboard />
     </>
   )
 }
