@@ -22,7 +22,7 @@ const NewDashboard = async() => {
   return (
     <div className="min-h-screen w-full bg-neutral-950 text-white">
       <SidebarProvider>
-        <DashboardHeader session={session} />
+        {/* <DashboardHeader session={session} /> */}
         <div className="flex">
             <DashboardSidebar />
           <main className="flex-1 transition-all duration-300 ease-in-out">
