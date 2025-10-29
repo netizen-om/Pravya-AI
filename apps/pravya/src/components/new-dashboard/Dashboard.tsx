@@ -29,8 +29,8 @@ const NewDashboard = async() => {
             <div className="mx-auto max-w-7xl px-6 md:px-8 py-8 space-y-10">
               <WelcomeSection session={session} />
               <QuickStats />
-              <RecentActivity />
               <PerformanceAnalytics />
+              <RecentActivity />
               <InterviewSuggestions />
               <ResumeInsights />
               {/* <LearningHubPreview /> */}

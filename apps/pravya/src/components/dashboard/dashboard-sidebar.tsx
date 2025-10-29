@@ -36,7 +36,7 @@ const navigation = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+   const { theme, setTheme } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
