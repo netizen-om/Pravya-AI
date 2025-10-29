@@ -131,7 +131,7 @@ export function PerformanceAnalytics() {
             )}
           >
             <MagicCard
-              gradientColor={isDark ? "#1a1a1a" : "#f9f9f9"}
+              gradientColor={isDark ? "#262626" : "#D9D9D955"}
               className={cn(
                 "rounded-2xl border-none p-6 transition-all duration-300",
                 isDark
@@ -205,7 +205,7 @@ export function PerformanceAnalytics() {
             )}
           >
             <MagicCard
-              gradientColor={isDark ? "#1a1a1a" : "#f9f9f9"}
+              gradientColor={isDark ? "#262626" : "#D9D9D955"}
               className={cn(
                 "rounded-2xl border-none p-6 transition-all duration-300",
                 isDark

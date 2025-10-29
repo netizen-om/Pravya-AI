@@ -9,6 +9,7 @@ import type { Session } from "next-auth";
 import { MagicCard } from "@/components/ui/magic-card";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { ShimmerButton } from "@/components/ui/shimmer-button"
 
 interface WelcomeSectionProps {
   session: Session;
@@ -25,14 +26,14 @@ export function WelcomeSection({ session }: WelcomeSectionProps) {
       transition={{ duration: 0.25 }}
       className="space-y-6"
     >
-      <Card className="bg-transparent rounded-2xl relative p-0 overflow-hidden">
+      <Card className="bg-transparent border-none shadow-none p-0">
         <MagicCard
-          gradientColor={"#D9D9D955"}
+          gradientColor={isDark ? "#262626" : "#D9D9D955"}
           className={cn(
             "rounded-2xl border p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-all duration-300",
             isDark
-            ? "bg-neutral-900/70 border-neutral-800"
-            : "bg-white/70 border-gray-200 backdrop-blur-md"
+              ? "bg-neutral-900/70 border-neutral-800"
+              : "bg-white/70 border-gray-200 backdrop-blur-md"
           )}
         >
           <div className="text-center space-y-6">
