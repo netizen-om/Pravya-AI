@@ -15,7 +15,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import Dashboard from "@/components/dashboard/Old-Dashboard"
-import NewDashboard from "@/components/new-dashboard/Dashboard"
+import {DashboardClient} from "@/components/new-dashboard/Dashboard"
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
     //   <Dashboard />
     // </>
     <>
-      <NewDashboard />
+      <DashboardClient session={session} />
     </>
   )
 }

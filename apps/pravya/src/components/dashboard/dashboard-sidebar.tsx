@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
@@ -36,10 +36,17 @@ const navigation = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-   const { theme, setTheme } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // 2. Set isMounted to true after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  const { theme, setTheme } = useTheme();
+  
   const handleSignOut = () => signOut();
 
   const toggleTheme = () => {

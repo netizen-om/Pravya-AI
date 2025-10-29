@@ -6,19 +6,52 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import type { Session } from "next-auth";
+// Use relative path to avoid alias resolution issues
 import { MagicCard } from "@/components/ui/magic-card";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-import { ShimmerButton } from "@/components/ui/shimmer-button"
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { useState, useEffect } from "react"; // Import hooks
 
 interface WelcomeSectionProps {
   session: Session;
 }
 
 export function WelcomeSection({ session }: WelcomeSectionProps) {
+  const [isMounted, setIsMounted] = useState(false); // Track mount state
+  
+  // When component mounts on client, set isMounted to true
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  // Render a placeholder/skeleton on the server and initial client render
+  // This prevents the hydration mismatch and CLS (layout shift)
+  if (!isMounted) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="space-y-6"
+      >
+        <Card className="bg-transparent border-none shadow-none p-0">
+          <div
+            className={cn(
+              "rounded-2xl border p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] transition-all duration-300",
+              "bg-neutral-900/70 border-neutral-800" // Default to dark skeleton
+            )}
+            style={{ minHeight: "230px" }} // Reserve space
+          />
+        </Card>
+      </motion.section>
+    );
+  }
+
+  // Once mounted, render the full, correctly-themed component
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -101,3 +134,4 @@ export function WelcomeSection({ session }: WelcomeSectionProps) {
     </motion.section>
   );
 }
+

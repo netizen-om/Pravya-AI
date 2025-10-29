@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import { CheckCircle, FileText, BarChart3, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
-import { MagicCard } from "../ui/magic-card";
+import { MagicCard } from "@/components/ui/magic-card"; // Correct relative path
+// 1. Import our custom hook
+import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme" // Correct relative path
 
 const activities = [
   {
@@ -47,7 +48,8 @@ const activities = [
 ];
 
 export function RecentActivity() {
-  const { theme } = useTheme();
+  // 2. Call our hook
+  const { theme, isMounted } = useHydrationSafeTheme();
   const isDark = theme === "dark";
 
   const colorMap: Record<string, string> = {
@@ -57,6 +59,24 @@ export function RecentActivity() {
     orange: "#FB923C",
   };
 
+  // 3. Render skeleton on server / initial client render
+  if (!isMounted) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.2 }}
+        className="space-y-6"
+      >
+        {/* Header Skeleton */}
+        <div className="h-8 w-56 rounded-lg bg-neutral-800 animate-pulse" />
+        {/* Card Skeleton */}
+        <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[400px] animate-pulse" />
+      </motion.section>
+    );
+  }
+
+  // 4. Render the full component once mounted
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -151,8 +171,8 @@ export function RecentActivity() {
                 {index < activities.length - 1 && (
                   <div
                     className={cn(
-                      "absolute left-[18px] mt-9 w-px h-6",
-                      
+                      "absolute left-[18px] mt-9 w-px h-full -bottom-6", // Adjusted height
+                      isDark ? "bg-neutral-800" : "bg-gray-200"
                     )}
                   />
                 )}

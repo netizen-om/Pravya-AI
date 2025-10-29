@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+// No longer need useState or useEffect here
 import { motion } from "framer-motion";
 import {
   LineChart,
@@ -15,9 +15,12 @@ import {
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
+// No longer need direct useTheme import
 import { MagicCard } from "../ui/magic-card";
 import { cn } from "@/lib/utils";
+import { useState } from "react"; // Keep useState for timeRange
+// 1. Import our new custom hook
+import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme";
 
 const scoresData7Days = [
   { date: "Mon", score: 78 },
@@ -44,7 +47,9 @@ const strengthsData = [
 ];
 
 export function PerformanceAnalytics() {
-  const { theme } = useTheme();
+  // 2. Call our hook to get theme and mount status
+  const { theme, isMounted } = useHydrationSafeTheme();
+  
   const isDark = theme === "dark";
   const [timeRange, setTimeRange] = useState<"7days" | "30days">("7days");
 
@@ -52,6 +57,34 @@ export function PerformanceAnalytics() {
 
   const barColors = ["#3B82F6", "#22C55E", "#A855F7", "#FB923C"]; // blue, green, purple, orange
 
+  // 3. Add the skeleton loader
+  if (!isMounted) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-64 rounded-lg bg-neutral-800 animate-pulse" />
+          <div className="flex rounded-lg p-1 bg-neutral-900">
+            <div className="h-8 w-24 rounded-md bg-neutral-800" />
+            <div className="h-8 w-24 rounded-md" />
+          </div>
+        </div>
+
+        {/* Charts Grid Skeleton */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[348px] animate-pulse" />
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[348px] animate-pulse" />
+        </div>
+      </motion.section>
+    );
+  }
+
+  // 4. Render the full component once mounted
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}

@@ -5,8 +5,9 @@ import { TrendingUp, Target, FileText, Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { MagicCard } from "../ui/magic-card";
-import { useTheme } from "next-themes";
+import { MagicCard } from "../../components/ui/magic-card"; // Corrected relative path
+// 1. Import our custom hook
+import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme"; // Corrected relative path
 
 const stats = [
   {
@@ -40,10 +41,42 @@ const stats = [
   },
 ];
 
+// Define a mapping for Tailwind colors to be applied safely
+const colorMap: Record<string, string> = {
+  blue: "text-blue-500",
+  purple: "text-purple-500",
+  green: "text-green-500",
+  orange: "text-orange-500",
+};
+
 export function QuickStats() {
-  const { theme } = useTheme();
+  // 2. Call our hook
+  const { theme, isMounted } = useHydrationSafeTheme();
   const isDark = theme === "dark";
 
+  // 3. Render skeleton on server / initial client render
+  if (!isMounted) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.1 }}
+        className="space-y-6"
+      >
+        {/* Header Skeleton */}
+        <div className="h-8 w-64 rounded-lg bg-neutral-800 animate-pulse" />
+        {/* Grid Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
+        </div>
+      </motion.section>
+    );
+  }
+
+  // 4. Render the full component once mounted
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -107,10 +140,11 @@ function StatContent({
   isDark: boolean;
 }) {
   return (
-    <div className="space-y-3 text-orange-500">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <stat.icon
-          className={cn("h-5 w-5", `text-${stat.color}-500`)}
+          // Use the color map to safely apply Tailwind class
+          className={cn("h-5 w-5", colorMap[stat.color] || "text-gray-500")}
         />
         <div className="text-right">
           <div
