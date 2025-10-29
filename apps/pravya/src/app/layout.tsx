@@ -19,11 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Pravya AI",
   description: "Ace Every Interview with Pravya AI",
-  icons: {
-    icon: "logo/pravya-logo.png",
-    shortcut: "logo/pravya-logo.png",
-    apple: "logo/pravya-logo.png",
-  },
+  
 };
 
 export default function RootLayout({
