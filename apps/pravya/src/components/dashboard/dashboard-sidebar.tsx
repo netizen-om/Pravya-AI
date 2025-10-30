@@ -1,12 +1,28 @@
-"use client"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { motion } from "framer-motion"
-import { LayoutDashboard, Upload, Play, History, BarChart3, BookOpen, User, Settings, LogOut } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { useSidebar } from "./sidebar-context"
-import { signOut } from "next-auth/react"
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  LayoutDashboard,
+  Upload,
+  Play,
+  History,
+  BarChart3,
+  BookOpen,
+  User,
+  LogOut,
+  Sun,
+  Moon,
+  Menu,
+  X,
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { signOut } from "next-auth/react";
+import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -16,72 +32,237 @@ const navigation = [
   { name: "Performance Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Learning Hub", href: "/learning", icon: BookOpen },
   { name: "Manage Profile", href: "/profile", icon: User },
-]
+];
 
 export function DashboardSidebar() {
-  const pathname = usePathname()
-  const { sidebarOpen } = useSidebar()
+  const pathname = usePathname();
+  const [isHovered, setIsHovered] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // 2. Set isMounted to true after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  const { theme, setTheme } = useTheme();
+  
+  const handleSignOut = () => signOut();
 
-  const handleSignOut = () => {
-    signOut()
-  }
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <div
+      {/* ===== MOBILE MENU BUTTON ===== */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
+          {mobileOpen ? <X /> : <Menu />}
+        </Button>
+      </div>
+
+      {/* ===== DESKTOP SIDEBAR ===== */}
+      <motion.div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        animate={{ width: isHovered ? 240 : 72 }}
+        transition={{ type: "spring", stiffness: 180, damping: 20 }}
         className={cn(
-          "hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col transition-transform duration-300 ease-in-out z-30",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "hidden lg:flex flex-col h-screen fixed inset-y-0 left-0 z-40 border-r transition-colors duration-300",
+          // light & dark mode separation
+          "bg-white border-gray-200 text-gray-700 dark:bg-neutral-950 dark:border-neutral-800 dark:text-neutral-300"
         )}
       >
-        <div className="flex flex-col flex-grow bg-neutral-950/90 border-r border-neutral-800 pt-20">
-          <div className="flex flex-col flex-grow px-4 py-6">
-            <nav className="flex-1 space-y-2">
-              {navigation.map((item, index) => {
-                const isActive = pathname === item.href
-                return (
-                  <motion.div
-                    key={item.name}
+        <div className="flex flex-col flex-grow pt-7 overflow-hidden">
+          {/* === LOGO SECTION === */}
+          <div className="flex items-center px-4 mb-6">
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center space-x-3"
+            >
+              <Image
+                src="/logo/pravya-logo.png"
+                alt="Pravya AI Logo"
+                width={36}
+                height={36}
+                className="rounded-md"
+              />
+              <AnimatePresence>
+                {isHovered && (
+                  <motion.span
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.25 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-lg font-semibold line-clamp-1 tracking-wide text-gray-800 dark:text-gray-100"
                   >
-                    <Link
-                      href={item.href}
+                    Pravya AI
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+
+          <nav className="flex-1 space-y-1 px-2">
+            {navigation.map((item, index) => {
+              const isActive = pathname === item.href;
+              return (
+                <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.04, duration: 0.25 }}
+                >
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center py-2 px-3 text-sm font-medium rounded-lg transition-all duration-200 group",
+                      isActive
+                        ? "bg-gray-100 text-gray-900 dark:bg-white/10 dark:text-white"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900/50"
+                    )}
+                  >
+                    <item.icon
                       className={cn(
-                        "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                        "h-5 w-5 min-w-[20px] transition-colors",
                         isActive
-                          ? "bg-white/10 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
-                          : "text-neutral-400 hover:text-white hover:bg-neutral-900/50",
+                          ? "text-gray-900 dark:text-white"
+                          : "text-gray-500 group-hover:text-gray-900 dark:text-neutral-500 dark:group-hover:text-white"
                       )}
-                    >
-                      <item.icon
-                        className={cn(
-                          "mr-3 h-5 w-5 transition-colors",
-                          isActive ? "text-white" : "text-neutral-500 group-hover:text-white",
-                        )}
-                      />
-                      {item.name}
-                    </Link>
-                  </motion.div>
-                )
+                    />
+                    <AnimatePresence>
+                      {isHovered && (
+                        <motion.span
+                          initial={{ opacity: 0, x: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -5 }}
+                          transition={{ duration: 0.2 }}
+                          className="ml-3 whitespace-nowrap"
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </nav>
+
+          {/* ===== THEME TOGGLE + SIGN OUT ===== */}
+          <div className="mt-auto px-2 pb-4 border-t border-gray-200 dark:border-neutral-800">
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start transition-all duration-200",
+                  "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
+                  "dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900/50"
+                )}
+                onClick={toggleTheme}
+              >
+                {theme === "dark" ? (
+                  <Sun className="mr-3 h-5 w-5" />
+                ) : (
+                  <Moon className="mr-3 h-5 w-5" />
+                )}
+                {isHovered && (
+                  <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                )}
+              </Button>
+
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start transition-all duration-200",
+                  "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
+                  "dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900/50"
+                )}
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                {isHovered && <span>Sign Out</span>}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ===== MOBILE SIDEBAR ===== */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 180, damping: 20 }}
+            className={cn(
+              "fixed inset-y-0 left-0 z-50 flex w-64 flex-col p-4 pt-20 border-r transition-colors duration-300",
+              "bg-white border-gray-200 text-gray-700 dark:bg-neutral-950 dark:border-neutral-800 dark:text-neutral-300"
+            )}
+          >
+            <nav className="space-y-2">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                      isActive
+                        ? "bg-gray-100 text-gray-900 dark:bg-white/10 dark:text-white"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900/50"
+                    )}
+                  >
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.name}
+                  </Link>
+                );
               })}
             </nav>
 
-            <div className="mt-6 pt-6 border-t border-neutral-800">
+            <div className="mt-auto pt-6 border-t border-gray-200 dark:border-neutral-800">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-neutral-400 hover:text-white hover:bg-neutral-900/50"
+                className={cn(
+                  "w-full justify-start transition-all duration-200",
+                  "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
+                  "dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900/50"
+                )}
+                onClick={toggleTheme}
+              >
+                {theme === "dark" ? (
+                  <Sun className="mr-3 h-5 w-5" />
+                ) : (
+                  <Moon className="mr-3 h-5 w-5" />
+                )}
+                Toggle Theme
+              </Button>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start transition-all duration-200",
+                  "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
+                  "dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900/50"
+                )}
                 onClick={handleSignOut}
               >
                 <LogOut className="mr-3 h-5 w-5" />
                 Sign Out
               </Button>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
-  )
+  );
 }

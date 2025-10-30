@@ -295,26 +295,26 @@ export default function Dashboard() {
             </Card>
 
             {/* Daily Tip Widget */}
-            <Card
-              className="glassmorphism"
-              style={{
-                background: "linear-gradient(135deg, rgba(180, 83, 9, 0.2) 0%, rgba(146, 64, 14, 0.2) 100%)",
-                borderColor: "rgba(180, 83, 9, 0.5)",
-              }}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-yellow-400">
-                  <Lightbulb className="h-5 w-5" />
-                  Today's Tip
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-300">
-                  Structure your answers using the STAR method: Situation, Task, Action, Result. This helps you provide
-                  comprehensive and organized responses.
-                </p>
-              </CardContent>
-            </Card>
+              <Card
+                className="glassmorphism"
+                style={{
+                  background: "linear-gradient(135deg, rgba(180, 83, 9, 0.2) 0%, rgba(146, 64, 14, 0.2) 100%)",
+                  borderColor: "rgba(180, 83, 9, 0.5)",
+                }}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-yellow-400">
+                    <Lightbulb className="h-5 w-5" />
+                    Today's Tip
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-300">
+                    Structure your answers using the STAR method: Situation, Task, Action, Result. This helps you provide
+                    comprehensive and organized responses.
+                  </p>
+                </CardContent>
+              </Card>
           </div>
 
           {/* Recent Feedback Panel */}
