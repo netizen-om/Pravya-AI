@@ -12,6 +12,7 @@ import { ResumeInsights } from "../dashboard/resume-insights";
 import { Gamification } from "../dashboard/gamification";
 import dynamic from "next/dynamic";
 import { Session } from "next-auth"; // Import the Session type
+import {TodaysTip} from "../dashboard/today-tip";
 
 // Dynamically import the sidebar (client-side)
 const DashboardSidebar = dynamic(
@@ -42,11 +43,10 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
               <WelcomeSection session={session} />
               <QuickStats />
               <PerformanceAnalytics />
+              <TodaysTip />
               <RecentActivity />
               <InterviewSuggestions />
               <ResumeInsights />
-              {/* <LearningHubPreview /> */}
-              <Gamification />
             </div>
           </main>
         </div>

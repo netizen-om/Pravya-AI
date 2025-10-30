@@ -1,63 +1,64 @@
 "use client";
 
-// No longer need useState or useEffect here
 import { motion } from "framer-motion";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
-  Cell,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Legend,
+  Tooltip,
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// No longer need direct useTheme import
 import { MagicCard } from "../ui/magic-card";
 import { cn } from "@/lib/utils";
-import { useState } from "react"; // Keep useState for timeRange
-// 1. Import our new custom hook
+import { useState } from "react";
 import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme";
 
+// 7-day data (Interview + ATS)
 const scoresData7Days = [
-  { date: "Mon", score: 78 },
-  { date: "Tue", score: 82 },
-  { date: "Wed", score: 85 },
-  { date: "Thu", score: 79 },
-  { date: "Fri", score: 88 },
-  { date: "Sat", score: 91 },
-  { date: "Sun", score: 87 },
+  { date: "Mon", interviewScore: 78, atsScore: 84 },
+  { date: "Tue", interviewScore: 82, atsScore: 81 },
+  { date: "Wed", interviewScore: 85, atsScore: 88 },
+  { date: "Thu", interviewScore: 79, atsScore: 83 },
+  { date: "Fri", interviewScore: 88, atsScore: 90 },
+  { date: "Sat", interviewScore: 91, atsScore: 86 },
+  { date: "Sun", interviewScore: 87, atsScore: 92 },
 ];
 
+// 30-day data (Weekly average)
 const scoresData30Days = [
-  { date: "Week 1", score: 75 },
-  { date: "Week 2", score: 82 },
-  { date: "Week 3", score: 88 },
-  { date: "Week 4", score: 87 },
+  { date: "Week 1", interviewScore: 75, atsScore: 80 },
+  { date: "Week 2", interviewScore: 82, atsScore: 85 },
+  { date: "Week 3", interviewScore: 88, atsScore: 90 },
+  { date: "Week 4", interviewScore: 87, atsScore: 88 },
 ];
 
+// Enhanced Radar data
 const strengthsData = [
   { skill: "Communication", score: 92 },
   { skill: "Technical", score: 85 },
   { skill: "Problem-Solving", score: 78 },
   { skill: "Confidence", score: 88 },
+  { skill: "Soft Skills", score: 90 },
+  { skill: "Hard Skills", score: 82 },
 ];
 
 export function PerformanceAnalytics() {
-  // 2. Call our hook to get theme and mount status
   const { theme, isMounted } = useHydrationSafeTheme();
-  
   const isDark = theme === "dark";
   const [timeRange, setTimeRange] = useState<"7days" | "30days">("7days");
 
   const scoresData = timeRange === "7days" ? scoresData7Days : scoresData30Days;
 
-  const barColors = ["#3B82F6", "#22C55E", "#A855F7", "#FB923C"]; // blue, green, purple, orange
-
-  // 3. Add the skeleton loader
   if (!isMounted) {
     return (
       <motion.section
@@ -66,7 +67,6 @@ export function PerformanceAnalytics() {
         transition={{ duration: 0.25, delay: 0.3 }}
         className="space-y-6"
       >
-        {/* Header Skeleton */}
         <div className="flex items-center justify-between">
           <div className="h-8 w-64 rounded-lg bg-neutral-800 animate-pulse" />
           <div className="flex rounded-lg p-1 bg-neutral-900">
@@ -74,8 +74,6 @@ export function PerformanceAnalytics() {
             <div className="h-8 w-24 rounded-md" />
           </div>
         </div>
-
-        {/* Charts Grid Skeleton */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[348px] animate-pulse" />
           <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[348px] animate-pulse" />
@@ -84,7 +82,6 @@ export function PerformanceAnalytics() {
     );
   }
 
-  // 4. Render the full component once mounted
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -103,7 +100,6 @@ export function PerformanceAnalytics() {
           Performance Analytics
         </h2>
 
-        {/* Filter */}
         <div
           className={cn(
             "flex rounded-lg p-1",
@@ -149,7 +145,7 @@ export function PerformanceAnalytics() {
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Scores Over Time */}
+        {/* Scores Over Time (Interview + ATS) */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -181,7 +177,7 @@ export function PerformanceAnalytics() {
                 Scores Over Time
               </h3>
 
-              <div className="h-64">
+              <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={scoresData}>
                     <CartesianGrid
@@ -200,21 +196,41 @@ export function PerformanceAnalytics() {
                       fontSize={12}
                       tickLine={false}
                       axisLine={false}
-                      domain={[0, 100]}
+                      domain={[60, 100]}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? "#18181b" : "#f9fafb",
+                        borderRadius: "8px",
+                        border: "none",
+                        color: isDark ? "#fff" : "#000",
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      height={36}
+                      wrapperStyle={{
+                        fontSize: "12px",
+                        color: isDark ? "#a3a3a3" : "#6b7280",
+                      }}
                     />
                     <Line
                       type="monotone"
-                      dataKey="score"
-                      stroke={isDark ? "#ffffff" : "#111827"}
-                      strokeWidth={2}
-                      dot={{
-                        fill: isDark ? "#ffffff" : "#111827",
-                        r: 4,
-                      }}
-                      activeDot={{
-                        r: 6,
-                        fill: isDark ? "#ffffff" : "#111827",
-                      }}
+                      dataKey="interviewScore"
+                      name="Interview Score"
+                      stroke={isDark ? "#22C55E" : "#2563EB"}
+                      strokeWidth={2.5}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="atsScore"
+                      name="Resume ATS Score"
+                      stroke={isDark ? "#38BDF8" : "#0EA5E9"}
+                      strokeWidth={2.5}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -255,40 +271,49 @@ export function PerformanceAnalytics() {
                 Strengths & Weaknesses
               </h3>
 
-              <div className="h-64">
+              <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={strengthsData}
-                    layout="vertical"
-                    margin={{ top: 5, right: 20, left: 40, bottom: 5 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke={isDark ? "#404040" : "#e5e7eb"}
-                    />
-                    <XAxis
-                      type="number"
-                      stroke={isDark ? "#a3a3a3" : "#6b7280"}
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      domain={[0, 100]}
-                    />
-                    <YAxis
-                      type="category"
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={strengthsData}>
+                    <PolarGrid stroke={isDark ? "#404040" : "#e5e7eb"} />
+                    <PolarAngleAxis
                       dataKey="skill"
                       stroke={isDark ? "#a3a3a3" : "#6b7280"}
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      width={110}
+                      fontSize={13}
                     />
-                    <Bar dataKey="score" radius={[0, 6, 6, 0]} barSize={16}>
-                      {strengthsData.map((_, i) => (
-                        <Cell key={i} fill={barColors[i % barColors.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                    <PolarRadiusAxis
+                      angle={30}
+                      domain={[0, 100]}
+                      stroke={isDark ? "#a3a3a3" : "#6b7280"}
+                      tickCount={5}
+                    />
+                    <Radar
+                      name="Skill Score"
+                      dataKey="score"
+                      stroke={isDark ? "#22C55E" : "#3B82F6"}
+                      fill={isDark ? "url(#radarGradientDark)" : "url(#radarGradientLight)"}
+                      fillOpacity={0.5}
+                      animationBegin={200}
+                      animationDuration={1000}
+                    />
+                    <defs>
+                      <linearGradient id="radarGradientLight" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.2} />
+                      </linearGradient>
+                      <linearGradient id="radarGradientDark" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#22C55E" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#15803D" stopOpacity={0.2} />
+                      </linearGradient>
+                    </defs>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? "#18181b" : "#f9fafb",
+                        borderRadius: "8px",
+                        border: "none",
+                        color: isDark ? "#fff" : "#000",
+                      }}
+                    />
+                  </RadarChart>
                 </ResponsiveContainer>
               </div>
             </MagicCard>
@@ -298,3 +323,4 @@ export function PerformanceAnalytics() {
     </motion.section>
   );
 }
+  
