@@ -52,7 +52,7 @@ model Interview {
   user                User              @relation(fields: [userId], references: [id]) // changed to reference id
   role                String?
   level               String?
-  techStack           String[]
+  transcribe          Json?
   noOfQuestions       Int
   type                String?
   status              String            @default("pending")
@@ -78,12 +78,25 @@ model Question {
 }
 
 model Feedback {
-  feedbackId       String    @id @default(uuid())
-  interviewId      String    @unique
-  interview        Interview @relation(fields: [interviewId], references: [interviewId])
-  summary          String
-  improvementAreas String[]
-  confidenceScore  Int
+  feedbackId  String    @id @default(uuid())
+  interviewId String    @unique
+  interview   Interview @relation(fields: [interviewId], references: [interviewId])
+
+  overallScore     Int 
+  summary          String 
+  keyStrengths     String[] 
+  improvementAreas String[] 
+
+  communicationScore  Int 
+  technicalScore      Int 
+  problemSolvingScore Int 
+  behavioralScore     Int 
+  confidenceScore     Int 
+
+  fullFeedbackJson Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model InterviewAudio {

@@ -281,7 +281,7 @@ export function PerformanceAnalytics() {
                       fontSize={13}
                     />
                     <PolarRadiusAxis
-                      angle={30}
+                      angle={60}
                       domain={[0, 100]}
                       stroke={isDark ? "#a3a3a3" : "#6b7280"}
                       tickCount={5}
