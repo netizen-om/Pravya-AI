@@ -1,23 +1,23 @@
 "use client"; // This component runs in the browser
 
 import React from "react";
-import { SidebarProvider } from "../dashboard/sidebar-context";
+import { SidebarProvider } from "./sidebar-context";
 // import { DashboardHeader } from "../dashboard/dashboard-header"; // Uncomment if you use it
-import { WelcomeSection } from "../dashboard/welcome-section";
-import { QuickStats } from "../dashboard/quick-stats";
-import { RecentActivity } from "../dashboard/recent-activity";
-import { PerformanceAnalytics } from "../dashboard/performance-analytics";
-import { InterviewSuggestions } from "../dashboard/interview-suggestions";
-import { ResumeInsights } from "../dashboard/resume-insights";
-import { Gamification } from "../dashboard/gamification";
+import { WelcomeSection } from "./welcome-section";
+import { QuickStats } from "./quick-stats";
+import { RecentActivity } from "./recent-activity";
+import { PerformanceAnalytics } from "./performance-analytics";
+import { InterviewSuggestions } from "./interview-suggestions";
+import { ResumeInsights } from "./resume-insights";
 import dynamic from "next/dynamic";
 import { Session } from "next-auth"; // Import the Session type
-import {TodaysTip} from "../dashboard/today-tip";
+import {TodaysTip} from "./today-tip";
+import { DashboardFooter } from "./Dashboard-footer";
 
 // Dynamically import the sidebar (client-side)
 const DashboardSidebar = dynamic(
   () =>
-    import("../dashboard/dashboard-sidebar").then(
+    import("./dashboard-sidebar").then(
       (mod) => mod.DashboardSidebar
     ),
   { ssr: false }
@@ -47,6 +47,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
               <RecentActivity />
               <InterviewSuggestions />
               <ResumeInsights />
+              <DashboardFooter />
             </div>
           </main>
         </div>

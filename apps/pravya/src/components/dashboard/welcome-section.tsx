@@ -83,7 +83,7 @@ export function WelcomeSection({ session }: WelcomeSectionProps) {
       </motion.div>
 
       {/* === Main Magic Card === */}
-      <Card className="bg-transparent border-none shadow-none p-0">
+      <Card className="bg-neutral-900/70 border-neutral-800 border-none shadow-none p-0">
         <motion.div
           whileHover={{ y: -2, rotateX: 2, rotateY: 1 }}
           transition={{ type: "spring", stiffness: 100, damping: 15 }}

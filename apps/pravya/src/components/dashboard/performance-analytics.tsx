@@ -155,7 +155,7 @@ export function PerformanceAnalytics() {
             className={cn(
               "rounded-2xl shadow-sm border transition-all duration-300",
               isDark
-                ? "bg-neutral-950/90 border-neutral-800"
+                ? "bg-neutral-900/70 border-neutral-800"
                 : "bg-white border-gray-200"
             )}
           >

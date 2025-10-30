@@ -16,13 +16,13 @@ import { cn } from "@/lib/utils";
 
 // Tiny trend data for Interview Mode Activity
 const interviewTrend = [
-  { day: "Mon", value: 3 },
-  { day: "Tue", value: 4 },
-  { day: "Wed", value: 0 },
-  { day: "Thu", value: 5 },
-  { day: "Fri", value: 3 },
-  { day: "Sat", value: 6 },
-  { day: "Sun", value: 4 },
+  { day: "Monday", value: 3 },
+  { day: "Tuesday", value: 4 },
+  { day: "Wednesday", value: 0 },
+  { day: "Thursday", value: 5 },
+  { day: "Friday", value: 3 },
+  { day: "Saturday", value: 6 },
+  { day: "Sunday", value: 4 },
 ];
 
 export function TodaysTip() {
@@ -85,7 +85,7 @@ export function TodaysTip() {
           className={cn(
             "rounded-2xl transition-all duration-300 backdrop-blur-md",
             isDark
-              ? "bg-neutral-900/70 border-neutral-800"
+              ? "bg-neutral-950/70 border-neutral-800"
               : "bg-white/70 border-gray-200"
           )}
         >

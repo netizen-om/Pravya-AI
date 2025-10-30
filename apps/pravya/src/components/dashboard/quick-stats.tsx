@@ -112,7 +112,7 @@ export function QuickStats() {
             >
               <Card
                 className={cn(
-                  "bg-transparent rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200 group border-none shadow-none",
+                  "bg-neutral-900/70 border-neutral-800 rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200 group border-none shadow-none",
                   isDark ? "text-white" : "text-gray-900"
                 )}
               >
