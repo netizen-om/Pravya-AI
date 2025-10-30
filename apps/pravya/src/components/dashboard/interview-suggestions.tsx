@@ -1,57 +1,89 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Play, Code, MessageSquare, Zap, Users, Database } from "lucide-react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
+import { InterviewTemplateCard } from "../interview/interview-template-card";
+import { MagicCard } from "../ui/magic-card";
+import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
+import { Card } from "../ui/card";
+import { cn } from "@/lib/utils";
 
 const suggestions = [
   {
-    id: 1,
+    id: "1",
     title: "System Design Deep Dive",
-    description: "Practice designing scalable systems with real-world scenarios",
-    icon: Database,
-    mode: "system-design",
+    description:
+      "Practice designing scalable systems with real-world scenarios",
+    tags: ["architecture", "scalability", "backend"],
   },
   {
-    id: 2,
+    id: "2",
     title: "Behavioral Practice",
     description: "Master the STAR method with common behavioral questions",
-    icon: MessageSquare,
-    mode: "behavioral",
+    tags: ["communication", "soft-skills", "self-awareness"],
   },
   {
-    id: 3,
+    id: "3",
     title: "DSA Drill",
     description: "Sharpen your data structures and algorithms skills",
-    icon: Code,
-    mode: "coding",
+    tags: ["algorithms", "problem-solving", "data-structures"],
   },
   {
-    id: 4,
+    id: "4",
     title: "Leadership Scenarios",
     description: "Practice leadership and management interview questions",
-    icon: Users,
-    mode: "leadership",
+    tags: ["management", "decision-making", "teamwork"],
   },
   {
-    id: 5,
+    id: "5",
     title: "Quick Fire Round",
     description: "Rapid-fire technical questions to test your knowledge",
-    icon: Zap,
-    mode: "quick-fire",
+    tags: ["technical", "rapid", "assessment"],
   },
   {
-    id: 6,
+    id: "6",
     title: "Mock Panel Interview",
     description: "Simulate a real panel interview experience",
-    icon: Users,
-    mode: "panel",
+    tags: ["simulation", "realistic", "multi-interviewer"],
   },
-]
+];
 
 export function InterviewSuggestions() {
+  const { theme, isMounted } = useHydrationSafeTheme();
+
+  if (!isMounted) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-64 rounded-lg bg-neutral-800 animate-pulse" />
+          <div className="flex rounded-lg p-1 bg-neutral-900">
+            <div className="h-8 w-24 rounded-md bg-neutral-800" />
+            <div className="h-8 w-24 rounded-md" />
+          </div>
+        </div>
+
+        {/* Charts Grid Skeleton */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[348px] animate-pulse" />
+          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[348px] animate-pulse" />
+        </div>
+      </motion.section>
+    );
+  }
+
+  const isDark = theme === "dark";
+  const textColor = theme === "light" ? "text-neutral-900" : "text-white";
+  const subTextColor =
+    theme === "light" ? "text-neutral-600" : "text-neutral-400";
+  const bgColor = theme === "light" ? "bg-neutral-100" : "bg-zinc-950";
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -59,43 +91,48 @@ export function InterviewSuggestions() {
       transition={{ duration: 0.25, delay: 0.3 }}
       className="space-y-6"
     >
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-white">Suggested Interviews</h2>
-        <Button variant="ghost" className="text-neutral-400 hover:text-white">
+        <h2 className={`text-2xl font-semibold ${textColor}`}>
+          Suggested Interviews
+        </h2>
+        <Button
+          variant="ghost"
+          className={`${subTextColor} hover:${textColor}`}
+        >
           View All
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Flex container for cards */}
+      <div className="flex flex-wrap gap-4 justify-start items-stretch">
         {suggestions.map((suggestion, index) => (
           <motion.div
             key={suggestion.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, delay: 0.05 * index }}
+            className="flex-grow sm:basis-[calc(50%-0.5rem)] lg:basis-[calc(33.333%-0.5rem)] flex"
           >
-            <Card className="bg-neutral-950/90 border-neutral-800 rounded-2xl shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] hover:scale-[1.02] transition-all duration-200 group">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-neutral-900 rounded-lg flex items-center justify-center group-hover:bg-neutral-800 transition-colors">
-                    <suggestion.icon className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-white">{suggestion.title}</h3>
-                </div>
-
-                <p className="text-sm text-neutral-400 leading-relaxed">{suggestion.description}</p>
-
-                <Button asChild className="w-full bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-                  <Link href={`/interview/start?mode=${suggestion.mode}`} className="flex items-center gap-2">
-                    <Play className="h-4 w-4" />
-                    Start
-                  </Link>
-                </Button>
-              </div>
-            </Card>
+            <div className="flex flex-col w-full h-full">
+              <MagicCard
+                gradientColor={isDark ? "#262626" : "#D9D9D955"}
+                className={cn(
+                  "rounded-2xl border-none p-6 transition-all duration-300",
+                  isDark
+                    ? "bg-neutral-900/70 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+                    : "bg-white/90 shadow-[0_0_0_1px_rgba(0,0,0,0.05)] backdrop-blur-md"
+                )}
+              >
+              <InterviewTemplateCard
+                template={suggestion}
+                backgroundColor={bgColor}
+              />
+            </MagicCard>
+            </div>
           </motion.div>
         ))}
       </div>
     </motion.section>
-  )
+  );
 }
