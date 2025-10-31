@@ -1,18 +1,19 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import type { DetailedInterviewFeedback } from "@/utlis/zod"
-import Header from "@/components/feedback/header"
-import OverallPerformance from "@/components/feedback/overall-performance"
-import DashboardMetrics from "@/components/feedback/dashboard-metrics"
-import CommunicationDelivery from "@/components/feedback/communication-delivery"
-import QuestionBreakdown from "@/components/feedback/question-breakdown"
-import RoleSpecificFit from "@/components/feedback/role-specific-fit"
-import AnswerQualityChart from "@/components/feedback/answer-quality-chart"
-import ImprovementAreasChart from "@/components/feedback/improvement-areas-chart"
+import { motion } from "framer-motion";
+import type { DetailedInterviewFeedback } from "@/utlis/zod";
+import Header from "@/components/feedback/header";
+import OverallPerformance from "@/components/feedback/overall-performance";
+import DashboardMetrics from "@/components/feedback/dashboard-metrics";
+import CommunicationDelivery from "@/components/feedback/communication-delivery";
+import QuestionBreakdown from "@/components/feedback/question-breakdown";
+import RoleSpecificFit from "@/components/feedback/role-specific-fit";
+import AnswerQualityChart from "@/components/feedback/answer-quality-chart";
+import ImprovementAreasChart from "@/components/feedback/improvement-areas-chart";
+import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
 
 interface FeedbackPageProps {
-  feedback: DetailedInterviewFeedback
+  feedback: DetailedInterviewFeedback;
 }
 
 const containerVariants = {
@@ -24,9 +25,19 @@ const containerVariants = {
       delayChildren: 0.2,
     },
   },
-}
+};
 
 export default function FeedbackPage({ feedback }: FeedbackPageProps) {
+  const { theme, isMounted } = useHydrationSafeTheme();
+  const isDark = theme === "dark";
+
+  // 3. Render skeleton on server / initial client render
+  if (!isMounted) {
+    return (
+      <></>
+    );
+  }
+
   return (
     <motion.div
       className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white"
@@ -40,9 +51,9 @@ export default function FeedbackPage({ feedback }: FeedbackPageProps) {
         <div className="flex gap-8">
           {/* Main Content */}
           <div className="flex-1 min-w-0 space-y-8">
-            <DashboardMetrics metrics={feedback.dashboardMetrics} />
-            <AnswerQualityChart questions={feedback.questionBreakdown} />
-            <ImprovementAreasChart questions={feedback.questionBreakdown} />
+            <DashboardMetrics metrics={feedback.dashboardMetrics} isDark={isDark}/>
+            <AnswerQualityChart questions={feedback.questionBreakdown} isDark={isDark}/>
+            <ImprovementAreasChart questions={feedback.questionBreakdown} isDark={isDark}/>
             <CommunicationDelivery data={feedback.communicationAndDelivery} />
             <QuestionBreakdown questions={feedback.questionBreakdown} />
             <RoleSpecificFit roleData={feedback.roleSpecificFit} />
@@ -57,5 +68,5 @@ export default function FeedbackPage({ feedback }: FeedbackPageProps) {
         </div>
       </main>
     </motion.div>
-  )
+  );
 }
