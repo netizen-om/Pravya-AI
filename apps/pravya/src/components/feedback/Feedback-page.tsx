@@ -54,15 +54,15 @@ export default function FeedbackPage({ feedback }: FeedbackPageProps) {
             <DashboardMetrics metrics={feedback.dashboardMetrics} isDark={isDark}/>
             <AnswerQualityChart questions={feedback.questionBreakdown} isDark={isDark}/>
             <ImprovementAreasChart questions={feedback.questionBreakdown} isDark={isDark}/>
-            <CommunicationDelivery data={feedback.communicationAndDelivery} />
-            <QuestionBreakdown questions={feedback.questionBreakdown} />
-            <RoleSpecificFit roleData={feedback.roleSpecificFit} />
+            <CommunicationDelivery data={feedback.communicationAndDelivery} isDark={isDark}/>
+            <QuestionBreakdown questions={feedback.questionBreakdown} isDark={isDark}/>
+            <RoleSpecificFit roleData={feedback.roleSpecificFit} isDark={isDark}/>
           </div>
 
           {/* Sticky Sidebar */}
           <div className="hidden lg:block flex-shrink-0 w-96">
             <div className="sticky top-8 space-y-8">
-              <OverallPerformance performance={feedback.overallPerformance} />
+              <OverallPerformance performance={feedback.overallPerformance} isDark={isDark} />
             </div>
           </div>
         </div>
