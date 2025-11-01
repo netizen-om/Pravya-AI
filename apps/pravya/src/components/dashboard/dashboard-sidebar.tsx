@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
@@ -34,19 +34,17 @@ const navigation = [
   { name: "Manage Profile", href: "/profile", icon: User },
 ];
 
-export function DashboardSidebar() {
+interface DashboardSidebarProps {
+  isDark: boolean;
+}
+
+export function DashboardSidebar({ isDark }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  
-  const [isMounted, setIsMounted] = useState(false);
-  
-  // 2. Set isMounted to true after component mounts
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+
   const { theme, setTheme } = useTheme();
-  
+
   const handleSignOut = () => signOut();
 
   const toggleTheme = () => {
@@ -73,9 +71,9 @@ export function DashboardSidebar() {
         animate={{ width: isHovered ? 240 : 72 }}
         transition={{ type: "spring", stiffness: 180, damping: 20 }}
         className={cn(
-          "hidden lg:flex flex-col h-screen fixed inset-y-0 left-0 z-40 border-r transition-colors duration-300",
+          "hidden lg:flex flex-col h-screen fixed inset-y-0 left-0 z-50 border-r transition-colors duration-300",
           // light & dark mode separation
-          "bg-white border-gray-200 text-gray-700 dark:bg-neutral-950 dark:border-neutral-800 dark:text-neutral-300"
+          "bg-white border-gray-200 text-gray-700 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-300"
         )}
       >
         <div className="flex flex-col flex-grow pt-7 overflow-hidden">

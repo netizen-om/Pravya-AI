@@ -5,9 +5,12 @@ import { TrendingUp, Target, FileText, Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { MagicCard } from "../../components/ui/magic-card"; // Corrected relative path
-// 1. Import our custom hook
-import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme"; // Corrected relative path
+import { MagicCard } from "../../components/ui/magic-card";
+import { HoverGradient } from "../HoverGradient";
+
+interface QuickStatsProps {
+  isDark: boolean;
+}
 
 const stats = [
   {
@@ -49,34 +52,7 @@ const colorMap: Record<string, string> = {
   orange: "text-orange-500",
 };
 
-export function QuickStats() {
-  // 2. Call our hook
-  const { theme, isMounted } = useHydrationSafeTheme();
-  const isDark = theme === "dark";
-
-  // 3. Render skeleton on server / initial client render
-  if (!isMounted) {
-    return (
-      <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.1 }}
-        className="space-y-6"
-      >
-        {/* Header Skeleton */}
-        <div className="h-8 w-64 rounded-lg bg-neutral-800 animate-pulse" />
-        {/* Grid Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-        </div>
-      </motion.section>
-    );
-  }
-
-  // 4. Render the full component once mounted
+export function QuickStats({ isDark }: QuickStatsProps) {
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -84,14 +60,7 @@ export function QuickStats() {
       transition={{ duration: 0.25, delay: 0.1 }}
       className="space-y-6"
     >
-      <h2
-        className={cn(
-          "text-2xl font-semibold",
-          isDark ? "text-white" : "text-gray-900"
-        )}
-      >
-        Quick Overview
-      </h2>
+      <h2 className={"text-2xl font-semibold"}>Quick Overview</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
@@ -101,30 +70,30 @@ export function QuickStats() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, delay: 0.05 * index }}
           >
-            <MagicCard
-              gradientColor={isDark ? "#262626" : "#D9D9D955"}
-              className={cn(
-                "border rounded-2xl transition-all duration-300",
-                isDark
-                  ? "bg-neutral-900/70 border-neutral-800 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
-                  : "bg-white/80 border-gray-200 shadow-[0_0_0_1px_rgba(0,0,0,0.05)] backdrop-blur-md"
-              )}
-            >
+            <div className="border rounded-2xl transition-all duration-300">
               <Card
-                className={cn(
-                  "bg-neutral-900/70 border-neutral-800 rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200 group border-none shadow-none",
-                  isDark ? "text-white" : "text-gray-900"
-                )}
+                className={
+                  "bg-neutral-900/50 border-neutral-800 rounded-2xl hover:scale-[1.02] transition-transform duration-200 group border-none shadow-none"
+                }
               >
-                {stat.href ? (
-                  <Link href={stat.href} className="block">
-                    <StatContent stat={stat} isDark={isDark} />
-                  </Link>
-                ) : (
-                  <StatContent stat={stat} isDark={isDark} />
-                )}
+                <HoverGradient
+                  gradientSize={300}
+                  fromColor={isDark ? "#262626" : "#D9D9D955"}
+                  toColor={isDark ? "#262626" : "#D9D9D955"}
+                  opacity={0.8}
+                >
+                  <div className="p-6">
+                    {stat.href ? (
+                      <Link href={stat.href} className="block">
+                        <StatContent stat={stat} isDark={isDark} />
+                      </Link>
+                    ) : (
+                      <StatContent stat={stat} isDark={isDark} />
+                    )}
+                  </div>
+                </HoverGradient>
               </Card>
-            </MagicCard>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -159,10 +128,7 @@ function StatContent({
       </div>
       <div className="space-y-1">
         <h3
-          className={cn(
-            "font-medium",
-            isDark ? "text-white" : "text-gray-800"
-          )}
+          className={cn("font-medium", isDark ? "text-white" : "text-gray-800")}
         >
           {stat.title}
         </h3>

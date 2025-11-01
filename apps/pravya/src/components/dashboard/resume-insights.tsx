@@ -6,8 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
 import { HoverGradient } from "../HoverGradient";
 
 const skills = [
@@ -27,37 +25,18 @@ const improvements = [
   "Strengthen the summary section with key accomplishments",
 ];
 
-export function ResumeInsights() {
-  const { theme, isMounted } = useHydrationSafeTheme();
-  const isDark = theme === "dark";
+interface ResumeInsightsProps {
+  isDark : boolean
+}
 
-  // 3. Render skeleton on server / initial client render
-  if (!isMounted) {
-    return (
-      <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.1 }}
-        className="space-y-6"
-      >
-        {/* Header Skeleton */}
-        <div className="h-8 w-64 rounded-lg bg-neutral-800 animate-pulse" />
-        {/* Grid Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-          <Card className="rounded-2xl border-neutral-800 bg-neutral-900/70 h-[160px] animate-pulse" />
-        </div>
-      </motion.section>
-    );
-  }
+export function ResumeInsights({ isDark } : ResumeInsightsProps) {
+  
   // Define adaptive colors
   const colors = {
     textPrimary: isDark ? "text-white" : "text-neutral-900",
     textSecondary: isDark ? "text-neutral-400" : "text-neutral-600",
     border: isDark ? "border-neutral-800" : "border-neutral-200",
-    bgCard: isDark ? "bg-neutral-950/90" : "bg-white/90",
+    bgCard: isDark ? "bg-neutral-900/50" : "bg-white/90",
     badgeBg: isDark ? "bg-neutral-900" : "bg-neutral-100",
     badgeText: isDark ? "text-neutral-300" : "text-neutral-700",
     divider: isDark ? "bg-neutral-700" : "bg-neutral-300",
