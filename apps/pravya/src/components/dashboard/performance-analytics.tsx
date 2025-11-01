@@ -90,12 +90,7 @@ export function PerformanceAnalytics({ isDark }: PerformanceAnalyticsProps) {
           transition={{ duration: 0.25, delay: 0.1 }}
         >
           <Card
-            className={cn(
-              "rounded-2xl shadow-sm border transition-all duration-300",
-              isDark
-                ? "bg-neutral-900/50 border-neutral-800"
-                : "bg-white border-gray-200"
-            )}
+            className={"rounded-2xl broder-none transition-all duration-300 bg-white dark:bg-neutral-900/50 dark:border-neutral-800"}
           >
             <HoverGradient
               gradientSize={300}
@@ -118,17 +113,17 @@ export function PerformanceAnalytics({ isDark }: PerformanceAnalyticsProps) {
                     <LineChart data={scoresData}>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke={isDark ? "#404040" : "#e5e7eb"}
+                        stroke={"#404040"}
                       />
                       <XAxis
                         dataKey="date"
-                        stroke={isDark ? "#a3a3a3" : "#6b7280"}
+                        stroke={"#a3a3a3"}
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
-                        stroke={isDark ? "#a3a3a3" : "#6b7280"}
+                        stroke={"#a3a3a3"}
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
@@ -147,7 +142,7 @@ export function PerformanceAnalytics({ isDark }: PerformanceAnalyticsProps) {
                         height={36}
                         wrapperStyle={{
                           fontSize: "12px",
-                          color: isDark ? "#a3a3a3" : "#6b7280",
+                          color: "#a3a3a3",
                         }}
                       />
                       <Line

@@ -73,7 +73,7 @@ export function QuickStats({ isDark }: QuickStatsProps) {
             <div className="border rounded-2xl transition-all duration-300">
               <Card
                 className={
-                  "bg-neutral-900/50 border-neutral-800 rounded-2xl hover:scale-[1.02] transition-transform duration-200 group border-none shadow-none"
+                  "border-neutral-400 bg-white dark:bg-neutral-900/50 dark:border-neutral-800 rounded-2xl hover:scale-[1.02] transition-transform duration-200 group border-none shadow-none"
                 }
               >
                 <HoverGradient

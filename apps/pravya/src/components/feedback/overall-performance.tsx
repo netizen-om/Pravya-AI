@@ -30,16 +30,16 @@ const COLORS = {
       alertText: "text-red-800",
     },
     medium: {
-      text: "text-orange-400",
+      text: "text-amber-900",
       ring: "#f59e0b",
-      bg: "bg-orange-100/60",
-      border: "border-orange-300",
+      bg: "bg-amber-400/60",
+      border: "border-amber-500",
       alertText: "text-orange-800",
     },
     high: {
       text: "text-green-600",
       ring: "#059669",
-      bg: "bg-green-100/60",
+      bg: "bg-green-200/70",
       border: "border-green-300",
       alertText: "text-green-800",
     },
@@ -78,6 +78,7 @@ function getColorSet(score: number, isDark: boolean) {
 }
 
 export default function OverallPerformance({ performance, isDark }: OverallPerformancePropsExtended) {
+
   const colorSet = getColorSet(performance.overallScore, isDark);
 
   const parentVariants = {

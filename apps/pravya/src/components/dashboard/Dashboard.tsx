@@ -59,7 +59,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
   }
 
   return (
-    <div className="min-h-screen w-full bg-neutral-950 text-white">
+    <div className="min-h-screen w-full bg-white text-neutral-900 dark:bg-neutral-950 dark:text-white">
       <SidebarProvider>
         {/* <DashboardHeader session={session} /> */}
         <div className="flex">
@@ -73,7 +73,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
               <RecentActivity isDark={isDark}/>
               <InterviewSuggestions isDark={isDark}/>
               <ResumeInsights isDark={isDark}/>
-              <DashboardFooter />
+              <DashboardFooter isDark={isDark}/>
             </div>
           </main>
         </div>

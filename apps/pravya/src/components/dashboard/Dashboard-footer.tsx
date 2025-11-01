@@ -1,29 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Twitter, Linkedin, Github } from "lucide-react";
+import { HoverGradient } from "../HoverGradient";
+import { boolean } from "zod";
 
-export const DashboardFooter = () => {
+interface DashboardFooterProps {
+  isDark : boolean
+}
+
+export const DashboardFooter = ({ isDark } : DashboardFooterProps) => {
   const currentYear = new Date().getFullYear();
-
-  const navigation = {
-    product: [
-      { name: "Start Practicing", href: "/practice" },
-      { name: "Watch Demo", href: "/demo" },
-      { name: "Features", href: "/features" },
-      { name: "Pricing", href: "/pricing" },
-    ],
-    company: [
-      { name: "About", href: "/about" },
-      { name: "Blog", href: "/blog" },
-      { name: "Careers", href: "/careers" },
-      { name: "Contact Us", href: "/contact" },
-    ],
-    legal: [
-      { name: "Privacy Policy", href: "/privacy" },
-      { name: "Terms of Service", href: "/terms" },
-      { name: "Cookie Policy", href: "/cookies" },
-    ],
-  };
 
   const FooterColumn = ({
     title,
@@ -52,13 +38,19 @@ export const DashboardFooter = () => {
 
   return (
     <footer
-      className="bg-neutral-950/70 border-t "
+      className="dark:bg-neutral-950/70 border-t "
       aria-labelledby="footer-heading"
     >
+      <HoverGradient
+                  gradientSize={300}
+                  fromColor={isDark ? "#262626" : "#D9D9D955"}
+                  toColor={isDark ? "#262626" : "#D9D9D955"}
+                  opacity={0.8}
+                >
       <h2 id="footer-heading" className="sr-only">
         Footer
       </h2>
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-2 lg:px-8">
         <div className="pb-8 xl:grid xl:grid-cols-4 xl:gap-8">
           {/* Logo + Description */}
           <div className="space-y-4 xl:col-span-1">
@@ -71,14 +63,14 @@ export const DashboardFooter = () => {
                 className="rounded-md"
                 priority
               />
-              <span className="text-2xl font-bold text-white">Pravya AI</span>
+              <span className="text-2xl font-bold dark:text-white">Pravya AI</span>
             </div>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-800/50 md:flex md:items-center md:justify-between">
-          <div className="flex space-x-6 md:order-2">
+        <div className="border-t dark:border-gray-200 border-gray-800/50 md:flex md:items-center md:justify-between">
+          <div className="flex space-x-6 md:order-2 mt-4">
             <Link
               href="/twitter"
               aria-label="Twitter"
@@ -106,6 +98,7 @@ export const DashboardFooter = () => {
           </p>
         </div>
       </div>
+      </HoverGradient>
     </footer>
   );
 };

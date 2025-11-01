@@ -50,7 +50,7 @@ interface InterviewSuggestionsProps {
 
 export function InterviewSuggestions({ isDark } : InterviewSuggestionsProps) {
   
-  const bgColor = "bg-zinc-900/70";
+  const bgColor = "dark:bg-zinc-900/70 bg-white";
 
   return (
     <motion.section
@@ -85,6 +85,7 @@ export function InterviewSuggestions({ isDark } : InterviewSuggestionsProps) {
             <div className="flex flex-col w-full h-full rounded-2xl border-none p-6 transition-all duration-300">
               
               <InterviewTemplateCard
+                isDark={isDark}
                 template={suggestion}
                 backgroundColor={bgColor}
               />

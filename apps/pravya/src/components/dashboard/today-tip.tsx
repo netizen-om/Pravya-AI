@@ -41,21 +41,16 @@ export function TodaysTip({ isDark }: TodaysTipProps) {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* === Left: Today's Tip === */}
         <Card
-          className="glassmorphism"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(180, 83, 9, 0.2) 0%, rgba(146, 64, 14, 0.2) 100%)",
-            borderColor: "rgba(180, 83, 9, 0.5)",
-          }}
+          className="glassmorphism border-amber-500 dark:border-amber-900 bg-amber-300/80 dark:bg-amber-950"
         >
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-400">
+            <CardTitle className="flex items-center gap-2  text-amber-800 dark:text-amber-200">
               <Lightbulb className="h-5 w-5" />
               Today's Tip
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-300">
+            <p className=" text-amber-700 dark:text-amber-200">
               Structure your answers using the <b>STAR method</b> —{" "}
               <b>Situation</b>, <b>Task</b>, <b>Action</b>, and <b>Result</b>.
               This helps you explain experiences clearly and confidently.

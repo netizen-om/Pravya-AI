@@ -56,7 +56,7 @@ export function WelcomeSection({ session, isDark }: WelcomeSectionProps) {
       </motion.div>
 
       {/* === Main Magic Card === */}
-      <Card className="bg-neutral-900/50 border-neutral-800 border-none shadow-none p-0">
+      <Card className="bg-white dark:bg-neutral-900/50 dark:border-neutral-800 border-none shadow-none p-0">
         <motion.div
           whileHover={{ y: -2, rotateX: 2, rotateY: 1 }}
           transition={{ type: "spring", stiffness: 100, damping: 15 }}
@@ -111,7 +111,7 @@ export function WelcomeSection({ session, isDark }: WelcomeSectionProps) {
                       "hover:scale-[1.03] transition-all duration-200 ring-1 focus:ring-1",
                       isDark
                         ? "bg-neutral-900 text-white hover:bg-neutral-800 ring-neutral-700 focus:ring-neutral-700"
-                        : "bg-gray-100 text-gray-900 hover:bg-gray-200 ring-gray-300 focus:ring-gray-400"
+                        : "bg-neutral-900 text-white hover:text-white hover:opacity-80 hover:bg-neutral-900"
                     )}
                   >
                     <Link
@@ -130,7 +130,7 @@ export function WelcomeSection({ session, isDark }: WelcomeSectionProps) {
                       "hover:scale-[1.03] transition-all duration-200",
                       isDark
                         ? "border-neutral-700 text-white hover:bg-neutral-900"
-                        : "border-gray-300 text-gray-900 hover:bg-gray-100"
+                        : "bg-neutral-900 text-white hover:text-white hover:opacity-80 hover:bg-neutral-900"
                     )}
                   >
                     <Link

@@ -176,7 +176,7 @@ export function ResumeInsights({ isDark } : ResumeInsightsProps) {
                 <Button
                   asChild
                   variant="ghost"
-                  className={`${colors.textPrimary} ${colors.hoverBg} group`}
+                  className={`dark:bg-white dark:text-neutral-900 text-white bg-neutral-900 hover:bg-neutral-950 hover:opacity-80 hover:text-white group`}
                 >
                   <Link
                     href="/resume/analysis"
