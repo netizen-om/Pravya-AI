@@ -1,4 +1,6 @@
-import { Marquee } from "@/components/ui/marquee"
+import { motion, useAnimation } from "framer-motion"
+import { useEffect } from "react"
+import Image from "next/image" // Import the Next.js Image component
 
 const testimonials = [
   {
@@ -13,7 +15,7 @@ const testimonials = [
     body: "Honestly shocked at how smooth the v0 generated components are out of the box. Just works perfectly.",
     img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
   },
-  { 
+  {
     name: "Devon Carter",
     username: "@devninja",
     body: "Our team launched a client site in 2 days using v0 components. Saved so much development time.",
@@ -57,10 +59,12 @@ const testimonials = [
   },
 ]
 
+// Slice testimonials for each column
 const firstColumn = testimonials.slice(0, 3)
 const secondColumn = testimonials.slice(3, 6)
 const thirdColumn = testimonials.slice(6, 9)
 
+// Testimonial Card Component
 const TestimonialCard = ({
   img,
   name,
@@ -74,12 +78,24 @@ const TestimonialCard = ({
 }) => {
   return (
     <div className="relative w-full max-w-xs overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] p-10 shadow-[0px_2px_0px_0px_rgba(255,255,255,0.1)_inset]">
-      <div className="absolute -top-5 -left-5 -z-10 h-40 w-40 rounded-full bg-gradient-to-b from-white/10 to-transparent blur-md"></div>
-
+      {/* This div's `blur-md` was causing significant lag */}
+      <div className="absolute -top-5 -left-5 -z-10 h-40 w-40 rounded-full bg-gradient-to-b from-white/10 to-transparent"></div>
       <div className="text-white/90 leading-relaxed">{body}</div>
-
       <div className="mt-5 flex items-center gap-2">
-        <img src={img || "/placeholder.svg"} alt={name} height="40" width="40" className="h-10 w-10 rounded-full" />
+        <Image
+          src={img || "/placeholder.svg"}
+          alt={name}
+          height={40} // Use number for Next.js Image
+          width={40} // Use number for Next.js Image
+          className="h-10 w-10 rounded-full"
+          loading="lazy"
+          unoptimized // Add this if images.unsplash.com is not in next.config.js
+          onError={(e) => {
+            const target = e.target as HTMLImageElement
+            target.onerror = null // Prevent infinite loop
+            target.src = "https://placehold.co/40x40/333/FFF?text=?" // Fallback
+          }}
+        />
         <div className="flex flex-col">
           <div className="leading-5 font-medium tracking-tight text-white">{name}</div>
           <div className="leading-5 tracking-tight text-white/60">{username}</div>
@@ -89,6 +105,68 @@ const TestimonialCard = ({
   )
 }
 
+// New Marquee Column Component using Framer Motion
+const MarqueeColumn = ({
+  testimonials,
+  duration = 20,
+  reverse = false,
+  className = "",
+}: {
+  testimonials: (typeof testimonials)[0][] // Corrected type
+  duration?: number
+  reverse?: boolean
+  className?: string
+}) => {
+  const controls = useAnimation()
+
+  // Define the start and end points for the animation
+  const yStart = reverse ? "-50%" : "0%"
+  const yEnd = reverse ? "0%" : "-50%"
+
+  // Function to start the animation
+  const startAnimation = () => {
+    controls.start({
+      y: [yStart, yEnd],
+      transition: {
+        y: {
+          repeat: Infinity,
+          repeatType: "loop",
+          duration: duration,
+          ease: "linear",
+        },
+      },
+    })
+  }
+
+  // Start animation on component mount
+  useEffect(() => {
+    startAnimation()
+  }, [controls, duration, reverse, yStart, yEnd]) // Re-run if props change
+
+  return (
+    <div
+      className={`flex-shrink-0 ${className}`} // Pass external classNames
+      onMouseEnter={() => controls.stop()} // Pause on hover
+      onMouseLeave={startAnimation} // Resume on leave
+    >
+      <motion.div
+        className="flex flex-col gap-6" // Gap between cards
+        animate={controls}
+        style={{ willChange: "transform" }} // Performance hint for browser
+      >
+        {/* Render the list twice for a seamless loop */}
+        {[...testimonials, ...testimonials].map((testimonial, index) => (
+          <TestimonialCard
+            key={`${testimonial.username}-${index}`} // Create unique keys for looped items
+            {...testimonial}
+          />
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
+// Main Testimonials Section
 export function TestimonialsSection() {
   return (
     <section id="testimonials" className="mb-24">
@@ -99,7 +177,7 @@ export function TestimonialsSection() {
               type="button"
               className="group relative z-[60] mx-auto rounded-full border border-white/20 bg-white/5 px-6 py-1 text-xs backdrop-blur transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-100 md:text-sm"
             >
-              <div className="absolute inset-x-0 -top-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-white to-transparent shadow-2xl transition-all duration-500 group-hover:w-3/4"></div>
+              <div className="absolute inset-x-0 -top-px mx-auto h-0.5 w-1T/2 bg-gradient-to-r from-transparent via-white to-transparent shadow-2xl transition-all duration-500 group-hover:w-3/4"></div>
               <div className="absolute inset-x-0 -bottom-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-white to-transparent shadow-2xl transition-all duration-500 group-hover:h-px"></div>
               <span className="relative text-white">Testimonials</span>
             </button>
@@ -109,34 +187,26 @@ export function TestimonialsSection() {
           </h2>
 
           <p className="mt-5 relative z-10 text-center text-lg text-zinc-500">
-            From intuitive design to powerful features, our app has become an essential tool for users around the world.
+            From intuitive design to powerful features, our app has become an
+            essential tool for users around the world.
           </p>
         </div>
 
-        <div className="my-16 flex max-h-[738px] justify-center gap-6 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)]">
-          <div>
-            <Marquee pauseOnHover vertical className="[--duration:20s]">
-              {firstColumn.map((testimonial) => (
-                <TestimonialCard key={testimonial.username} {...testimonial} />
-              ))}
-            </Marquee>
-          </div>
-
-          <div className="hidden md:block">
-            <Marquee reverse pauseOnHover vertical className="[--duration:25s]">
-              {secondColumn.map((testimonial) => (
-                <TestimonialCard key={testimonial.username} {...testimonial} />
-              ))}
-            </Marquee>
-          </div>
-
-          <div className="hidden lg:block">
-            <Marquee pauseOnHover vertical className="[--duration:30s]">
-              {thirdColumn.map((testimonial) => (
-                <TestimonialCard key={testimonial.username} {...testimonial} />
-              ))}
-            </Marquee>
-          </div>
+        {/* Replaced Marquee with Framer Motion MarqueeColumn */}
+        {/* Removed [mask-image:...] from this div as it's very expensive to render on scrolling content */}
+        <div className="my-16 flex max-h-[738px] justify-center gap-6 overflow-hidden">
+          <MarqueeColumn testimonials={firstColumn} duration={20} />
+          <MarqueeColumn
+            testimonials={secondColumn}
+            duration={25}
+            reverse
+            className="hidden md:block"
+          />
+          <MarqueeColumn
+            testimonials={thirdColumn}
+            duration={30}
+            className="hidden lg:block"
+          />
         </div>
 
         <div className="-mt-8 flex justify-center">
@@ -153,3 +223,4 @@ export function TestimonialsSection() {
     </section>
   )
 }
+

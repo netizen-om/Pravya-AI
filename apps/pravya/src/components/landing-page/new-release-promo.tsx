@@ -1,10 +1,12 @@
 "use client"
 
+import Link from "next/link"
+
 export function NewReleasePromo() {
   return (
     <section className="mt-12 w-full">
-      <div className="mx-auto max-w-4xl rounded-[40px] border border-black/5 dark:border-white/20 p-2 shadow-sm">
-        <div className="relative mx-auto h-[400px] max-w-4xl overflow-hidden rounded-[38px] border border-black/5 dark:border-white/20 bg-primary p-2 shadow-sm">
+      <div className="mx-auto max-w-4xl rounded-[40px] border  border-white/20 p-2 shadow-sm">
+        <div className="relative mx-auto h-[400px] max-w-4xl overflow-hidden rounded-[38px] border border-white/20 bg-primary p-2 shadow-sm">
           {/* Subtle radial glow from center */}
           <div
             className="absolute inset-0 z-0"
@@ -23,15 +25,15 @@ export function NewReleasePromo() {
 
           <div className="relative z-10">
             <div className="mt-8 text-center">
-              <h2 className="text-4xl font-bold text-white mb-6">Build. Customize. Deploy Quickly.</h2>
-              <p className="text-white/60 mb-8">Built to keep you hooked.</p>
+              <h2 className="text-4xl font-bold text-black mb-6">Speak. Learn. Succeed. Anywhere.</h2>
+              <p className="text-neutral-500 px-28 mb-6">Our voice-based mock interviews are now accessible globally — empowering learners across continents to practice and improve anytime.</p>
               <svg
                 width="100"
                 height="50"
                 viewBox="0 0 100 50"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="fill-black dark:fill-white mx-auto mb-4"
+                className="fill-black mx-auto mb-4"
               >
                 <path d="M68.6958 5.40679C67.3329 12.7082 68.5287 20.1216 68.5197 27.4583C68.5189 29.5382 68.404 31.6054 68.1147 33.682C67.9844 34.592 69.4111 34.751 69.5414 33.8411C70.5618 26.5016 69.2488 19.104 69.4639 11.7325C69.5218 9.65887 69.7222 7.6012 70.0939 5.56265C70.1638 5.1949 69.831 4.81112 69.4601 4.76976C69.0891 4.72841 68.7689 5.01049 68.6958 5.40679Z"></path>
                 <path d="M74.0117 26.1349C73.2662 27.1206 72.5493 28.1096 72.0194 29.235C71.5688 30.167 71.2007 31.137 70.7216 32.0658C70.4995 32.5033 70.252 32.9091 69.9475 33.3085C69.8142 33.4669 69.6779 33.654 69.5161 33.8093C69.4527 33.86 68.9199 34.2339 68.9167 34.2624C68.9263 34.1768 69.0752 34.3957 69.0055 34.2434C68.958 34.1515 68.8534 34.0531 68.8058 33.9612C68.6347 33.6821 68.4637 33.403 68.264 33.1208L67.1612 31.3512C66.3532 30.0477 65.5199 28.7126 64.7119 27.4093C64.5185 27.0699 63.9701 27.0666 63.7131 27.2979C63.396 27.5514 63.4053 27.9858 63.6018 28.2966C64.3845 29.5683 65.1956 30.8431 65.9783 32.1149L67.1572 33.9796C67.5025 34.5093 67.8225 35.2671 68.428 35.5368C69.6136 36.0446 70.7841 34.615 71.3424 33.7529C71.9992 32.786 72.4085 31.705 72.9035 30.6336C73.4842 29.3116 74.2774 28.1578 75.1306 26.9818C75.7047 26.2369 74.5573 25.3868 74.0117 26.1349ZM55.1301 12.2849C54.6936 18.274 54.6565 24.3076 55.0284 30.3003C55.1293 31.987 55.2555 33.7056 55.4419 35.4019C55.5431 36.3087 56.9541 36.0905 56.8529 35.1837C56.2654 29.3115 56.0868 23.3982 56.2824 17.4978C56.3528 15.8301 56.4263 14.1339 56.5537 12.4725C56.6301 11.5276 55.2034 11.3686 55.1301 12.2849Z"></path>
@@ -40,10 +42,10 @@ export function NewReleasePromo() {
                 <path d="M30.5625 27.3357C29.9525 30.7343 29.3425 34.133 28.704 37.5284C29.1225 37.4018 29.5411 37.2751 29.9882 37.1516C28.6034 35.0617 27.2504 32.9465 25.8655 30.8565C25.6406 30.5425 25.1523 30.517 24.8669 30.7451C24.5497 30.9987 24.5305 31.4299 24.7555 31.7439C26.1403 33.8338 27.4933 35.9491 28.8781 38.039C29.2489 38.6003 30.0417 38.2265 30.1624 37.6621C30.7724 34.2635 31.3824 30.8648 32.0209 27.4694C32.0908 27.1016 31.758 26.7178 31.3871 26.6765C30.9559 26.6573 30.6324 26.9679 30.5625 27.3357Z"></path>
               </svg>
               <div className="flex items-center justify-center">
-                <a href="/docs/get-started">
+                <Link href="/dashboard">
                   <div className="group border-border bg-secondary/70 flex h-[64px] cursor-pointer items-center gap-2 rounded-full border p-[11px] mt-10">
                     <div className="border-border bg-primary flex h-[43px] items-center justify-center rounded-full border">
-                      <p className="mr-3 ml-2 flex items-center justify-center gap-2 font-medium tracking-tight text-white">
+                      <p className="mr-3 ml-2 flex items-center justify-center gap-2 font-medium tracking-tight text-black">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -83,7 +85,7 @@ export function NewReleasePromo() {
                       </svg>
                     </div>
                   </div>
-                </a>
+                </Link>
               </div>
             </div>
 
