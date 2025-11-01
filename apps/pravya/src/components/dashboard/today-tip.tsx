@@ -41,7 +41,7 @@ export function TodaysTip({ isDark }: TodaysTipProps) {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* === Left: Today's Tip === */}
         <Card
-          className="glassmorphism border-amber-500 dark:border-amber-900 bg-amber-300/80 dark:bg-amber-950"
+          className="glassmorphism border-amber-500 dark:border-amber-900 bg-amber-300/60 dark:bg-amber-950"
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2  text-amber-800 dark:text-amber-200">

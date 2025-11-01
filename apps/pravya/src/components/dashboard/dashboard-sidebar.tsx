@@ -23,13 +23,13 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Upload Resume", href: "/resume/upload", icon: Upload },
-  { name: "Start Mock Interview", href: "/interview/start", icon: Play },
+  { name: "Mock Interview", href: "/interview/start", icon: Play },
   { name: "Interview History", href: "/interview/history", icon: History },
-  { name: "Performance Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Learning Hub", href: "/learning", icon: BookOpen },
   { name: "Manage Profile", href: "/profile", icon: User },
 ];
@@ -157,24 +157,8 @@ export function DashboardSidebar({ isDark }: DashboardSidebarProps) {
           {/* ===== THEME TOGGLE + SIGN OUT ===== */}
           <div className="mt-auto px-2 pb-4 border-t border-gray-200 dark:border-neutral-800">
             <div className="flex flex-col gap-2">
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start transition-all duration-200",
-                  "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
-                  "dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900/50"
-                )}
-                onClick={toggleTheme}
-              >
-                {theme === "dark" ? (
-                  <Sun className="mr-3 h-5 w-5" />
-                ) : (
-                  <Moon className="mr-3 h-5 w-5" />
-                )}
-                {isHovered && (
-                  <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-                )}
-              </Button>
+              
+              <AnimatedThemeToggler isHovered={isHovered}/>
 
               <Button
                 variant="ghost"
