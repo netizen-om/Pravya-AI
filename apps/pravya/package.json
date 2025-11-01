@@ -29,6 +29,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-email/components": "^0.5.0",
     "@react-spring/three": "^10.0.3",
+    "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",

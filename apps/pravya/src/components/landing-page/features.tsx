@@ -1,46 +1,56 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useTheme } from "next-themes"
-import Earth from "@/components/ui/globe"
-import ScrambleHover from "@/components/ui/scramble"
-import { FollowerPointerCard } from "@/components/ui/following-pointer"
-import { motion, useInView } from "framer-motion"
-import { Suspense, useEffect, useRef, useState } from "react"
-import { cn } from "@/lib/utils"
+import { useTheme } from "next-themes";
+import Earth from "@/components/ui/globe";
+import ScrambleHover from "@/components/ui/scramble";
+import { FollowerPointerCard } from "@/components/ui/following-pointer";
+import { motion, useInView } from "framer-motion";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { AnimatedBeam } from "../ui/animated-beam";
+import { AnimatedBeamMultipleOutputDemo } from "./feature-svg";
+import { EvervaultCard } from "../ui/evervault-card";
 
 export default function Features() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, amount: 0.3 })
-  const { theme } = useTheme()
-  const [isHovering, setIsHovering] = useState(false)
-  const [isCliHovering, setIsCliHovering] = useState(false)
-  const [isFeature3Hovering, setIsFeature3Hovering] = useState(false)
-  const [isFeature4Hovering, setIsFeature4Hovering] = useState(false)
-  const [inputValue, setInputValue] = useState("")
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const { theme } = useTheme();
+  const [isHovering, setIsHovering] = useState(false);
+  const [isCliHovering, setIsCliHovering] = useState(false);
+  const [isFeature3Hovering, setIsFeature3Hovering] = useState(false);
+  const [isFeature4Hovering, setIsFeature4Hovering] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   /* Changed base color from orange to white for monochrome palette */
-  const [baseColor, setBaseColor] = useState<[number, number, number]>([1.0, 1.0, 1.0])
-  const [glowColor, setGlowColor] = useState<[number, number, number]>([1.0, 1.0, 1.0])
+  const [baseColor, setBaseColor] = useState<[number, number, number]>([
+    1.0, 1.0, 1.0,
+  ]);
+  const [glowColor, setGlowColor] = useState<[number, number, number]>([
+    1.0, 1.0, 1.0,
+  ]);
 
-  const [dark, setDark] = useState<number>(theme === "dark" ? 1 : 0)
+  const [dark, setDark] = useState<number>(theme === "dark" ? 1 : 0);
 
   useEffect(() => {
-    setBaseColor([1.0, 1.0, 1.0])
-    setGlowColor([1.0, 1.0, 1.0])
-    setDark(theme === "dark" ? 1 : 0)
-  }, [theme])
+    setBaseColor([1.0, 1.0, 1.0]);
+    setGlowColor([1.0, 1.0, 1.0]);
+    setDark(theme === "dark" ? 1 : 0);
+  }, [theme]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
-      e.preventDefault()
-      setInputValue("")
+      e.preventDefault();
+      setInputValue("");
     }
-  }
+  };
 
   return (
-    <section id="features" className="text-foreground relative overflow-hidden py-12 sm:py-24 md:py-32">
+    <section
+      id="features"
+      className="text-foreground relative overflow-hidden py-12 sm:py-24 md:py-32"
+    >
       <div className="bg-primary absolute -top-10 left-1/2 h-16 w-44 -translate-x-1/2 rounded-full opacity-40 blur-3xl select-none"></div>
       <div className="via-primary/50 absolute top-0 left-1/2 h-px w-3/5 -translate-x-1/2 bg-gradient-to-r from-transparent to-transparent transition-all ease-in-out"></div>
       <motion.div
@@ -52,7 +62,7 @@ export default function Features() {
       >
         <h2
           className={cn(
-            "via-foreground mb-8 bg-gradient-to-b from-zinc-800 to-zinc-700 bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px]",
+            "via-foreground mb-8 bg-gradient-to-b from-zinc-800 to-zinc-700 bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px]"
           )}
         >
           Features
@@ -74,7 +84,9 @@ export default function Features() {
                 onMouseLeave={() => setIsCliHovering(false)}
                 ref={ref}
                 initial={{ opacity: 0, y: 50 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                animate={
+                  isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                }
                 transition={{ duration: 0.5, delay: 0.5 }}
                 /* Changed hover border color from orange to white */
                 whileHover={{
@@ -85,14 +97,21 @@ export default function Features() {
                 style={{ transition: "all 0s ease-in-out" }}
               >
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-2xl leading-none font-semibold tracking-tight">CLI & Manual Support</h3>
+                  <h3 className="text-2xl leading-none font-semibold tracking-tight">
+                    Real-Time Voice Mock Interviews
+                  </h3>
                   <div className="text-md text-muted-foreground flex flex-col gap-2 text-sm">
                     <p className="max-w-[460px]">
-                      Integrate your landing page directly in the product while using your favorite tools.
+                      Practice like it’s real — with voice-driven AI
+                      interviewers. Speak naturally to an AI interviewer that
+                      simulates recruiters: dynamic follow-ups, realistic
+                      pacing, and on-the-spot prompts so you build confidence
+                      under pressure.
                     </p>
                   </div>
                 </div>
                 {/* ... existing content ... */}
+                <AnimatedBeamMultipleOutputDemo />
               </motion.div>
 
               {/* Global Card */}
@@ -102,7 +121,9 @@ export default function Features() {
                 onMouseLeave={() => setIsHovering(false)}
                 ref={ref}
                 initial={{ opacity: 0, y: 50 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                animate={
+                  isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                }
                 transition={{ duration: 0.5, delay: 0.5 }}
                 /* Changed hover border color from orange to white */
                 whileHover={{
@@ -113,11 +134,14 @@ export default function Features() {
                 style={{ transition: "all 0s ease-in-out" }}
               >
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-2xl leading-none font-semibold tracking-tight">Globally Usable</h3>
+                  <h3 className="text-2xl leading-none font-semibold tracking-tight">
+                    Global AI That Learns and Adapts to You
+                  </h3>
                   <div className="text-md text-muted-foreground flex flex-col gap-2 text-sm">
                     <p className="max-w-[460px]">
-                      Blocks are available everywhere but ours are the best. Use them in your favorite framework or even
-                      in plain HTML.
+                      Powered by global interview insights, Pravya AI customizes
+                      each session for your domain, region, and experience level
+                      — helping you prepare smarter, not harder.
                     </p>
                   </div>
                 </div>
@@ -125,7 +149,7 @@ export default function Features() {
                   <h1 className="mt-8 text-center text-5xl leading-[100%] font-semibold sm:leading-normal lg:mt-12 lg:text-6xl">
                     <span className='bg-background relative mt-3 inline-block w-fit rounded-md border px-1.5 py-0.5 before:absolute before:top-0 before:left-0 before:z-10 before:h-full before:w-full before:bg-[url("/noise.gif")] before:opacity-[0.09] before:content-[""]'>
                       <ScrambleHover
-                        text="feature-2"
+                        text="Evolving. Learning. Adapting."
                         scrambleSpeed={70}
                         maxIterations={20}
                         useOriginalCharsOnly={false}
@@ -144,7 +168,12 @@ export default function Features() {
                           <div className="bg-secondary/20 h-[400px] w-[400px] animate-pulse rounded-full"></div>
                         }
                       >
-                        <Earth baseColor={baseColor} markerColor={[0, 0, 0]} glowColor={glowColor} dark={dark} />
+                        <Earth
+                          baseColor={baseColor}
+                          markerColor={[0, 0, 0]}
+                          glowColor={glowColor}
+                          dark={dark}
+                        />
                       </Suspense>
                     </div>
                   </div>
@@ -161,7 +190,9 @@ export default function Features() {
                 onMouseEnter={() => setIsFeature3Hovering(true)}
                 onMouseLeave={() => setIsFeature3Hovering(false)}
                 initial={{ opacity: 0, y: 50 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                animate={
+                  isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                }
                 transition={{ duration: 0.5, delay: 1.0 }}
                 /* Changed hover border color from orange to white */
                 whileHover={{
@@ -172,10 +203,15 @@ export default function Features() {
                 style={{ transition: "all 0s ease-in-out" }}
               >
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-2xl leading-none font-semibold tracking-tight">Smart Components</h3>
+                  <h3 className="text-2xl leading-none font-semibold tracking-tight">
+                    Resume Chatbot (RAG) — Global Talent Assistant
+                  </h3>
                   <div className="text-md text-muted-foreground flex flex-col gap-2 text-sm">
                     <p className="max-w-[460px]">
-                      Intelligent components that adapt to your needs with built-in animations and interactions.
+                      Chat with your resume and get role-specific answers
+                      anywhere in the world. Upload your resume and ask it
+                      anything — tailor answers, extract achievements, and
+                      rehearse responses that match target roles and regions.
                     </p>
                   </div>
                 </div>
@@ -257,7 +293,9 @@ export default function Features() {
                 onMouseEnter={() => setIsFeature4Hovering(true)}
                 onMouseLeave={() => setIsFeature4Hovering(false)}
                 initial={{ opacity: 0, y: 50 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                animate={
+                  isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                }
                 transition={{ duration: 0.5, delay: 1.0 }}
                 /* Changed hover effect colors from orange to white */
                 whileHover={{
@@ -269,21 +307,22 @@ export default function Features() {
                 style={{ transition: "all 0s ease-in-out" }}
               >
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-2xl leading-none font-semibold tracking-tight">Dynamic Layouts</h3>
+                  <h3 className="text-2xl leading-none font-semibold tracking-tight">
+                    Deep, Actionable Feedback
+                  </h3>
                   <div className="text-md text-muted-foreground flex flex-col gap-2 text-sm">
                     <p className="max-w-[460px]">
-                      Responsive layouts that transform and adapt seamlessly across all device sizes.
+                      Instant, granular insights that improve your responses.
+                      Receive automated scoring and written advice on tone,
+                      structure, technical accuracy, and recruiter-fit — plus
+                      example rewrites you can practice immediately.
                     </p>
                   </div>
                 </div>
-                <div className="flex grow items-center justify-center select-none relative min-h-[300px] p-4">
+                <div className="flex grow items-center justify-center select-none relative h-[300px] min-h-[300px]">
                   <div className="relative w-full max-w-sm">
-                    <img
-                      src="/modern-grid-layout.png"
-                      alt="Dynamic Layout Example"
-                      className="w-full h-auto rounded-lg shadow-lg"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
+                    {/* here  */}
+                    <EvervaultCard text="Get instant, personalized feedback" className="h-[300px] w-full"/>
                   </div>
                 </div>
               </motion.div>
@@ -292,5 +331,5 @@ export default function Features() {
         </FollowerPointerCard>
       </motion.div>
     </section>
-  )
+  );
 }
