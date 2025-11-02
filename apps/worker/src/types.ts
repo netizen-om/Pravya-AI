@@ -14,5 +14,9 @@ export interface ResumeAnalyseJobData {
   resumeId: string;
 }
 
+export interface InterviewAnalyseJobData {
+  interviewId: string;
+}
+
 // ----- Inferred type -----
 export type ResumeAnalysisType = z.infer<typeof AnalysisSchema>;

@@ -24,6 +24,7 @@ import resumeRouter from "./routes/resume.routes";
 import interviewRouter from "./routes/interview.routes";
 import { resumeParser } from "./utils/parseResume";
 import { resumeAnalysis } from "./utils/analyseResume";
+import { analyseInterview } from "./utils/AnalyseInterview";
 
 app.use("/api/v1/resume", resumeRouter);
 app.use("/api/v1/interview", interviewRouter);
@@ -36,7 +37,15 @@ const ParseingWorker = new Worker("resume-processing", resumeParser, {
   },
 });
 
-const AnalysingWorker = new Worker("resume-analyse", resumeAnalysis, {
+const resumeAnalysingWorker = new Worker("resume-analyse", resumeAnalysis, {
+  concurrency: 5,
+  connection: {
+    host: "localhost",
+    port: 6379,
+  },
+});
+
+const interviewAnalysingWorker = new Worker("interview-analyse", analyseInterview, {
   concurrency: 5,
   connection: {
     host: "localhost",

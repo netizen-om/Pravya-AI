@@ -8,3 +8,7 @@ export const resumeProcessingQueue = new Queue("resume-processing", {
 export const resumeAnalyseQueue = new Queue("resume-analyse", {
   connection: redis,
 });
+
+export const interviewAnalyseQueue = new Queue("interview-analyse", {
+  connection: redis,
+});

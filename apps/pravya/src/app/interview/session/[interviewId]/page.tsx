@@ -1,5 +1,8 @@
 "use client";
-import { getInterviewDetails } from "@/actions/interview-action";
+import {
+  addInterviewTranscribe,
+  getInterviewDetails,
+} from "@/actions/interview-action";
 import Agent from "@/components/interview/agent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -16,6 +19,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { string } from "zod";
 import Loader from "@/components/loader/loader";
+import { toast } from "sonner";
+import TextShimmer from "@/components/forgeui/text-shimmer";
 
 // A new component for the "Listening..." animation
 const ListeningIndicator = () => {
@@ -31,6 +36,7 @@ const ListeningIndicator = () => {
 const page = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     {
       id: string;
@@ -63,13 +69,18 @@ const page = () => {
   const lastMessage = messages[messages.length - 1];
   const isAgentListening = lastMessage?.role === "user" && lastMessage?.interim;
 
-useEffect(() => {
-  (async () => {
-    const data = await getInterviewDetails(interviewId);
-    setInterviewData(data);
-    console.log(data);
-  })();
-}, [interviewId]);
+  const messagesRef = useRef(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getInterviewDetails(interviewId);
+      setInterviewData(data);
+      console.log(data);
+    })();
+  }, [interviewId]);
 
   useEffect(() => {
     if (isAgentSpeaking && isAgentThinking) {
@@ -82,6 +93,27 @@ useEffect(() => {
       setIsAgentSpeaking(false);
     }
   }, [isAgentSpeaking, isAgentThinking, isAgentListening, isRecording]);
+
+  const endInterview = async () => {
+    try {
+      setIsLoading(true);
+      console.log("Transcribe : ", messagesRef.current);
+
+      const interview = await addInterviewTranscribe(interviewId, messagesRef.current);
+
+      if (interview) {
+        toast.success("Interview Completed");
+      } else {
+        throw new Error("Failed to add transcribe");
+      }
+    } catch (error) {
+      toast.error("Failed to end interview");
+      setIsLoading(false);
+      throw new Error("Failed to add transcribe");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Initialize Socket.IO connection
@@ -185,6 +217,7 @@ useEffect(() => {
 
     socket.on("interview-finished", () => {
       console.log('✅ Received "interview-finished" signal from server.');
+      endInterview();
     });
 
     // Cleanup on component unmount
@@ -269,7 +302,9 @@ useEffect(() => {
         };
 
         // Tell the server to get ready
-        socketRef.current?.emit("start-stream", {questions : interviewData?.questions});
+        socketRef.current?.emit("start-stream", {
+          questions: interviewData?.questions,
+        });
         setIsRecording(true);
       } catch (error) {
         console.error("Error accessing microphone:", error);
@@ -297,6 +332,13 @@ useEffect(() => {
     return <Loader title="Interview Loading..." />;
   }
 
+  if (isLoading) {
+    return (
+      <>
+        <Loader title="" />
+      </>
+    );
+  }
   return (
     <>
       <div className="min-h-screen w-full bg-neutral-950 flex items-center p-4">

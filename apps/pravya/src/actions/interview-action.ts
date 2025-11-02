@@ -1,7 +1,9 @@
-"use server"
+"use server";
 
+import { interviewAnalyseQueue } from "@/lib/queues";
 import { prisma } from "@repo/db";
 import { unstable_cache as cache } from "next/cache"; // 1. Import the cache function
+import { log } from "util";
 
 /**
  * Fetches all main categories and includes a preview of their associated templates.
@@ -66,8 +68,10 @@ export async function getCategoryDetails(categoryId: string) {
   return cache(
     async () => {
       try {
-        console.log(`CACHE MISS: Fetching details for category ${categoryId} from DB.`);
-        
+        console.log(
+          `CACHE MISS: Fetching details for category ${categoryId} from DB.`
+        );
+
         const category = await prisma.mainCategory.findUnique({
           where: {
             mainCategoryId: categoryId,
@@ -102,7 +106,10 @@ export async function getCategoryDetails(categoryId: string) {
           })),
         };
       } catch (error) {
-        console.error(`Failed to fetch details for category ${categoryId}:`, error);
+        console.error(
+          `Failed to fetch details for category ${categoryId}:`,
+          error
+        );
         return null;
       }
     },
@@ -114,7 +121,7 @@ export async function getCategoryDetails(categoryId: string) {
 }
 
 export async function getInterviewDetails(interviewId: string) {
-    const interview = await prisma.interview.findUnique({
+  const interview = await prisma.interview.findUnique({
     where: { interviewId },
     select: {
       role: true, // or 'title' if your field name is title
@@ -127,11 +134,42 @@ export async function getInterviewDetails(interviewId: string) {
         },
       },
     },
-  })
+  });
 
   // Return a clean structure
   return {
     title: interview?.role || "", // or interview?.title
     questions: interview?.questions.map((q) => q.questionText) || [],
+  };
+}
+
+export async function addInterviewTranscribe(
+  interviewId: string,
+  transcribe: {
+    id: string;
+    role: "user" | "assistant";
+    text: string;
+    interim?: boolean;
+  }[]
+) {
+  try {
+    console.log("USER transcribe : ", transcribe);
+    
+    const interview = await prisma.interview.update({
+      where: { interviewId: interviewId },
+      data: { transcribe : transcribe },
+    });
+
+    await interviewAnalyseQueue.add("interview-analyse", {
+      interviewId : interviewId
+    })
+
+    console.log("Transcribe aded succesfully");
+    
+
+    return interview;
+  } catch (error) {
+    console.error("Error updating interview transcribe:", error);
+    throw error;
   }
 }
