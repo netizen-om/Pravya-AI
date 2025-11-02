@@ -1,54 +1,43 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Check, Sparkles } from "lucide-react"
-import { useState } from "react"
+import { motion } from "framer-motion";
+import { Check, Sparkles } from "lucide-react";
+import { useState } from "react";
 
 const pricingPlans = [
   {
     name: "Starter",
     price: "Free",
-    description: "Perfect for getting started with v0",
-    features: ["5 components per month", "Basic templates", "Community support", "Standard components"],
+    description: "Perfect for trying out AI-powered mock interviews.",
+    features: [
+      "2 AI voice interviews per week",
+      "Basic performance feedback",
+      "Access to community support",
+      "Resume upload & basic insights",
+    ],
     popular: false,
-    cta: "Get Started",
+    cta: "Get Started Free",
   },
   {
     name: "Pro",
     monthlyPrice: 29,
     annualPrice: 24,
-    description: "For professionals building serious projects",
+    description: "For serious learners preparing for top roles.",
     features: [
-      "Unlimited components",
-      "Premium templates",
-      "Priority support",
-      "Advanced animations",
-      "Custom themes",
-      "Export to GitHub",
+      "Unlimited AI voice interviews",
+      "Detailed feedback & score breakdown",
+      "Chat with your resume (RAG)",
+      "Role-based & level-specific interviews",
+      "Advanced analytics & insights",
+      "Priority AI feedback & support",
     ],
     popular: true,
     cta: "Start Free Trial",
   },
-  {
-    name: "Team",
-    monthlyPrice: 99,
-    annualPrice: 79,
-    description: "For teams collaborating on projects",
-    features: [
-      "Everything in Pro",
-      "Team collaboration",
-      "Shared component library",
-      "Advanced analytics",
-      "Custom integrations",
-      "Dedicated support",
-    ],
-    popular: false,
-    cta: "Contact Sales",
-  },
-]
+];
 
 export function PricingSection() {
-  const [isAnnual, setIsAnnual] = useState(false)
+  const [isAnnual, setIsAnnual] = useState(false);
 
   return (
     <section className="relative py-24 px-4">
@@ -73,15 +62,16 @@ export function PricingSection() {
           </motion.div>
 
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent mb-4">
-            Choose your plan
+            Choose Your Path to Interview Confidence
           </h2>
 
           <p className="text-lg text-white/60 max-w-2xl mx-auto mb-8">
-            Start building beautiful components today. Upgrade anytime as your needs grow.
+            Start building beautiful components today. Upgrade anytime as your
+            needs grow.
           </p>
 
           {/* Monthly/Annual Toggle */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -90,7 +80,6 @@ export function PricingSection() {
           >
             <button
               onClick={() => setIsAnnual(false)}
-              /* Changed button color from orange to white for primary state */
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 !isAnnual ? "bg-white text-black shadow-lg" : "text-white/60 hover:text-white/80"
               }`}
@@ -99,7 +88,6 @@ export function PricingSection() {
             </button>
             <button
               onClick={() => setIsAnnual(true)}
-              /* Changed button color from orange to white for primary state */
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 relative ${
                 isAnnual ? "bg-white text-black shadow-lg" : "text-white/60 hover:text-white/80"
               }`}
@@ -109,11 +97,11 @@ export function PricingSection() {
                 Save 20%
               </span>
             </button>
-          </motion.div>
+          </motion.div> */}
         </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="flex justify-center gap-8 max-w-5xl mx-auto">
           {pricingPlans.map((plan, index) => (
             <motion.div
               key={plan.name}
@@ -122,8 +110,7 @@ export function PricingSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ y: -5 }}
-              /* Changed popular card styling from orange to white/gray monochrome */
-              className={`relative rounded-2xl p-8 backdrop-blur-sm border transition-all duration-300 ${
+              className={`relative flex flex-col justify-between rounded-2xl p-8 backdrop-blur-sm border transition-all duration-300 ${
                 plan.popular
                   ? "bg-white/10 border-white/30 shadow-lg shadow-white/10"
                   : "bg-white/5 border-white/10 hover:border-white/20"
@@ -131,41 +118,52 @@ export function PricingSection() {
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-white text-black text-sm font-medium px-4 py-2 rounded-full">Most Popular</div>
+                  <div className="bg-white text-black text-sm font-medium px-4 py-2 rounded-full">
+                    Most Popular
+                  </div>
                 </div>
               )}
 
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-1 mb-2">
-                  {plan.price ? (
-                    <span className="text-4xl font-bold text-white">{plan.price}</span>
-                  ) : (
-                    <>
+              {/* Content Wrapper (flex-grow) */}
+              <div className="flex flex-col flex-grow">
+                <div className="text-center mb-8">
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {plan.name}
+                  </h3>
+                  <div className="flex items-baseline justify-center gap-1 mb-2">
+                    {plan.price ? (
                       <span className="text-4xl font-bold text-white">
-                        ${isAnnual ? plan.annualPrice : plan.monthlyPrice}
+                        {plan.price}
                       </span>
-                      <span className="text-white/60 text-lg">{isAnnual ? "/year" : "/month"}</span>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <span className="text-4xl font-bold text-white">
+                          ${isAnnual ? plan.annualPrice : plan.monthlyPrice}
+                        </span>
+                        <span className="text-white/60 text-lg">
+                          {isAnnual ? "/year" : "/month"}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-white/60 text-sm">{plan.description}</p>
                 </div>
-                <p className="text-white/60 text-sm">{plan.description}</p>
+
+                <ul className="space-y-4 mb-8 flex-grow">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center gap-3">
+                      <Check className="w-5 h-5 text-white flex-shrink-0" />
+                      <span className="text-white/80 text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <ul className="space-y-4 mb-8">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-white flex-shrink-0" />
-                    <span className="text-white/80 text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
+              {/* CTA Button at bottom */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                /* Changed button from orange gradient to white/black monochrome */
-                className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 mt-auto ${
                   plan.popular
                     ? "bg-white text-black shadow-lg shadow-white/25 hover:shadow-white/40 hover:bg-white/90"
                     : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
@@ -185,7 +183,9 @@ export function PricingSection() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-16"
         >
-          <p className="text-white/60 mb-4">Need a custom solution? We're here to help.</p>
+          <p className="text-white/60 mb-4">
+            Need a custom solution? We're here to help.
+          </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -196,5 +196,5 @@ export function PricingSection() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

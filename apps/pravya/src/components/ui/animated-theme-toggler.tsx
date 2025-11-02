@@ -83,9 +83,9 @@ export const AnimatedThemeToggler = ({
       )}
       {...props}
     >
-      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="mr-3 w-5 h-5" />}
       {isHovered && (
-        <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+        <span className="ml-3">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
       )}
     </Button>
   );

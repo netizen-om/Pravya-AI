@@ -1,19 +1,3 @@
-// "use client"
-// import React from 'react'
-// import HeroSection from '@/components/HeroSection';
-// import { LandingFooter } from '@/components/Footer';
-
-// function page() {
-
-//   return (
-//     <div>
-//       <HeroSection />
-//       <LandingFooter />
-//     </div>
-//   )
-// }
-// export default page
-
 "use client"
 import { useState, useEffect } from "react"
 import Hero from "@/components/landing-page/hero"
@@ -24,17 +8,19 @@ import { FAQSection } from "@/components/landing-page/faq-section"
 import { PricingSection } from "@/components/landing-page/pricing-section"
 import { StickyFooter } from "@/components/landing-page/sticky-footer"
 import LandingHeader from "@/components/landing-page/header"
+import Lenis from "@studio-freight/lenis"
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false)
 
-
+  // Force dark mode
   useEffect(() => {
     const root = window.document.documentElement
     root.classList.remove("light", "system")
     root.classList.add("dark")
   }, [])
 
+  // Scroll detection for header styling
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100)
@@ -44,17 +30,35 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // 🌀 Lenis Smooth Scroll Setup
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 2.4,       // Smoothness duration
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Natural easing
+      smoothWheel: true,   // Enables wheel smoothness
+      smoothTouch: false,  // Disable smoothness on touch devices for performance
+      direction: "vertical",
+    })
+
+    function raf(time: number) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+
+    requestAnimationFrame(raf)
+
+    return () => {
+      lenis.destroy()
+    }
+  }, [])
 
   return (
     <div className="min-h-screen w-full relative top-0 bg-black">
-    
-      <div
-        className="absolute inset-0 z-0"
-      />
+      <div className="absolute inset-0 z-0" />
 
-      {/* Desktop Header */}
+      {/* Header */}
       <div className="flex justify-center">
-      <LandingHeader isScrolled={isScrolled}/>
+        <LandingHeader isScrolled={isScrolled} />
       </div>
 
       {/* Hero Section */}
@@ -75,6 +79,7 @@ export default function Home() {
         <TestimonialsSection />
       </div>
 
+      {/* New Release Promo */}
       <NewReleasePromo />
 
       {/* FAQ Section */}

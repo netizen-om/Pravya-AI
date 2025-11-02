@@ -13,9 +13,9 @@ import { ResumeInsights } from "./resume-insights";
 import dynamic from "next/dynamic";
 import { Session } from "next-auth"; // Import the Session type
 import { TodaysTip } from "./today-tip";
-import { DashboardFooter } from "./Dashboard-footer";
 import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
 import { Card } from "../ui/card";
+import { DashboardFooter } from "./Dashboard-footer";
 
 // Dynamically import the sidebar (client-side)
 const DashboardSidebar = dynamic(

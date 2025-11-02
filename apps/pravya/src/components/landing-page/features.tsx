@@ -9,7 +9,6 @@ import { FollowerPointerCard } from "@/components/ui/following-pointer";
 import { motion, useInView } from "framer-motion";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { AnimatedBeam } from "../ui/animated-beam";
 import { AnimatedBeamMultipleOutputDemo } from "./feature-svg";
 import { EvervaultCard } from "../ui/evervault-card";
 

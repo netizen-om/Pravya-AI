@@ -8,7 +8,6 @@ import {
   Upload,
   Play,
   History,
-  BarChart3,
   BookOpen,
   User,
   LogOut,

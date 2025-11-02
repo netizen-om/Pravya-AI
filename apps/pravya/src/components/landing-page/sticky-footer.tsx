@@ -1,8 +1,29 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
+import Link from "next/link"
 
 export function StickyFooter() {
+  // ✅ Define navigation structure here
+  const navigation = [
+    {
+      title: "Main",
+      items: [
+        { name: "Home", href: "/" },
+        { name: "About", href: "/about" },
+        { name: "Contact", href: "/contact" },
+      ],
+    },
+    {
+      title: "Social",
+      items: [
+        { name: "Github", href: "https://github.com/netizen-om/Pravya-AI" },
+        { name: "linkedIn", href: "https://www.linkedin.com/in/om-borisagar-754591314/" },
+        { name: "Discord", href: "https://discord.gg/wbheCWqTaH" },
+      ],
+    },
+  ]
+
   const [isAtBottom, setIsAtBottom] = useState(false)
 
   useEffect(() => {
@@ -24,7 +45,7 @@ export function StickyFooter() {
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll() // Check initial state
+    handleScroll()
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -33,7 +54,6 @@ export function StickyFooter() {
       {isAtBottom && (
         <motion.div
           className="fixed z-50 bottom-0 left-0 w-full h-80 flex justify-center items-center"
-          /* Changed footer background from orange to white for monochrome */
           style={{ backgroundColor: "white" }}
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
@@ -42,7 +62,6 @@ export function StickyFooter() {
         >
           <div
             className="relative overflow-hidden w-full h-full flex justify-end px-12 text-right items-start py-12"
-            /* Changed footer text color from orange background dark to white background dark */
             style={{ color: "black" }}
           >
             <motion.div
@@ -51,59 +70,23 @@ export function StickyFooter() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <ul className="space-y-2">
-                <li
-                  className="hover:underline cursor-pointer transition-colors"
-                  style={{ color: "black" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(0, 0, 0, 0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                >
-                  Home
-                </li>
-                <li
-                  className="hover:underline cursor-pointer transition-colors"
-                  style={{ color: "black" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(0, 0, 0, 0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                >
-                  Docs
-                </li>
-                <li
-                  className="hover:underline cursor-pointer transition-colors"
-                  style={{ color: "black" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(0, 0, 0, 0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                >
-                  Components
-                </li>
-              </ul>
-              <ul className="space-y-2">
-                <li
-                  className="hover:underline cursor-pointer transition-colors"
-                  style={{ color: "black" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(0, 0, 0, 0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                >
-                  Github
-                </li>
-                <li
-                  className="hover:underline cursor-pointer transition-colors"
-                  style={{ color: "black" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(0, 0, 0, 0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                >
-                  Twitter
-                </li>
-                <li
-                  className="hover:underline cursor-pointer transition-colors"
-                  style={{ color: "black" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(0, 0, 0, 0.8)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                >
-                  Discord
-                </li>
-              </ul>
+              {navigation.map((group, groupIndex) => (
+                <ul key={groupIndex} className="space-y-2">
+                  {group.items.map((item, itemIndex) => (
+                    <li
+                      key={itemIndex}
+                      className="hover:underline cursor-pointer transition-colors"
+                      style={{ color: "black" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(0, 0, 0, 0.8)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+                    >
+                      <Link href={item.href}>{item.name}</Link>
+                    </li>
+                  ))}
+                </ul>
+              ))}
             </motion.div>
+
             <motion.h2
               className="absolute bottom-0 left-0 translate-y-1/3 sm:text-[192px] text-[80px] font-bold select-none"
               style={{ color: "black" }}

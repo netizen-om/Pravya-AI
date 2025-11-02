@@ -5,10 +5,10 @@ import { HoverGradient } from "../HoverGradient";
 import { boolean } from "zod";
 
 interface DashboardFooterProps {
-  isDark : boolean
+  isDark: boolean;
 }
 
-export const DashboardFooter = ({ isDark } : DashboardFooterProps) => {
+export const DashboardFooter = ({ isDark }: DashboardFooterProps) => {
   const currentYear = new Date().getFullYear();
 
   const FooterColumn = ({
@@ -42,62 +42,64 @@ export const DashboardFooter = ({ isDark } : DashboardFooterProps) => {
       aria-labelledby="footer-heading"
     >
       <HoverGradient
-                  gradientSize={300}
-                  fromColor={isDark ? "#262626" : "#D9D9D955"}
-                  toColor={isDark ? "#262626" : "#D9D9D955"}
-                  opacity={0.8}
-                >
-      <h2 id="footer-heading" className="sr-only">
-        Footer
-      </h2>
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-2 lg:px-8">
-        <div className="pb-8 xl:grid xl:grid-cols-4 xl:gap-8">
-          {/* Logo + Description */}
-          <div className="space-y-4 xl:col-span-1">
-            <div className="flex items-center space-x-2">
-              <Image
-                src="/logo/pravya-logo1.png"
-                alt="Pravya AI Logo"
-                width={32}
-                height={32}
-                className="rounded-md"
-                priority
-              />
-              <span className="text-2xl font-bold dark:text-white">Pravya AI</span>
+        gradientSize={300}
+        fromColor={isDark ? "#262626" : "#D9D9D955"}
+        toColor={isDark ? "#262626" : "#D9D9D955"}
+        opacity={0.8}
+      >
+        <h2 id="footer-heading" className="sr-only">
+          Footer
+        </h2>
+        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-2 lg:px-8">
+          <div className="pb-8 xl:grid xl:grid-cols-4 xl:gap-8">
+            {/* Logo + Description */}
+            <div className="space-y-4 xl:col-span-1">
+              <div className="flex items-center space-x-2">
+                <Image
+                  src="/logo/pravya-logo1.png"
+                  alt="Pravya AI Logo"
+                  width={32}
+                  height={32}
+                  className="rounded-md"
+                  priority
+                />
+                <span className="text-2xl font-bold dark:text-white">
+                  Pravya AI
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Bottom Section */}
-        <div className="border-t dark:border-gray-200 border-gray-800/50 md:flex md:items-center md:justify-between">
-          <div className="flex space-x-6 md:order-2 mt-4">
-            <Link
-              href="/twitter"
-              aria-label="Twitter"
-              className="text-gray-400 hover:text-white transition-colors duration-200"
-            >
-              <Twitter className="h-6 w-6" />
-            </Link>
-            <Link
-              href="/github"
-              aria-label="GitHub"
-              className="text-gray-400 hover:text-white transition-colors duration-200"
-            >
-              <Github className="h-6 w-6" />
-            </Link>
-            <Link
-              href="/linkedin"
-              aria-label="LinkedIn"
-              className="text-gray-400 hover:text-white transition-colors duration-200"
-            >
-              <Linkedin className="h-6 w-6" />
-            </Link>
+          {/* Bottom Section */}
+          <div className="border-t  border-gray-800/50 md:flex md:items-center md:justify-between">
+            <div className="flex space-x-6 md:order-2 mt-4">
+              <Link
+                href="/twitter"
+                aria-label="Twitter"
+                className="text-gray-400 hover:text-white transition-colors duration-200"
+              >
+                <Twitter className="h-6 w-6" />
+              </Link>
+              <Link
+                href="/github"
+                aria-label="GitHub"
+                className="text-gray-400 hover:text-white transition-colors duration-200"
+              >
+                <Github className="h-6 w-6" />
+              </Link>
+              <Link
+                href="/linkedin"
+                aria-label="LinkedIn"
+                className="text-gray-400 hover:text-white transition-colors duration-200"
+              >
+                <Linkedin className="h-6 w-6" />
+              </Link>
+            </div>
+            <p className="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
+              &copy; {currentYear} Pravya AI. All rights reserved.
+            </p>
           </div>
-          <p className="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
-            &copy; {currentYear} Pravya AI. All rights reserved.
-          </p>
         </div>
-      </div>
       </HoverGradient>
     </footer>
   );

@@ -34,6 +34,7 @@
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@shadergradient/react": "^2.4.5",
+    "@studio-freight/lenis": "^1.0.42",
     "@tabler/icons-react": "^3.35.0",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@vapi-ai/web": "^2.3.8",

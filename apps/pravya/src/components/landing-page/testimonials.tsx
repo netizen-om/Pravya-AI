@@ -4,60 +4,61 @@ import Image from "next/image" // Import the Next.js Image component
 
 const testimonials = [
   {
-    name: "Arjun Mehta",
-    username: "@arjdev",
-    body: "v0 has completely changed the way I build UIs. Generate, copy-paste, done. No more design stress.",
-    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-  },
-  {
-    name: "Sara Lin",
-    username: "@sara.codes",
-    body: "Honestly shocked at how smooth the v0 generated components are out of the box. Just works perfectly.",
-    img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
-  },
-  {
-    name: "Devon Carter",
-    username: "@devninja",
-    body: "Our team launched a client site in 2 days using v0 components. Saved so much development time.",
-    img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-  },
-  {
-    name: "Priya Shah",
-    username: "@priyacodes",
-    body: "Generated a few components in v0 and everything blended perfectly with our codebase. Massive W.",
+    name: "Ananya Gupta",
+    username: "@ananya.codes",
+    body: "Pravya AI felt like a real interviewer sitting across from me. The voice feedback helped me fix my tone and confidence before my actual interview!",
     img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Leo Martin",
-    username: "@leobuilds",
-    body: "Found a beautiful hero section in v0, tweaked the prompt, and shipped in 15 minutes. Game changer.",
-    img: "https://images.unsplash.com/photo-1472099644761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-  },
-  {
-    name: "Chloe Winters",
-    username: "@chloewinters",
-    body: "v0 helped us prototype multiple landing pages without writing CSS once. Pure magic.",
-    img: "https://images.unsplash.com/photo-1580489944761-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-  },
-  {
-    name: "Ayaan Malik",
-    username: "@ayaan_dev",
-    body: "As a solo founder, v0 lets me move fast without sacrificing design quality. Essential tool.",
+    name: "Rohit Sharma",
+    username: "@rohit_dev",
+    body: "I used Pravya AI to prepare for my software engineering role — the AI questions were spot on, and the feedback was insanely detailed.",
     img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "Monica Reeves",
-    username: "@monicareeves",
-    body: "Can't believe how polished the v0 generated components look. Clients are impressed every time.",
+    name: "Emily Chen",
+    username: "@emilych",
+    body: "The resume chatbot blew my mind! It explained my own projects better than I could. Definitely helped me sound more confident in interviews.",
+    img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+  },
+  {
+    name: "Vikram Patel",
+    username: "@vikpatel",
+    body: "Pravya AI made me realize where I was going wrong in behavioral questions. The voice-based experience feels super real.",
+    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+  },
+  {
+    name: "Sophia Davis",
+    username: "@sophiadavis",
+    body: "I’ve tried many mock interview tools, but Pravya AI stands out. It’s like having a personal AI mentor guiding you through every question.",
+    img: "https://images.unsplash.com/photo-1559192823-e1d8e87def54?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1974",
+  },
+  {
+    name: "Aarav Nair",
+    username: "@aaravnair",
+    body: "Pravya AI helped me prepare for my Google interview. The AI questions were tough, realistic, and the feedback helped me improve every round.",
+    img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+  },
+  {
+    name: "Maya Thompson",
+    username: "@maya_thinks",
+    body: "I love how interactive it feels. The AI voice actually understands your intent — it’s not robotic at all. Best interview prep tool I’ve used.",
     img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
   },
   {
-    name: "James Roy",
-    username: "@jamesrdev",
-    body: "v0 is a lifesaver when deadlines are tight. Generate a component, tweak, and deploy instantly.",
+    name: "Aditya Verma",
+    username: "@aditya_ai",
+    body: "Pravya AI gave me the confidence to face real interviews. The detailed breakdown of answers and tone analysis is next-level stuff.",
+    img: "https://plus.unsplash.com/premium_photo-1723478495487-c436ae82f48f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=952",
+  },
+  {
+    name: "Rachel Lee",
+    username: "@racheltalks",
+    body: "It’s like having a 24/7 interview coach. The instant feedback and resume insights helped me land my first internship!",
     img: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=150&h=150&fit=crop&crop=face",
   },
 ]
+
 
 // Slice testimonials for each column
 const firstColumn = testimonials.slice(0, 3)
@@ -177,8 +178,8 @@ export function TestimonialsSection() {
               type="button"
               className="group relative z-[60] mx-auto rounded-full border border-white/20 bg-white/5 px-6 py-1 text-xs backdrop-blur transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-100 md:text-sm"
             >
-              <div className="absolute inset-x-0 -top-px mx-auto h-0.5 w-1T/2 bg-gradient-to-r from-transparent via-white to-transparent shadow-2xl transition-all duration-500 group-hover:w-3/4"></div>
-              <div className="absolute inset-x-0 -bottom-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-white to-transparent shadow-2xl transition-all duration-500 group-hover:h-px"></div>
+              <div className="absolute inset-x-0 -top-px mx-auto h-0.5 w-1T/2 bg-gradient-to-r from-transparent via-rose-200 to-transparent shadow-2xl transition-all duration-500 group-hover:w-3/4"></div>
+              <div className="absolute inset-x-0 -bottom-px mx-auto h-0.5 w-1/2 bg-gradient-to-r from-transparent via-rose-200 to-transparent shadow-2xl transition-all duration-500 group-hover:h-px"></div>
               <span className="relative text-white">Testimonials</span>
             </button>
           </div>
