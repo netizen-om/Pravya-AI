@@ -1,15 +1,28 @@
-import { Job } from "bullmq";
-import { DetailedInterviewFeedback, InterviewAnalyseJobData } from "../types";
-import { prisma } from "@repo/db";
-import { generateObject } from "ai";
-import { google } from "../lib/googleForAISDK";
-import { detailedInterviewFeedbackSchema } from "../lib/zod";
+import { Job } from 'bullmq';
+import { DetailedInterviewFeedback, InterviewAnalyseJobData } from '../types';
+import { prisma } from '@repo/db';
+import { generateObject } from 'ai';
+import { google } from '../lib/googleForAISDK';
+import { z } from 'zod';
+
+
+// Import all our new and old schemas
+import {
+  detailedInterviewFeedbackSchema, // The original, full schema for final validation
+  singleQuestionFeedbackSchema, // Type helper for Call 1
+  communicationDeliverySchema, // Schema for Call 2
+  finalSynthesisSchema, // Schema for Call 3
+} from '../lib/zod';
+
+const llmQuestionAnalysisSchema = singleQuestionFeedbackSchema.omit({
+  questionId: true,
+  questionText: true,
+  userAnswerTranscript: true,
+});
 
 export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
   const { interviewId } = job.data;
-
-    console.log(interviewId);
-    
+  console.log(`🚀 Starting analysis for interview: ${interviewId}`);
 
   try {
     // 1️⃣ Fetch interview
@@ -18,74 +31,159 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     });
 
     if (!interview || !interview.transcribe) {
-      throw new Error("Interview or transcript not found");
+      throw new Error('Interview or transcript not found');
     }
 
     // 2️⃣ Mark status as 'Analysing'
     await prisma.interview.update({
       where: { interviewId },
-      data: { status: "Analysing" },
+      data: { status: 'Analysing' },
     });
 
-    // 3️⃣ Clean transcript (remove unwanted props)
-    //@ts-ignore
-    const cleanedTranscript = interview.transcribe.map(({ role, text }) => ({
-      role,
-      text,
-    }));
+    // 3️⃣ Clean transcript and prepare inputs for LLM calls
+    // @ts-ignore
+    const cleanedTranscript: { role: 'user' | 'assistant'; text: string }[] =
+      interview.transcribe.map(({ role, text }) => ({
+        role,
+        text,
+      }));
 
-    const transcriptText = cleanedTranscript
-      .map(
-        (t) => `${t.role === "user" ? "Candidate" : "Interviewer"}: ${t.text}`
-      )
-      .join("\n");
-
-    // 4️⃣ Generate structured feedback
-    let generated;
-    try {
-      generated = await generateObject({
-        model: google("gemini-2.5-flash"),
-        system: `You are an AI interview feedback analyst. 
-                Your job is to analyze an interview transcript and produce a structured JSON that strictly matches the provided schema.
-                DO NOT include any explanations, reasoning, markdown, or text outside the JSON object.
-
-                ### Output Format Rules:
-                - Return **only** valid JSON that conforms 100% to the provided schema.
-                - If the schema specifies a minimum number of items (e.g., at least 3 strengths), always include that many or more.
-                - Ensure all required fields are present and non-empty.
-                - Avoid null, undefined, or missing keys.
-                - Keep text concise, specific, and professional.
-                - Numbers (scores) must be within realistic interview scoring ranges (0–10 or 0–100 depending on schema).
-                - Never output partial JSON or comments.
-
-                ### Task:
-                You will receive the full interview transcript below.
-                Analyze the candidate’s communication, technical depth, confidence, and problem-solving ability.
-                Then fill every field in the JSON **completely**, making sure arrays meet the minimum length requirements.
-
-                IMPORTANT: Do not skip any required field. 
-                Even if the interview was very poor, generate at least 3 strengths and 3 improvement areas.
-                `,
-        schema: detailedInterviewFeedbackSchema as any,
-        prompt: `Here is the interview transcript:\n${transcriptText}`,
-      });
-    } catch (modelError) {
-      console.error("AI model generation failed:", modelError);
-      throw new Error("AI model failed to generate feedback");
+    // --- Input for Call 1: Group questions and answers ---
+    const questionAnswerPairs = [];
+    for (let i = 0; i < cleanedTranscript.length; i++) {
+      if (
+        cleanedTranscript[i].role === 'assistant' &&
+        cleanedTranscript[i + 1]?.role === 'user'
+      ) {
+        questionAnswerPairs.push({
+          questionId: `q_${i + 1}`, // Generate a simple unique ID
+          questionText: cleanedTranscript[i].text,
+          userAnswerTranscript: cleanedTranscript[i + 1].text,
+        });
+        i++; // Skip the answer we just processed
+      }
     }
 
-    const { object } = generated;
+    if (questionAnswerPairs.length === 0) {
+      throw new Error('No valid question/answer pairs found in transcript.');
+    }
 
-    // 5️⃣ Validate output
+    // --- Input for Call 2: Get all user answers for delivery analysis ---
+    const allUserAnswers = cleanedTranscript
+      .filter((t) => t.role === 'user')
+      .map((t) => t.text)
+      .join('\n\n'); // Join with newlines for context
+
+    // --- Context for Calls: Job Role ---
+    const jobContext = `Role: ${
+      interview.role || 'Software Engineer'
+    }, Level: ${interview.level || 'Entry-level'}`;
+
+    // 4️⃣ --- Execute 3-Call LLM Workflow ---
+    let questionBreakdown: z.infer<typeof singleQuestionFeedbackSchema>[];
+    let communicationAndDelivery: z.infer<typeof communicationDeliverySchema>;
+    let finalSynthesis: z.infer<typeof finalSynthesisSchema>;
+
+    try {
+      // --- Call 1: Per-Question Analysis (in parallel) ---
+      console.log(`[${interviewId}] Starting Call 1: Per-Question Analysis...`);
+      const questionBreakdownPromises = questionAnswerPairs.map((pair) =>
+        generateObject({
+          model: google('gemini-2.5-flash'), // Use 1.5 Pro for this
+          system: `You are an expert interview coach. Analyze the candidate's answer to the given question.
+                   Role Context: ${jobContext}
+                   Focus *only* on this single question and answer.
+                   Be specific, constructive, and fair.
+                   Provide a concise model answer if you can.`,
+          schema: llmQuestionAnalysisSchema, // Use the OMITTED schema
+          prompt: `Question: ${pair.questionText}\n\nAnswer: ${pair.userAnswerTranscript}`,
+        }).then((result) => {
+          // Merge the static data with the LLM's analysis
+          const fullBreakdown: z.infer<typeof singleQuestionFeedbackSchema> = {
+            ...pair, // This has questionId, questionText, userAnswerTranscript
+            ...result.object, // This has specificFeedback, positivePoints, etc.
+          };
+          return fullBreakdown;
+        }),
+      );
+      questionBreakdown = await Promise.all(questionBreakdownPromises);
+      console.log(`[${interviewId}] Finished Call 1.`);
+
+      // --- Call 2: Communication & Delivery ---
+      console.log(`[${interviewId}] Starting Call 2: Communication & Delivery...`);
+      const communicationResult = await generateObject({
+        model: google('gemini-2.5-flash'),
+        system: `You are a speech and communication coach.
+                 Analyze the *entire* collection of the candidate's answers.
+                 Focus *only* on delivery: pace, filler words, tone, and clarity.
+                 Do *not* judge the content or correctness of the answers.`,
+        schema: communicationDeliverySchema,
+        prompt: `Here are all the candidate's answers, separated by newlines:
+                 \n\n${allUserAnswers}`,
+      });
+      communicationAndDelivery = communicationResult.object;
+      console.log(`[${interviewId}] Finished Call 2.`);
+
+      // --- Call 3: Final Synthesis ---
+      console.log(`[${interviewId}] Starting Call 3: Final Synthesis...`);
+      const synthesisResult = await generateObject({
+        model: google('gemini-2.5-flash'), // Use a strong model for synthesis
+        system: `You are a senior hiring manager.
+                 You have received detailed analysis from your team (per-question feedback and a communication report).
+                 Your job is to synthesize all this information into a high-level summary.
+                 Provide the final dashboard metrics, overall performance, and role-fit analysis.
+                 You MUST provide at least 3 strengths and 3 improvement areas.`,
+        schema: finalSynthesisSchema,
+        prompt: `
+              Job Context: ${jobContext}
+
+              Here is the detailed per-question analysis:
+              ${JSON.stringify(questionBreakdown, null, 2)}
+
+              Here is the communication & delivery report:
+              ${JSON.stringify(communicationAndDelivery, null, 2)}
+
+              Please synthesize these inputs into the final report.
+            `,
+      });
+      finalSynthesis = synthesisResult.object;
+      console.log(`[${interviewId}] Finished Call 3.`);
+    } catch (modelError) {
+      console.error(`[${interviewId}] AI model generation failed:`, modelError);
+      throw new Error('AI model failed to generate feedback');
+    }
+
+    // 5️⃣ --- Assemble Final Report ---
+    // This combines the results from the 3 calls back into your
+    // *original* detailedInterviewFeedbackSchema structure.
+    console.log(`[${interviewId}] Assembling final report...`);
+    const fullFeedbackObject = {
+      ...finalSynthesis, // This has overallPerformance, dashboardMetrics, roleSpecificFit
+      communicationAndDelivery: communicationAndDelivery, // From Call 2
+      questionBreakdown: questionBreakdown, // From Call 1
+    };
+
+    // 6️⃣ Validate assembled output
     let validatedAnalysis: DetailedInterviewFeedback;
     try {
-      validatedAnalysis = detailedInterviewFeedbackSchema.parse(object);
+      // Validate against the *original* complete schema
+      validatedAnalysis =
+        detailedInterviewFeedbackSchema.parse(fullFeedbackObject);
     } catch (validationError) {
-      console.error("Schema validation failed:", validationError);
-      throw new Error("Generated feedback did not match expected schema");
+      console.error(
+        `[${interviewId}] FINAL Schema validation failed:`,
+        validationError,
+      );
+      console.error(
+        'Object that failed validation:',
+        JSON.stringify(fullFeedbackObject, null, 2),
+      );
+      throw new Error('Assembled feedback did not match original schema');
     }
+    console.log(`[${interviewId}] Final report assembled and validated.`);
 
-    // 6️⃣ Save feedback to DB
+    // 7️⃣ Save feedback to DB
+    // This section is identical to your original code and should work perfectly.
     const feedback = await prisma.feedback.create({
       data: {
         interviewId,
@@ -105,32 +203,35 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
       },
     });
 
-    // 7️⃣ Update interview status
+    // 8️⃣ Update interview status
     if (feedback) {
       await prisma.interview.update({
         where: { interviewId },
-        data: { status: "Completed" },
+        data: { status: 'Completed' },
       });
     }
 
     console.log(`✅ Interview analysis completed for ${interviewId}`);
   } catch (error: any) {
-    console.error(`❌ Interview analysis failed for ${interviewId}:`, error);
+    console.error(
+      `❌ Interview analysis failed for ${interviewId}:`,
+      error.message,
+    );
 
-    // 8️⃣ Ensure DB status reflects the failure
+    // 9️⃣ Ensure DB status reflects the failure
     try {
       await prisma.interview.update({
         where: { interviewId },
-        data: { status: "Failed" },
+        data: { status: 'Failed' },
       });
     } catch (updateError) {
       console.error(
-        "Failed to update interview status after error:",
-        updateError
+        `[${interviewId}] Failed to update interview status after error:`,
+        updateError.message,
       );
     }
 
-    // Optionally rethrow to let BullMQ handle retries
+    // Rethrow to let BullMQ handle retries
     throw error;
   }
 };

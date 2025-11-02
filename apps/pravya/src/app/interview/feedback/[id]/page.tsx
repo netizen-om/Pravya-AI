@@ -1,7 +1,10 @@
-"use client"
+"use client";
 
-import type { DetailedInterviewFeedback } from "@/utlis/zod"
-import FeedbackPage from "@/components/feedback/Feedback-page"
+import type { DetailedInterviewFeedback } from "@/utlis/zod";
+import FeedbackPage from "@/components/feedback/Feedback-page";
+import { useParams } from "next/navigation";
+import { getFeedback } from "@/actions/interview-action";
+import { useCallback, useEffect, useState } from "react";
 
 // Mock data for demonstration
 const mockFeedback: DetailedInterviewFeedback = {
@@ -30,58 +33,70 @@ const mockFeedback: DetailedInterviewFeedback = {
     },
     technicalCommunication: {
       score: 9,
-      comment: "Outstanding ability to explain complex concepts. Breaks down technical ideas into digestible parts.",
+      comment:
+        "Outstanding ability to explain complex concepts. Breaks down technical ideas into digestible parts.",
     },
     hardSkills: {
       score: 8,
-      comment: "Strong technical foundation with solid understanding of core concepts and best practices.",
+      comment:
+        "Strong technical foundation with solid understanding of core concepts and best practices.",
     },
     problemSolving: {
       score: 7,
-      comment: "Good analytical approach but could benefit from considering more edge cases upfront.",
+      comment:
+        "Good analytical approach but could benefit from considering more edge cases upfront.",
     },
     softSkills: {
       score: 8,
-      comment: "Demonstrates strong teamwork mindset and collaborative approach to problem-solving.",
+      comment:
+        "Demonstrates strong teamwork mindset and collaborative approach to problem-solving.",
     },
     confidence: {
       score: 8,
-      comment: "Confident delivery with professional presence. Shows comfort with technical discussions.",
+      comment:
+        "Confident delivery with professional presence. Shows comfort with technical discussions.",
     },
   },
   communicationAndDelivery: {
     pace: {
       rating: "Just Right",
-      comment: "Speaking pace was well-calibrated, allowing for clear comprehension without rushing.",
+      comment:
+        "Speaking pace was well-calibrated, allowing for clear comprehension without rushing.",
     },
     fillerWords: {
       frequency: "Low",
       commonFillers: ["um", "like"],
-      comment: "Minimal use of filler words. Demonstrates good command of language and confidence.",
+      comment:
+        "Minimal use of filler words. Demonstrates good command of language and confidence.",
     },
     toneAndConfidence: {
       score: 8,
-      comment: "Professional and enthusiastic tone throughout. Conveyed confidence without arrogance.",
+      comment:
+        "Professional and enthusiastic tone throughout. Conveyed confidence without arrogance.",
     },
     clarityAndArticulation: {
       score: 8,
-      comment: "Clear enunciation and appropriate volume. Easy to understand throughout the interview.",
+      comment:
+        "Clear enunciation and appropriate volume. Easy to understand throughout the interview.",
     },
   },
   questionBreakdown: [
     {
       questionId: "q1",
-      questionText: "Tell me about a time you faced a significant technical challenge.",
+      questionText:
+        "Tell me about a time you faced a significant technical challenge.",
       userAnswerTranscript:
         "In my previous role, I was tasked with optimizing a database query that was taking over 30 seconds to execute. I started by analyzing the query execution plan, identified missing indexes, and implemented proper caching strategies. The result was reducing query time to under 2 seconds, which significantly improved user experience.",
       specificFeedback: {
         relevance: {
           score: 9,
-          comment: "Directly addressed the question with a concrete technical challenge.",
+          comment:
+            "Directly addressed the question with a concrete technical challenge.",
         },
         clarity: {
           score: 8,
-          comment: "Well-structured explanation with clear problem and solution.",
+          comment:
+            "Well-structured explanation with clear problem and solution.",
         },
         depthAndExamples: {
           score: 8,
@@ -89,7 +104,8 @@ const mockFeedback: DetailedInterviewFeedback = {
         },
         structure: {
           score: 9,
-          comment: "Excellent STAR method application with clear context and results.",
+          comment:
+            "Excellent STAR method application with clear context and results.",
         },
       },
       positivePoints:
@@ -115,7 +131,8 @@ const mockFeedback: DetailedInterviewFeedback = {
         },
         depthAndExamples: {
           score: 6,
-          comment: "Would benefit from concrete examples of technologies learned.",
+          comment:
+            "Would benefit from concrete examples of technologies learned.",
         },
         structure: {
           score: 8,
@@ -138,8 +155,25 @@ const mockFeedback: DetailedInterviewFeedback = {
     overallFitMessage:
       "This candidate is a strong fit for the Senior Software Engineer role. They bring solid technical skills, excellent communication abilities, and a collaborative mindset. With continued focus on edge case handling and architectural depth, they would be an excellent addition to the team.",
   },
-}
+};
+
+// const data : DetailedInterviewFeedback =
 
 export default function Home() {
-  return <FeedbackPage feedback={mockFeedback} />
+  const [feedback, setFeedback] = useState({});
+  const params = useParams();
+  const id = params?.id as string;
+
+  useEffect(() => {
+    async function fetchFeedback() {
+      if (!id) return;
+      const feedbackData = await getFeedback(id);
+      console.log(feedbackData);
+      setFeedback(feedbackData);
+    }
+
+    fetchFeedback();
+  }, [id]);
+
+  return <FeedbackPage feedback={mockFeedback} />;
 }

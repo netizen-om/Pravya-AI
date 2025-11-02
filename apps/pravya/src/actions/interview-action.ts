@@ -176,6 +176,23 @@ export async function addInterviewTranscribe(
   }
 }
 
+export async function getFeedback(
+  feedbackId: string
+) {
+  try {
+    const feedback = await prisma.feedback.findUnique({
+      where : {
+        feedbackId : feedbackId
+      }
+    })
+
+    return feedback;
+  } catch (error) {
+    console.log("ERROR", error);
+    
+  }
+}
+
 export async function check2(
   interviewId: string
 ) {
