@@ -169,11 +169,11 @@ export default function Home() {
       if (!id) return;
       const feedbackData = await getFeedback(id);
       console.log(feedbackData);
-      setFeedback(feedbackData);
+      setFeedback(feedbackData?.fullFeedbackJson);
     }
 
     fetchFeedback();
   }, [id]);
 
-  return <FeedbackPage feedback={mockFeedback} />;
+  return <FeedbackPage feedback={feedback} />;
 }
