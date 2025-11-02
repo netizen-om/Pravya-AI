@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AnalysisSchema } from "./lib/zod";
+import { AnalysisSchema, detailedInterviewFeedbackSchema } from "./lib/zod";
 
 export type AnalysisJson = {
   grammarErrors?: { error: string; suggestion: string }[];
@@ -20,3 +20,6 @@ export interface InterviewAnalyseJobData {
 
 // ----- Inferred type -----
 export type ResumeAnalysisType = z.infer<typeof AnalysisSchema>;
+export type DetailedInterviewFeedback = z.infer<
+  typeof detailedInterviewFeedbackSchema
+>;

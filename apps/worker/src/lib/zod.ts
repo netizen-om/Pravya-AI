@@ -251,8 +251,4 @@ export const detailedInterviewFeedbackSchema = z.object({
   }),
 });
 
-// You can also export the type for use in your application
-export type DetailedInterviewFeedback = z.infer<
-  typeof detailedInterviewFeedbackSchema
->;
 

@@ -136,6 +136,8 @@ export async function getInterviewDetails(interviewId: string) {
     },
   });
 
+  console.log(interview);
+  
   // Return a clean structure
   return {
     title: interview?.role || "", // or interview?.title
@@ -168,6 +170,23 @@ export async function addInterviewTranscribe(
     
 
     return interview;
+  } catch (error) {
+    console.error("Error updating interview transcribe:", error);
+    throw error;
+  }
+}
+
+export async function check2(
+  interviewId: string
+) {
+  try {
+    
+    await interviewAnalyseQueue.add("interview-analyse", {
+      interviewId : interviewId
+    })
+
+    console.log("Queued");
+    
   } catch (error) {
     console.error("Error updating interview transcribe:", error);
     throw error;
