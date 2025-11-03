@@ -120,7 +120,7 @@ function CategoryContent({
         transition={{ duration: 0.5 }}
         className="mb-12"
       >
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl ">
           {categoryData?.mainCategoryName || "Loading..."} Interviews
         </h1>
         <p className="mt-4 text-lg text-zinc-400">
@@ -141,7 +141,7 @@ function CategoryContent({
             placeholder={`Search ${categoryData?.mainCategoryName || "templates"} (e.g., React, Senior, Sales...)`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border-zinc-800 bg-zinc-900 pl-10 text-white placeholder:text-zinc-500"
+            className="dark:border-zinc-800 dark:bg-zinc-900 pl-10 dark:text-white dark:placeholder:text-zinc-500"
           />
         </div>
       </motion.div>
@@ -189,7 +189,7 @@ export default function CategoryDetailPage({
   params: { category: string }
 }) {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-white text-neutral-900 dark:bg-zinc-950 dark:text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <Suspense fallback={<SkeletonGrid />}>
           <CategoryContent params={params} />

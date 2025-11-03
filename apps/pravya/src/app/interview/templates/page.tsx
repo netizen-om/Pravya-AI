@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { InterviewTemplateCard } from "@/components/interview/interview-template-card"
 import { getMainCategoriesWithTemplates } from "@/actions/interview-action"
+import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme"
+import { Card } from "@/components/ui/card"
+import Loader from "@/components/loader/loader"
 
 interface Template {
   id: string
@@ -23,10 +26,18 @@ interface Category {
 }
 
 export default function InterviewsPage() {
+
+  const { theme, isMounted } = useHydrationSafeTheme();
+  const isDark = theme === "dark";
+
+
+
   const [categories, setCategories] = useState<Category[]>([])
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+
+  
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -80,8 +91,14 @@ export default function InterviewsPage() {
     },
   }
 
+    if (!isMounted) {
+    return (
+      <Loader title="hi" />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-white text-neutral-900 dark:bg-zinc-950 dark:text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -109,7 +126,7 @@ export default function InterviewsPage() {
               placeholder="Search all templates (e.g., React, Senior, Sales...)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-zinc-800 bg-zinc-900 pl-10 text-white placeholder:text-zinc-500"
+              className="dark:border-zinc-800 dark:bg-zinc-900 pl-10 dark:text-white dark:placeholder:text-zinc-500"
             />
           </div>
         </motion.div>
@@ -138,7 +155,7 @@ export default function InterviewsPage() {
                   <div className="flex gap-4 overflow-x-hidden pb-4 ">
                     {category.templates.map((template) => (
                       <div key={template.id} className="flex-shrink-0 w-80">
-                        <InterviewTemplateCard template={template} />
+                        <InterviewTemplateCard template={template} isDark={isDark}/>
                       </div>
                     ))}
                   </div>

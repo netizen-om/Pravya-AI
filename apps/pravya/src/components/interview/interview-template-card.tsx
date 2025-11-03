@@ -13,10 +13,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StartSessionDialog } from "./start-session-dialog";
-import { cn } from "@/lib/utils"; // used for combining conditional classes
-import { MagicCard } from "../ui/magic-card";
+import { cn } from "@/lib/utils";
 import { HoverGradient } from "../HoverGradient";
-import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
 
 interface Template {
   id: string;
@@ -33,7 +31,7 @@ interface InterviewTemplateCardProps {
 
 export function InterviewTemplateCard({
   template,
-  backgroundColor = "bg-zinc-900",
+  backgroundColor = "dark:bg-zinc-900",
   isDark,
 }: InterviewTemplateCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -83,12 +81,7 @@ export function InterviewTemplateCard({
 
               <Button
                 onClick={() => setIsDialogOpen(true)}
-                className={cn(
-                  "w-full",
-                  isDark
-                    ? "bg-white text-neutral-900 ring-neutral-700 focus:ring-neutral-700"
-                    : "bg-neutral-900 text-white hover:text-white hover:opacity-80 hover:bg-neutral-900"
-                )}
+                className={"w-full dark:bg-white "}
               >
                 Start Session
               </Button>

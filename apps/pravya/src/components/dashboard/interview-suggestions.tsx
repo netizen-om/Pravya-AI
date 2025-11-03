@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { InterviewTemplateCard } from "../interview/interview-template-card";
+import Link from "next/link";
 
 const suggestions = [
   {
@@ -50,7 +51,7 @@ interface InterviewSuggestionsProps {
 
 export function InterviewSuggestions({ isDark } : InterviewSuggestionsProps) {
   
-  const bgColor = "dark:bg-zinc-900/70 bg-white";
+  const bgColor = "dark:bg-zinc-900/70";
 
   return (
     <motion.section
@@ -64,12 +65,14 @@ export function InterviewSuggestions({ isDark } : InterviewSuggestionsProps) {
         <h2 className={`text-2xl font-semibold text-white`}>
           Suggested Interviews
         </h2>
+        <Link href={"/interview/templates"}>
         <Button
           variant="ghost"
           className={`text-neutral-400 hover:text-neutral-400`}
         >
           View All
         </Button>
+        </Link>
       </div>
 
       {/* Flex container for cards */}
