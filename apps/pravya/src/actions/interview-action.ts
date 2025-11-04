@@ -57,11 +57,6 @@ export const getMainCategoriesWithTemplates = cache(
   }
 );
 
-/**
- * Fetches the detailed view for a single main category.
- * The result is cached for 1 hour (3600 seconds).
- * @param categoryId The ID of the main category to fetch.
- */
 export async function getCategoryDetails(categoryId: string) {
   // The cache key is dynamic, including the categoryId to ensure
   // each category's data is cached separately.
@@ -137,7 +132,7 @@ export async function getInterviewDetails(interviewId: string) {
   });
 
   console.log(interview);
-  
+
   // Return a clean structure
   return {
     title: interview?.role || "", // or interview?.title
@@ -156,18 +151,46 @@ export async function addInterviewTranscribe(
 ) {
   try {
     console.log("USER transcribe : ", transcribe);
-    
+
     const interview = await prisma.interview.update({
       where: { interviewId: interviewId },
-      data: { transcribe : transcribe },
+      data: { transcribe: transcribe },
     });
 
+    if(!interview || !interview.transcribe) {
+      throw new Error("Interview or Transcribe no found to process feedback");
+    }
+
+    const cleanedTranscript: { role: "user" | "assistant"; text: string }[] =
+      interview.transcribe.map(({ role, text }) => ({
+        role,
+        text,
+      }));
+
+    const questionAnswerPairs = [];
+    for (let i = 0; i < cleanedTranscript.length; i++) {
+      if (
+        cleanedTranscript[i].role === "assistant" &&
+        cleanedTranscript[i + 1]?.role === "user"
+      ) {
+        questionAnswerPairs.push({
+          questionId: `q_${i + 1}`, // Generate a simple unique ID
+          questionText: cleanedTranscript[i].text,
+          userAnswerTranscript: cleanedTranscript[i + 1].text,
+        });
+        i++; // Skip the answer we just processed
+      }
+    }
+
+    if (2 <= questionAnswerPairs.length) {
+      throw new Error("No valid question/answer pairs found in transcript.");
+    }
+
     await interviewAnalyseQueue.add("interview-analyse", {
-      interviewId : interviewId
-    })
+      interviewId: interviewId,
+    });
 
     console.log("Transcribe aded succesfully");
-    
 
     return interview;
   } catch (error) {
@@ -176,34 +199,27 @@ export async function addInterviewTranscribe(
   }
 }
 
-export async function getFeedback(
-  feedbackId: string
-) {
+export async function getFeedback(feedbackId: string) {
   try {
     const feedback = await prisma.feedback.findUnique({
-      where : {
-        feedbackId : feedbackId
-      }
-    })
+      where: {
+        feedbackId: feedbackId,
+      },
+    });
 
     return feedback;
   } catch (error) {
     console.log("ERROR", error);
-    
   }
 }
 
-export async function check2(
-  interviewId: string
-) {
+export async function check2(interviewId: string) {
   try {
-    
     await interviewAnalyseQueue.add("interview-analyse", {
-      interviewId : interviewId
-    })
+      interviewId: interviewId,
+    });
 
     console.log("Queued");
-    
   } catch (error) {
     console.error("Error updating interview transcribe:", error);
     throw error;

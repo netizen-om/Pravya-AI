@@ -15,12 +15,10 @@ import {
 import { MessageCircle, PhoneIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { string } from "zod";
 import Loader from "@/components/loader/loader";
 import { toast } from "sonner";
-import TextShimmer from "@/components/forgeui/text-shimmer";
 
 // A new component for the "Listening..." animation
 const ListeningIndicator = () => {

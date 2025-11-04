@@ -175,5 +175,5 @@ export default function Home() {
     fetchFeedback();
   }, [id]);
 
-  return <FeedbackPage feedback={feedback} />;
+  return <FeedbackPage feedback={mockFeedback} />;
 }
