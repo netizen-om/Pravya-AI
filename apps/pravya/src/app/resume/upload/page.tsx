@@ -13,9 +13,7 @@ import {
   X,
   FileText,
   ArrowLeft,
-  Eye,
   RotateCcw,
-  Trash2,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -484,9 +482,7 @@ export default function ResumeUploadPage() {
   };
 
   const handleViewResume = (resume: Resume) => {
-    // Navigate to resume analysis page or open modal
     if (resume.ResumeAnalysis) {
-      // You can implement navigation to a detailed view page here
       console.log("Viewing resume analysis:", resume.ResumeAnalysis);
       // Example: router.push(`/resume/analyse/${resume.id}`)
     } else {
@@ -607,8 +603,9 @@ export default function ResumeUploadPage() {
 
             {/* Error Message */}
             {errorMessage && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center justify-center space-x-2 text-red-400">
+              // ADDED light-mode classes, prefixed dark-mode classes
+              <div className="bg-red-100 border border-red-200 rounded-lg p-4 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-300 dark:bg-red-500/10 dark:border-red-500/20">
+                <div className="flex items-center justify-center space-x-2 text-red-700 dark:text-red-400">
                   <AlertCircle className="w-5 h-5" />
                   <p className="font-medium">{errorMessage}</p>
                 </div>
@@ -617,8 +614,9 @@ export default function ResumeUploadPage() {
 
             {/* Success Message */}
             {successMessage && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center justify-center space-x-2 text-green-400">
+              // ADDED light-mode classes, prefixed dark-mode classes
+              <div className="bg-green-100 border border-green-200 rounded-lg p-4 text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-300 dark:bg-green-500/10 dark:border-green-500/20">
+                <div className="flex items-center justify-center space-x-2 text-green-700 dark:text-green-400">
                   <CheckCircle className="w-5 h-5" />
                   <p className="font-medium">{successMessage}</p>
                 </div>
@@ -647,16 +645,15 @@ export default function ResumeUploadPage() {
                 )}
               </Button>
 
-              <Link href="/dashboard">             
-               <Button
-                variant="ghost"
-                className="h-12 text-base transition-all duration-300 hover:scale-[1.02] hover:bg-muted/80"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              </Link>
-
+              <a href="/dashboard">
+                <Button
+                  variant="ghost"
+                  className="h-12 text-base transition-all duration-300 hover:scale-[1.02] hover:bg-muted/80 w-full"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              </a>
             </div>
           </div>
         </Card>
@@ -676,7 +673,9 @@ export default function ResumeUploadPage() {
                 className="flex items-center space-x-2"
               >
                 <RotateCcw
-                  className={`w-4 h-4 ${isLoadingResumes ? "animate-spin" : ""}`}
+                  className={`w-4 h-4 ${
+                    isLoadingResumes ? "animate-spin" : ""
+                  }`}
                 />
                 <span>Refresh</span>
               </Button>
@@ -692,8 +691,9 @@ export default function ResumeUploadPage() {
             )}
 
             {resumesError && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
-                <div className="flex items-center justify-center space-x-2 text-red-400">
+              // ADDED light-mode classes, prefixed dark-mode classes
+              <div className="bg-red-100 border border-red-200 rounded-lg p-4 text-center dark:bg-red-500/10 dark:border-red-500/20">
+                <div className="flex items-center justify-center space-x-2 text-red-700 dark:text-red-400">
                   <AlertCircle className="w-5 h-5" />
                   <p className="font-medium">{resumesError}</p>
                 </div>
@@ -745,13 +745,26 @@ export default function ResumeUploadPage() {
                           <div className="flex items-center space-x-1 mt-1">
                             <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                             <div
-                              className={`w-2 h-2 rounded-full ${getOverallStatus(resume) === "parsing" || getOverallStatus(resume) === "analyzing" ? "bg-yellow-400" : "bg-gray-300"}`}
+                              className={`w-2 h-2 rounded-full ${
+                                getOverallStatus(resume) === "parsing" ||
+                                getOverallStatus(resume) === "analyzing"
+                                  ? "bg-yellow-400"
+                                  : "bg-gray-300 dark:bg-gray-600" // THEMED gray
+                              }`}
                             ></div>
                             <div
-                              className={`w-2 h-2 rounded-full ${getOverallStatus(resume) === "analyzing" ? "bg-purple-400" : "bg-gray-300"}`}
+                              className={`w-2 h-2 rounded-full ${
+                                getOverallStatus(resume) === "analyzing"
+                                  ? "bg-purple-400"
+                                  : "bg-gray-300 dark:bg-gray-600" // THEMED gray
+                              }`}
                             ></div>
                             <div
-                              className={`w-2 h-2 rounded-full ${getOverallStatus(resume) === "completed" ? "bg-green-400" : "bg-gray-300"}`}
+                              className={`w-2 h-2 rounded-full ${
+                                getOverallStatus(resume) === "completed"
+                                  ? "bg-green-400"
+                                  : "bg-gray-300 dark:bg-gray-600" // THEMED gray
+                              }`}
                             ></div>
                           </div>
                         )}
@@ -774,11 +787,12 @@ export default function ResumeUploadPage() {
                           </Button>
                         )}
                         {getOverallStatus(resume) === "error" && (
+                          // ADDED light-mode classes, prefixed dark-mode classes
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={handleRetry}
-                            className="h-8 w-8 p-0 hover:bg-blue-500/20 hover:text-blue-400 transition-all duration-200 hover:scale-110"
+                            className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-500/20 dark:hover:text-blue-400 transition-all duration-200 hover:scale-110"
                           >
                             <RotateCcw className="w-4 h-4" />
                           </Button>
@@ -792,25 +806,17 @@ export default function ResumeUploadPage() {
                           <Trash2 className="w-4 h-4" />
                         </Button> */}
                         {getOverallStatus(resume) === "completed" && (
-                        <Button
-                          onClick={() =>
-                            router.push(`/resume/chat/${resume.id}`)
-                          }
-                          variant="ghost"
-                          className="text-silver-300 text-black bg-white hover:bg-zinc-300 hover:text-black shadow-lg shadow-silver-500/20 transition-all duration-300 ease-in-out transform border border-silver-600/30"
-                        >
-                          Chat
-                        </Button>
+                          <Button
+                            onClick={() =>
+                              (window.location.href = `/resume/chat/${resume.id}`)
+                            }
+                            variant="ghost"
+                            // ADDED light-mode classes, prefixed dark-mode classes
+                            className="text-zinc-900 bg-white hover:bg-zinc-100 border border-zinc-200 shadow-sm transition-all duration-300 ease-in-out transform dark:text-silver-300 dark:text-black dark:bg-white dark:hover:bg-zinc-300 dark:hover:text-black dark:shadow-lg dark:shadow-silver-500/20 dark:border dark:border-silver-600/30"
+                          >
+                            Chat
+                          </Button>
                         )}
-                        {/* <Button
-                          onClick={() =>
-                            router.push(`/resume/chat/${resume.id}`)
-                          }
-                          variant="ghost"
-                          className="text-silver-300 text-black bg-white hover:bg-zinc-300 hover:text-black shadow-lg shadow-silver-500/20 transition-all duration-300 ease-in-out transform border border-silver-600/30"
-                        >
-                          Chat
-                        </Button> */}
                       </div>
                     </div>
                   </div>
