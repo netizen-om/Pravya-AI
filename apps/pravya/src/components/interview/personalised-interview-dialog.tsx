@@ -49,11 +49,12 @@ export function PersonalisedInterviewDialog() {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white">
+          <Button className="gap-2 dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white">
             <Sparkles className="w-4 h-4" />
             Start Personalised Interview
           </Button>
         </DialogTrigger>
+
         <DialogContent className="bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 max-w-2xl">
           <DialogHeader>
             <DialogTitle>Create Personalised Interview</DialogTitle>
@@ -62,6 +63,7 @@ export function PersonalisedInterviewDialog() {
             </DialogDescription>
           </DialogHeader>
 
+          {/* Resume selection list */}
           <div className="py-4 space-y-2 max-h-[60vh] overflow-y-auto">
             {RESUMES.map((resume) => (
               <button
@@ -69,20 +71,24 @@ export function PersonalisedInterviewDialog() {
                 onClick={() => setSelectedResume(resume.id)}
                 className={`w-full px-4 py-3 flex items-center gap-3 rounded-lg border-2 transition-all ${
                   selectedResume === resume.id
-                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20"
+                    ? "dark:border-white border-white bg-neutral-700/10 dark:bg-white/20"
                     : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
                 }`}
               >
+                {/* Selection indicator */}
                 <div
                   className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
                     selectedResume === resume.id
-                      ? "border-emerald-500 bg-emerald-500"
+                      ? "dark:border-neutral-500 dark:bg-neutral-500 border-neutral-100 bg-neutral-700"
                       : "border-neutral-300 dark:border-neutral-600"
                   }`}
                 >
-                  {selectedResume === resume.id && <div className="w-2 h-2 bg-white rounded-full" />}
+                  {selectedResume === resume.id && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
                 </div>
 
+                {/* Resume preview */}
                 <img
                   src={resume.image || "/placeholder.svg"}
                   alt={resume.name}
@@ -93,16 +99,20 @@ export function PersonalisedInterviewDialog() {
                   <p className="text-sm font-medium truncate">{resume.name}</p>
                 </div>
 
-                <button
+                {/* 👇 Changed from <button> to <div role="button"> */}
+                <div
                   onClick={(e) => {
                     e.stopPropagation()
                     setFullscreenResume(resume.image)
                   }}
-                  className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors flex-shrink-0"
+                  className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors flex-shrink-0 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   aria-label="View resume"
+                  onKeyDown={(e) => e.key === "Enter" && setFullscreenResume(resume.image)}
                 >
                   <Eye className="w-4 h-4" />
-                </button>
+                </div>
               </button>
             ))}
           </div>
@@ -110,7 +120,7 @@ export function PersonalisedInterviewDialog() {
           <DialogFooter>
             <Button
               type="submit"
-              className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white"
+              className="gap-2 dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white"
               onClick={handleGenerate}
               disabled={!selectedResume}
             >
@@ -121,6 +131,7 @@ export function PersonalisedInterviewDialog() {
         </DialogContent>
       </Dialog>
 
+      {/* Fullscreen Resume View */}
       {fullscreenResume && (
         <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
           <button
@@ -130,6 +141,7 @@ export function PersonalisedInterviewDialog() {
           >
             <X className="w-6 h-6 text-white" />
           </button>
+
           <img
             src={fullscreenResume || "/placeholder.svg"}
             alt="Resume fullscreen view"

@@ -49,7 +49,7 @@ export function InterviewHistoryTabs() {
                 </p>
               </CardContent>
               <CardFooter>
-                <Button variant="outline">View Full Report</Button>
+                <Button className="dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white">View Full Report</Button>
               </CardFooter>
             </Card>
 
@@ -65,7 +65,7 @@ export function InterviewHistoryTabs() {
                 </p>
               </CardContent>
               <CardFooter>
-                <Button variant="outline">View Full Report</Button>
+                <Button className="dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white">View Full Report</Button>
               </CardFooter>
             </Card>
           </motion.div>
