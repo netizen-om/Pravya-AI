@@ -10,7 +10,11 @@ import { ArrowRight, MicOff, AlertTriangle } from "lucide-react"
 import { BestPracticesList } from "./best-practices-list"
 import { MicrophoneSetup } from "./microphone-setup"
 
-export function InterviewLobbyPage() {
+interface InterviewLobbyPageProps {
+  handleConfirm: () => void; 
+}
+
+export function InterviewLobbyPage( { handleConfirm } : InterviewLobbyPageProps ) {
   const [permissionStatus, setPermissionStatus] = useState<"idle" | "granted" | "denied">("idle")
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("")
@@ -172,6 +176,7 @@ export function InterviewLobbyPage() {
 
           <div className="p-6 md:p-8 pt-0 flex justify-end">
             <Button
+              onClick={handleConfirm}
               disabled={permissionStatus !== "granted" || !selectedDeviceId}
               className="h-12 text-base font-semibold bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >

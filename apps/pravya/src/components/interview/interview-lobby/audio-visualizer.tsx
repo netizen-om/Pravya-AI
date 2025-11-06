@@ -1,38 +1,76 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
+import React, { useRef, useEffect, useState } from "react";
+import { AudioVisualizer, LiveAudioVisualizer } from "react-audio-visualize";
 
-interface AudioVisualizerProps {
-  audioLevel: number
+interface MyAudioVisualizerProps {
+  /** If you have a blob (e.g. recorded or fetched audio) use blob mode */
+  audioBlob?: Blob;
+  /** If you have a live media stream (e.g. microphone) use live mode */
+  mediaStream?: MediaStream;
+  /** width & height for the visualizer canvas */
+  width?: number;
+  height?: number;
 }
 
-export function AudioVisualizer({ audioLevel }: AudioVisualizerProps) {
-  const bars = Array.from({ length: 15 }, (_, i) => i)
+export function MyAudioVisualizer({
+  audioBlob,
+  mediaStream,
+  width = 600,
+  height = 100,
+}: MyAudioVisualizerProps) {
+  // determine current theme (light/dark) — example using CSS media query
+  const [isDark, setIsDark] = useState(false);
 
-  const getBarHeight = (index: number): number => {
-    const baseHeight = 8
-    const maxHeight = 100
-    // Add some variation across bars for visual interest
-    const variation = Math.sin((index * Math.PI) / 7.5) * 0.5 + 0.5
-    const height = baseHeight + (audioLevel / 255) * maxHeight * variation
-    return Math.min(height, maxHeight)
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
+    setIsDark(mql.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
+  // define colours based on theme
+  const backgroundColor = isDark ? "#1e1e1e" : "#f5f5f5";
+  const barColor = isDark ? "#4b9aff" : "#1e40ff";       // un-played bars
+  const barPlayedColor = isDark ? "#2c6bed" : "#2563eb"; // played bars
+
+  if (mediaStream) {
+    // live mode
+    return (
+      <div style={{ backgroundColor, borderRadius: 8, padding: 8 }}>
+        <LiveAudioVisualizer
+          mediaRecorder={ /* create a MediaRecorder from mediaStream in parent */ }
+          width={width}
+          height={height}
+          barWidth={2}
+          gap={1}
+          backgroundColor="transparent"
+          barColor={barColor}
+        />
+      </div>
+    );
   }
 
-  return (
-    <div className="flex items-end justify-center gap-1 h-20 w-full bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 overflow-hidden">
-      {bars.map((i) => (
-        <motion.div
-          key={i}
-          className="flex-1 bg-blue-400 rounded-t-full"
-          animate={{
-            height: `${getBarHeight(i)}px`,
-          }}
-          transition={{
-            duration: 0.05,
-            ease: "linear",
-          }}
+  if (audioBlob) {
+    // blob/file mode
+    const blobUrl = URL.createObjectURL(audioBlob);
+    return (
+      <div style={{ backgroundColor, borderRadius: 8, padding: 8 }}>
+        <AudioVisualizer
+          blob={audioBlob}
+          width={width}
+          height={height}
+          barWidth={2}
+          gap={1}
+          backgroundColor={backgroundColor}
+          barColor={barColor}
+          barPlayedColor={barPlayedColor}
         />
-      ))}
-    </div>
-  )
+        <audio src={blobUrl} controls style={{ width: "100%", marginTop: 8 }} />
+      </div>
+    );
+  }
+
+  return <div style={{ color: isDark ? "#fff" : "#000" }}>No audio source</div>;
 }

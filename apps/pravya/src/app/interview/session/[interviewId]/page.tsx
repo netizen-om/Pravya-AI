@@ -19,6 +19,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import Loader from "@/components/loader/loader";
 import { toast } from "sonner";
+import { InterviewLobbyPage } from "@/components/interview/interview-lobby/interview-lobby-page";
 
 // A new component for the "Listening..." animation
 const ListeningIndicator = () => {
@@ -35,6 +36,7 @@ const page = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLobby, setIsLobby] = useState(false);
   const [messages, setMessages] = useState<
     {
       id: string;
@@ -325,6 +327,14 @@ const page = () => {
   const filteredMessages = messages.filter(
     (msg) => !(msg.role === "user" && msg.interim)
   );
+
+  const handleLobbyConfirm = () => {
+    setIsLobby(true);
+  }
+
+  if(!isLobby) {
+    return <InterviewLobbyPage handleConfirm={handleLobbyConfirm}/>;
+  }
 
   if (!interviewData) {
     return <Loader title="Interview Loading..." />;
