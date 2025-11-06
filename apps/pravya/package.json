@@ -58,6 +58,7 @@
     "nodemailer": "^6.9.4",
     "posthog-js": "^1.260.1",
     "react": "^19.0.0",
+    "react-audio-visualize": "^1.2.0",
     "react-dom": "^19.0.0",
     "react-email": "^4.2.8",
     "react-hook-form": "^7.59.0",

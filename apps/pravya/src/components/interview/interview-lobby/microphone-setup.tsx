@@ -1,18 +1,31 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Mic } from "lucide-react"
-import { AudioVisualizer } from "./audio-visualizer"
+import { motion } from "framer-motion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Mic } from "lucide-react";
+import { AudioVisualizer } from "./audio-visualizer";
 
 interface MicrophoneSetupProps {
-  devices: MediaDeviceInfo[]
-  selectedDeviceId: string
-  audioLevel: number
-  onMicChange: (deviceId: string) => void
+  devices: MediaDeviceInfo[];
+  selectedDeviceId: string;
+  audioLevel: number;
+  stream?: MediaStream | null;
+  onMicChange: (deviceId: string) => void;
 }
 
-export function MicrophoneSetup({ devices, selectedDeviceId, audioLevel, onMicChange }: MicrophoneSetupProps) {
+export function MicrophoneSetup({
+  devices,
+  selectedDeviceId,
+  audioLevel,
+  stream,
+  onMicChange,
+}: MicrophoneSetupProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -21,7 +34,9 @@ export function MicrophoneSetup({ devices, selectedDeviceId, audioLevel, onMicCh
       className="space-y-4"
     >
       <div className="space-y-2">
-        <label className="text-sm font-medium text-neutral-900 dark:text-white">Select Microphone</label>
+        <label className="text-sm font-medium text-neutral-900 dark:text-white">
+          Select Microphone
+        </label>
         <Select value={selectedDeviceId || ""} onValueChange={onMicChange}>
           <SelectTrigger className="w-full">
             <Mic className="w-4 h-4 mr-2" />
@@ -44,10 +59,12 @@ export function MicrophoneSetup({ devices, selectedDeviceId, audioLevel, onMicCh
           transition={{ duration: 0.3 }}
           className="space-y-3"
         >
-          <AudioVisualizer audioLevel={audioLevel} />
-          <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">Speak into your mic to test.</p>
+          <AudioVisualizer stream={stream} />
+          <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
+            Speak into your mic to test.
+          </p>
         </motion.div>
       )}
     </motion.div>
-  )
+  );
 }

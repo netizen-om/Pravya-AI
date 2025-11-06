@@ -11,10 +11,10 @@ import { BestPracticesList } from "./best-practices-list"
 import { MicrophoneSetup } from "./microphone-setup"
 
 interface InterviewLobbyPageProps {
-  handleConfirm: () => void; 
+  handleConfirm: () => void
 }
 
-export function InterviewLobbyPage( { handleConfirm } : InterviewLobbyPageProps ) {
+export function InterviewLobbyPage({ handleConfirm }: InterviewLobbyPageProps) {
   const [permissionStatus, setPermissionStatus] = useState<"idle" | "granted" | "denied">("idle")
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("")
@@ -25,6 +25,19 @@ export function InterviewLobbyPage( { handleConfirm } : InterviewLobbyPageProps 
   const analyserRef = useRef<AnalyserNode | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const animationFrameRef = useRef<number | null>(null)
+
+  // Helper — safely close AudioContext
+  const closeAudioContext = async () => {
+    try {
+      const ctx = audioContextRef.current
+      if (ctx && ctx.state !== "closed") {
+        await ctx.close()
+      }
+      audioContextRef.current = null
+    } catch (err) {
+      console.warn("AudioContext already closed or failed to close:", err)
+    }
+  }
 
   const handleRequestPermission = async () => {
     try {
@@ -56,42 +69,41 @@ export function InterviewLobbyPage( { handleConfirm } : InterviewLobbyPageProps 
 
     const setupAudioStream = async () => {
       try {
-        // Stop previous stream and cleanup
+        // Stop and cleanup previous stream
         if (streamRef.current) {
           streamRef.current.getTracks().forEach((track) => track.stop())
+          streamRef.current = null
         }
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current)
+          animationFrameRef.current = null
         }
-        if (audioContextRef.current) {
-          audioContextRef.current.close()
-        }
+        await closeAudioContext()
 
-        // Get new stream with selected device
+        // Get new stream for selected device
         const constraints = {
           audio: { deviceId: { exact: selectedDeviceId } },
         }
-
         const stream = await navigator.mediaDevices.getUserMedia(constraints)
         streamRef.current = stream
 
         // Setup Web Audio API
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
-        analyserRef.current = audioContextRef.current.createAnalyser()
-        analyserRef.current.fftSize = 256
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+        audioContextRef.current = ctx
+        const analyser = ctx.createAnalyser()
+        analyserRef.current = analyser
+        analyser.fftSize = 256
 
-        const source = audioContextRef.current.createMediaStreamSource(stream)
-        source.connect(analyserRef.current)
+        const source = ctx.createMediaStreamSource(stream)
+        source.connect(analyser)
 
-        const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
+        const dataArray = new Uint8Array(analyser.frequencyBinCount)
 
         const visualize = () => {
           if (!analyserRef.current) return
-
           analyserRef.current.getByteFrequencyData(dataArray)
           const avg = dataArray.reduce((a, b) => a + b) / dataArray.length
           setAudioLevel(avg)
-
           animationFrameRef.current = requestAnimationFrame(visualize)
         }
 
@@ -103,16 +115,17 @@ export function InterviewLobbyPage( { handleConfirm } : InterviewLobbyPageProps 
 
     setupAudioStream()
 
+    // Cleanup
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop())
+        streamRef.current = null
       }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
       }
-      if (audioContextRef.current) {
-        audioContextRef.current.close()
-      }
+      closeAudioContext()
     }
   }, [selectedDeviceId])
 
@@ -168,6 +181,7 @@ export function InterviewLobbyPage( { handleConfirm } : InterviewLobbyPageProps 
                   devices={devices}
                   selectedDeviceId={selectedDeviceId}
                   audioLevel={audioLevel}
+                  stream={streamRef.current}
                   onMicChange={handleMicChange}
                 />
               )}
