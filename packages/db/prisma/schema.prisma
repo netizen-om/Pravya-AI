@@ -201,8 +201,10 @@ enum AdminRoleType {
 model Admin {
   id         String        @id @default(cuid())
   name       String
-  
+  email      String        @unique
+  password   String
   expiresAt  DateTime?
   role       AdminRoleType @default(MANAGER)
   createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 }

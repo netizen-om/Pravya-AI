@@ -1,11 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, Mic, FileText, BookOpen, DollarSign, Activity, LogOut, Menu, X } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { LayoutDashboard, Users, Mic, FileText, BookOpen, DollarSign, Activity, LogOut, Menu, X, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+
+enum AdminRoleType {
+  SUPER_ADMIN = "SUPER_ADMIN",
+  MANAGER = "MANAGER",
+  SUPPORT = "SUPPORT",
+}
 
 const navigationItems = [
   {
@@ -45,9 +51,51 @@ const navigationItems = [
   },
 ]
 
+const superAdminItems = [
+  {
+    label: "Admin Management",
+    href: "/admin/admins",
+    icon: Shield,
+    requireSuperAdmin: true,
+  },
+]
+
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(true)
+  const [currentAdmin, setCurrentAdmin] = useState<{ role: AdminRoleType } | null>(null)
+
+  useEffect(() => {
+    // Fetch current admin to check role
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.admin) {
+          setCurrentAdmin(data.admin)
+        }
+      })
+      .catch(() => {
+        // Handle error silently
+      })
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" })
+      router.push("/sign-in")
+      router.refresh()
+    } catch (error) {
+      console.error("Logout error:", error)
+      router.push("/sign-in")
+    }
+  }
+
+  const isSuperAdmin = currentAdmin?.role === AdminRoleType.SUPER_ADMIN
+  const allNavigationItems = [
+    ...navigationItems,
+    ...(isSuperAdmin ? superAdminItems : []),
+  ]
 
   return (
     <>
@@ -68,7 +116,7 @@ export function Sidebar() {
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {navigationItems.map((item) => {
+          {allNavigationItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
             const Icon = item.icon
             return (
@@ -107,7 +155,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             className="w-full justify-start text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => (window.location.href = "/login")}
+            onClick={handleLogout}
           >
             <LogOut className="w-5 h-5" />
             {isOpen && <span className="ml-2 text-sm">Sign Out</span>}
@@ -132,7 +180,7 @@ export function Sidebar() {
             </div>
 
             <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-              {navigationItems.map((item) => {
+              {allNavigationItems.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
                 const Icon = item.icon
                 return (
@@ -158,7 +206,7 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => (window.location.href = "/login")}
+                onClick={handleLogout}
               >
                 <LogOut className="w-5 h-5" />
                 <span className="ml-2 text-sm">Sign Out</span>
