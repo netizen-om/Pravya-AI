@@ -9,16 +9,30 @@ enum AdminRoleType {
 }
 
 // Public routes that don't require authentication
-const PUBLIC_ROUTES = ["/sign-in", "/api/auth/login"];
+const PUBLIC_ROUTES = ["/sign-in", "/api/auth/login", "/api/auth/create-super-admin"];
 
 // Routes that require SUPER_ADMIN role
 const SUPER_ADMIN_ROUTES = ["/admin/admins"];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
+  // Allow public routes (check exact matches first, then startsWith)
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => {
+    if (pathname === route) return true;
+    if (pathname.startsWith(route)) return true;
+    return false;
+  });
+
+  if (isPublicRoute) {
+    // If accessing sign-in and already authenticated, redirect to admin
+    const token = request.cookies.get("admin_token")?.value;
+    if (token && pathname === "/sign-in") {
+      const payload = await verifyToken(token);
+      if (payload) {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
+    }
     return NextResponse.next();
   }
 
@@ -27,25 +41,31 @@ export function middleware(request: NextRequest) {
 
   // If no token and trying to access protected route, redirect to sign-in
   if (!token) {
-    if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin") || pathname === "/") {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
     return NextResponse.next();
   }
 
   // Verify token
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   
   if (!payload) {
     // Invalid token, clear cookie and redirect
     const response = NextResponse.redirect(new URL("/sign-in", request.url));
-    response.cookies.delete("admin_token");
+    response.cookies.set("admin_token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 0,
+      path: "/",
+    });
     return response;
   }
 
   // Check if route requires SUPER_ADMIN
   if (SUPER_ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
-    if (payload.role !== AdminRoleType.SUPER_ADMIN) {
+    if (payload.role !== "SUPER_ADMIN") {
       return NextResponse.json(
         { error: "Forbidden: SUPER_ADMIN access required" },
         { status: 403 }
@@ -55,7 +75,7 @@ export function middleware(request: NextRequest) {
 
   // Check API routes that require SUPER_ADMIN
   if (pathname.startsWith("/api/admin/create") || pathname.startsWith("/api/admin/list")) {
-    if (payload.role !== AdminRoleType.SUPER_ADMIN) {
+    if (payload.role !== "SUPER_ADMIN") {
       return NextResponse.json(
         { error: "Forbidden: SUPER_ADMIN access required" },
         { status: 403 }
@@ -63,11 +83,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // If authenticated and trying to access sign-in, redirect to admin dashboard
-  if (pathname === "/sign-in") {
-    return NextResponse.redirect(new URL("/admin", request.url));
-  }
-
+  // Allow authenticated users to access protected routes
   return NextResponse.next();
 }
 

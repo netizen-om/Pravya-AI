@@ -8,16 +8,21 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const admin = await getCurrentAdmin()
-  
-  if (!admin) {
+  try {
+    const admin = await getCurrentAdmin()
+    
+    if (!admin) {
+      redirect("/sign-in")
+    }
+
+    return (
+      <div className="flex h-screen">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto bg-background">{children}</main>
+      </div>
+    )
+  } catch (error) {
+    console.error("Admin layout error:", error);
     redirect("/sign-in")
   }
-
-  return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto bg-background">{children}</main>
-    </div>
-  )
 }

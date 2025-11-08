@@ -1,53 +1,73 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { Users, Star, DollarSign, Mic } from "lucide-react"
-
-const kpiData = [
-  { label: "Total Users", value: "1,420", icon: Users, color: "text-accent" },
-  { label: "Subscribed Users", value: "120", icon: Star, color: "text-primary" },
-  { label: "Total Revenue", value: "$5,600", icon: DollarSign, color: "text-primary" },
-  { label: "Interviews Done", value: "2,850", icon: Mic, color: "text-accent" },
-]
-
-const userGrowthData = [
-  { date: "Day 1", users: 120 },
-  { date: "Day 5", users: 290 },
-  { date: "Day 10", users: 520 },
-  { date: "Day 15", users: 680 },
-  { date: "Day 20", users: 890 },
-  { date: "Day 25", users: 1200 },
-  { date: "Day 30", users: 1420 },
-]
-
-const revenueData = [
-  { day: "Mon", revenue: 400 },
-  { day: "Tue", revenue: 480 },
-  { day: "Wed", revenue: 520 },
-  { day: "Thu", revenue: 690 },
-  { day: "Fri", revenue: 890 },
-  { day: "Sat", revenue: 720 },
-  { day: "Sun", revenue: 600 },
-]
-
-const latestSignups = [
-  { email: "john.doe@company.com", joined: "2 hours ago" },
-  { email: "jane.smith@startup.io", joined: "5 hours ago" },
-  { email: "alex.johnson@tech.co", joined: "1 day ago" },
-  { email: "maria.garcia@design.com", joined: "2 days ago" },
-]
-
-const failedJobs = [
-  { resumeId: "RES-001", user: "john.doe@company.com", status: "Error" },
-  { resumeId: "RES-042", user: "alex.johnson@tech.co", status: "Error" },
-  { resumeId: "RES-085", user: "maria.garcia@design.com", status: "Error" },
-]
+import { getDashboardMetrics, getUserGrowthData, getRevenueData, getLatestSignups, getFailedJobs } from "@/actions/dashboard-actions"
+import { toast } from "sonner"
 
 export default function DashboardPage() {
+  const [metrics, setMetrics] = useState({
+    totalUsers: 0,
+    subscribedUsers: 0,
+    totalRevenue: 0,
+    totalInterviews: 0,
+  })
+  const [userGrowthData, setUserGrowthData] = useState<{ date: string; users: number }[]>([])
+  const [revenueData, setRevenueData] = useState<{ day: string; revenue: number }[]>([])
+  const [latestSignups, setLatestSignups] = useState<{ email: string; joined: string }[]>([])
+  const [failedJobs, setFailedJobs] = useState<{ resumeId: string; user: string; status: string }[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true)
+        
+        const [metricsRes, growthRes, revenueRes, signupsRes, jobsRes] = await Promise.all([
+          getDashboardMetrics(),
+          getUserGrowthData(),
+          getRevenueData(),
+          getLatestSignups(),
+          getFailedJobs(),
+        ])
+
+        if (metricsRes.success) {
+          setMetrics(metricsRes.metrics)
+        }
+        if (growthRes.success) {
+          setUserGrowthData(growthRes.data)
+        }
+        if (revenueRes.success) {
+          setRevenueData(revenueRes.data)
+        }
+        if (signupsRes.success) {
+          setLatestSignups(signupsRes.signups)
+        }
+        if (jobsRes.success) {
+          setFailedJobs(jobsRes.failedJobs)
+        }
+      } catch (error) {
+        console.error("Error loading dashboard data:", error)
+        toast.error("Failed to load dashboard data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  const kpiData = [
+    { label: "Total Users", value: metrics.totalUsers.toLocaleString(), icon: Users, color: "text-accent" },
+    { label: "Subscribed Users", value: metrics.subscribedUsers.toLocaleString(), icon: Star, color: "text-primary" },
+    { label: "Total Revenue", value: `₹${metrics.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-primary" },
+    { label: "Interviews Done", value: metrics.totalInterviews.toLocaleString(), icon: Mic, color: "text-accent" },
+  ]
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -66,6 +86,17 @@ export default function DashboardPage() {
       y: 0,
       transition: { duration: 0.5, ease: "easeOut" },
     },
+  }
+
+  if (loading) {
+    return (
+      <div className="p-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -193,12 +224,20 @@ export default function DashboardPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {latestSignups.map((signup, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{signup.email}</TableCell>
-                      <TableCell className="text-muted-foreground">{signup.joined}</TableCell>
+                  {latestSignups.length > 0 ? (
+                    latestSignups.map((signup, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-medium">{signup.email}</TableCell>
+                        <TableCell className="text-muted-foreground">{signup.joined}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center text-muted-foreground">
+                        No recent signups
+                      </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -221,15 +260,23 @@ export default function DashboardPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {failedJobs.map((job, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-mono text-sm">{job.resumeId}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{job.user}</TableCell>
-                      <TableCell>
-                        <Badge variant="destructive">{job.status}</Badge>
+                  {failedJobs.length > 0 ? (
+                    failedJobs.map((job, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-mono text-sm">{job.resumeId}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{job.user}</TableCell>
+                        <TableCell>
+                          <Badge variant="destructive">{job.status}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground">
+                        No failed jobs
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

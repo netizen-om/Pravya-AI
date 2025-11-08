@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@repo/db";
 import bcrypt from "bcryptjs";
-import { generateToken, setAuthToken } from "@/lib/auth";
+import { generateToken } from "@/lib/auth";
 import { loginSchema } from "@/lib/validations";
 
 export async function POST(req: NextRequest) {
@@ -15,8 +15,6 @@ export async function POST(req: NextRequest) {
     });
 
     if (!admin) {
-      console.log("admin not found");
-      
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -44,11 +42,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate JWT token
-    const token = generateToken({
+    // Generate JWT token - ensure role is a string
+    const roleString = String(admin.role) as "SUPER_ADMIN" | "MANAGER" | "SUPPORT";
+    const token = await generateToken({
       id: admin.id,
       email: admin.email,
-      role: admin.role,
+      role: roleString,
     });
 
     // Set cookie
@@ -65,13 +64,14 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
 
-    // Set auth cookie
+    // Set auth cookie with proper settings
     response.cookies.set("admin_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
+      // Don't set domain - let browser handle it
     });
 
     return response;

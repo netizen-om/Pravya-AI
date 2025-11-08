@@ -72,8 +72,8 @@ export default function SignIn() {
       }
 
       toast.success("Login successful!");
-      router.push("/admin");
-      router.refresh();
+      // Use window.location for a full page reload to ensure cookies are sent
+      window.location.href = "/admin";
     } catch (error) {
       console.error("Login error:", error);
       toast.error("An error occurred during login");
