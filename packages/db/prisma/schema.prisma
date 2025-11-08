@@ -198,10 +198,10 @@ model UserActivity {
 
   action ActivityAction
 
-  targetType ActivityTarget 
-  targetId   String 
+  targetType ActivityTarget
+  targetId   String
 
-  details Json?
+  details String?
 
   @@index([userId])
   @@index([adminId])

@@ -67,6 +67,16 @@ export async function POST(req: Request) {
       }
     })
 
+    await prisma.userActivity.create({
+      data: {
+        userId: session.user.id,
+        action: "RESUME_UPLOADED",
+        targetType: "RESUME",
+        targetId: resume.id,
+        details: resume.fileName,
+      },
+    });
+
     await resumeProcessingQueue.add("process-resume", {
       resumeId: resume.id,
       fileUrl: resume.fileUrl,

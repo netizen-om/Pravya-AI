@@ -155,9 +155,10 @@ export async function addInterviewTranscribe(
     const interview = await prisma.interview.update({
       where: { interviewId: interviewId },
       data: { transcribe: transcribe },
+      include : { template : true }
     });
 
-    if(!interview || !interview.transcribe) {
+    if (!interview || !interview.transcribe) {
       throw new Error("Interview or Transcribe no found to process feedback");
     }
 
@@ -181,6 +182,16 @@ export async function addInterviewTranscribe(
         i++; // Skip the answer we just processed
       }
     }
+
+    await prisma.userActivity.create({
+      data: {
+        userId: interview.userId,
+        action: "INTERVIEW_COMPLETED",
+        targetType: "INTERVIEW",
+        targetId: interview.interviewId,
+        details: interview.template.title,
+      },
+    });
 
     if (2 <= questionAnswerPairs.length) {
       throw new Error("No valid question/answer pairs found in transcript.");

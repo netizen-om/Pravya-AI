@@ -6,12 +6,11 @@ import { prisma } from "@/lib/prismadb";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-export async function POST(req : NextRequest) {
+export async function POST(req: NextRequest) {
   const { email } = await req.json();
   try {
-
     const user = await prisma.user.findUnique({
-      where : { email },
+      where: { email },
       include: {
         accounts: {
           select: {
@@ -19,25 +18,38 @@ export async function POST(req : NextRequest) {
           },
         },
       },
-    })
+    });
 
-    
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 500 });
     }
-    
-    const provider = user.accounts.length > 0 ? user.accounts[0].provider : null;
-    
-    if(provider) {
-      return NextResponse.json({ error: "Password reset is not available. You signed in using Google/GitHub." }, { status: 500 });
+
+    const provider =
+      user.accounts.length > 0 ? user.accounts[0].provider : null;
+
+    if (provider) {
+      return NextResponse.json(
+        {
+          error:
+            "Password reset is not available. You signed in using Google/GitHub.",
+        },
+        { status: 500 }
+      );
     }
 
+    await prisma.userActivity.create({
+      data: {
+        userId: user.id,
+        action: "PASSWORD_RESET_REQUEST",
+        targetType: "USER",
+        targetId: user.id,
+      },
+    });
+
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: "10m" }
-    );
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: "10m",
+    });
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/forget-password?token=${token}`;
     console.log("Attempting to send verification email to:", user.email);
@@ -81,10 +93,13 @@ export async function POST(req : NextRequest) {
         text: `Visit this link to reset password your email: ${resetUrl}`,
       });
 
-      return NextResponse.json({
-        success: true,
-        message: "Verification email sent successfully",
-      }, {status : 200});
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Verification email sent successfully",
+        },
+        { status: 200 }
+      );
     } catch (emailError) {
       console.error("[EMAIL_SEND_ERROR]", emailError);
       return NextResponse.json(
