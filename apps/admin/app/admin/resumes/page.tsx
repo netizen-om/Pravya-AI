@@ -123,11 +123,8 @@ export default function ResumeManagementPage() {
                         <DropdownMenuContent align="end" className="border-0">
                           <DropdownMenuItem>View Details</DropdownMenuItem>
                           <DropdownMenuItem>
-                            <Download className="w-4 h-4 mr-2" />
                             Download File
                           </DropdownMenuItem>
-                          <DropdownMenuItem>Re-process Analysis</DropdownMenuItem>
-                          <DropdownMenuItem>Re-ingest to Vector DB</DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

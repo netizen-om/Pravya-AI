@@ -76,7 +76,7 @@ export default function InterviewManagementPage() {
         <p className="text-muted-foreground mt-1">Monitor and manage AI interviews</p>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div initforegroundial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <Card className="border-0 shadow-lg">
           <CardHeader>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -119,7 +119,6 @@ export default function InterviewManagementPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="border-0">
                           <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>Re-process Feedback</DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

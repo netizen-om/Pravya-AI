@@ -191,3 +191,18 @@ model Tag {
 
   templates InterviewTemplate[]
 }
+
+enum AdminRoleType {
+  SUPER_ADMIN
+  MANAGER
+  SUPPORT
+}
+
+model Admin {
+  id         String        @id @default(cuid())
+  name       String
+  
+  expiresAt  DateTime?
+  role       AdminRoleType @default(MANAGER)
+  createdAt  DateTime      @default(now())
+}
