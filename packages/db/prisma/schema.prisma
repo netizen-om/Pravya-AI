@@ -21,10 +21,11 @@ model User {
   createdAt     DateTime? @default(now())
   updatedAt     DateTime? @updatedAt
 
-  accounts   Account[]
-  interviews Interview[]
-  payment    Payment[]
-  Resume     Resume[]
+  accounts       Account[]
+  interviews     Interview[]
+  payment        Payment[]
+  Resume         Resume[]
+  userActivities UserActivity[]
 }
 
 model Account {
@@ -82,16 +83,16 @@ model Feedback {
   interviewId String    @unique
   interview   Interview @relation(fields: [interviewId], references: [interviewId])
 
-  overallScore     Int 
-  summary          String 
-  keyStrengths     String[] 
-  improvementAreas String[] 
+  overallScore     Int
+  summary          String
+  keyStrengths     String[]
+  improvementAreas String[]
 
-  communicationScore  Int 
-  technicalScore      Int 
-  problemSolvingScore Int 
-  behavioralScore     Int 
-  confidenceScore     Int 
+  communicationScore  Int
+  technicalScore      Int
+  problemSolvingScore Int
+  behavioralScore     Int
+  confidenceScore     Int
 
   fullFeedbackJson Json
 
@@ -152,6 +153,61 @@ model ResumeAnalysis {
   updatedAt        DateTime @updatedAt
 }
 
+enum ActivityAction {
+  // User Actions
+  PASSWORD_RESET_REQUEST
+
+  // Interview Actions
+  INTERVIEW_COMPLETED
+  INTERVIEW_DELETED
+
+  // Resume Actions
+  RESUME_UPLOADED
+  RESUME_DELETED
+
+  // Payment/Subscription Actions
+  SUBSCRIPTION_STARTED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+
+  // Admin Actions
+  ADMIN_LOGIN
+  ADMIN_TEMPLATE_CREATED
+  ADMIN_USER_DELETED
+}
+
+enum ActivityTarget {
+  USER
+  INTERVIEW
+  RESUME
+  PAYMENT
+  INTERVIEW_TEMPLATE
+  ADMIN
+  // Add other models as needed
+}
+
+model UserActivity {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  adminId String?
+  admin   Admin?  @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  action ActivityAction
+
+  targetType ActivityTarget 
+  targetId   String 
+
+  details Json?
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([targetType, targetId]) // Useful for finding all activity for a specific resume
+}
+
 // LEVEL 1: Your main categories like Tech, Sales, Marketing.
 model MainCategory {
   mainCategoryId String @id @default(cuid())
@@ -199,12 +255,13 @@ enum AdminRoleType {
 }
 
 model Admin {
-  id         String        @id @default(cuid())
-  name       String
-  email      String        @unique
-  password   String
-  expiresAt  DateTime?
-  role       AdminRoleType @default(MANAGER)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  password       String
+  expiresAt      DateTime?
+  role           AdminRoleType  @default(MANAGER)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  userActivities UserActivity[]
 }
