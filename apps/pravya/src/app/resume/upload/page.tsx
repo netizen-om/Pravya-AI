@@ -18,9 +18,15 @@ import {
   AlertCircle,
   Loader2,
   Download,
+  Trash2,
+  View,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import DeleteResumeDialog from "@/components/resume/delete-resume-dialog";
+import { deleteResume } from "@/actions/resume-action";
+import { toast } from "sonner";
 
 interface UploadedFile {
   name: string;
@@ -42,6 +48,21 @@ interface Resume {
     analysis?: Record<string, unknown>;
   };
 }
+
+const openPdfInGoogleViewer = (fileUrl: string) => {
+  if (!fileUrl) return;
+
+  // ensure .pdf extension so Google Viewer always detects properly
+  const safeUrl = fileUrl.endsWith(".pdf") ? fileUrl : `${fileUrl}.pdf`;
+
+  // construct Google Drive Viewer URL
+  const viewerUrl = `https://drive.google.com/viewerng/viewer?embedded=true&url=${
+    fileUrl
+  }`;
+
+  // open fullscreen (new tab)
+  window.open(viewerUrl, "_blank", "noopener,noreferrer");
+};
 
 const motivationalQuotes = [
   "Analyzing your unique skills and experience...",
@@ -442,13 +463,13 @@ export default function ResumeUploadPage() {
       await fetchResumes();
 
       // Simulate analysis completion (this would be replaced with real-time updates from the queue)
-      setTimeout(() => {
-        setIsAnalyzing(false);
-        setUploadedFile(null);
-        setUploadProgress(0);
-        // Fetch again to get updated status
-        fetchResumes();
-      }, 8000);
+      // setTimeout(() => {
+      //   setIsAnalyzing(false);
+      //   setUploadedFile(null);
+      //   setUploadProgress(0);
+      //   // Fetch again to get updated status
+      //   fetchResumes();
+      // }, 8000);
     } catch (error) {
       console.error("Upload error:", error);
       setIsUploading(false);
@@ -456,7 +477,9 @@ export default function ResumeUploadPage() {
 
       // Set error message for user display
       setErrorMessage(
-        `Upload failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Upload failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
 
       // Clear error message after 5 seconds
@@ -476,9 +499,13 @@ export default function ResumeUploadPage() {
   };
 
   const handleDelete = async (id: string) => {
-    // In a real implementation, you would call an API to delete the resume
-    // For now, we'll just remove it from the local state
-    setResumes((prev) => prev.filter((resume) => resume.id !== id));
+    const res = await deleteResume(id);
+    if(res.success) {
+      toast.success("Resume deleted");
+      await fetchResumes();
+    } else {
+      toast.error("Failed to delete, please try again later")
+    }
   };
 
   const handleViewResume = (resume: Resume) => {
@@ -775,17 +802,7 @@ export default function ResumeUploadPage() {
                       <StatusBadge resume={resume} />
 
                       <div className="flex space-x-1">
-                        {getOverallStatus(resume) === "completed" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewResume(resume)}
-                            className="h-8 w-8 p-0 hover:bg-primary/20 hover:text-primary transition-all duration-200 hover:scale-110"
-                            title="Download"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        )}
+                        
                         {getOverallStatus(resume) === "error" && (
                           // ADDED light-mode classes, prefixed dark-mode classes
                           <Button
@@ -797,14 +814,15 @@ export default function ResumeUploadPage() {
                             <RotateCcw className="w-4 h-4" />
                           </Button>
                         )}
-                        {/* <Button
+                        <DeleteResumeDialog onConfirm={handleDelete} resume={resume} />
+                        <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(resume.id)}
-                          className="h-8 w-8 p-0 hover:bg-destructive/20 hover:text-destructive transition-all duration-200 hover:scale-110"
+                          onClick={() => openPdfInGoogleViewer(resume.fileUrl)}
+                          className="h-8 w-8 p-0 hover:bg-neutral-500/20 hover:opacity-70 transition-all duration-200 hover:scale-110"
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </Button> */}
+                          <Eye className="w-4 h-4" />
+                        </Button>
                         {getOverallStatus(resume) === "completed" && (
                           <Button
                             onClick={() =>

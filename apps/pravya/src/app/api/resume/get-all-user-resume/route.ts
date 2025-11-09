@@ -12,7 +12,8 @@ export async function GET(req: Request) {
 
     const res = await prisma.resume.findMany({
         where : {
-            userId : session.user.id
+            userId : session.user.id,
+            isDeleted : false
         }
     })
 

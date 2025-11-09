@@ -3,7 +3,7 @@
 import { interviewAnalyseQueue } from "@/lib/queues";
 import { prisma } from "@repo/db";
 import { unstable_cache as cache } from "next/cache"; // 1. Import the cache function
-import { log } from "util";
+
 
 /**
  * Fetches all main categories and includes a preview of their associated templates.
