@@ -62,7 +62,7 @@ export default function Hero() {
           >
             <h1
               id="main-title"
-              className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+              className="text-4xl text-white font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
             >
               Ace Every <strong>Interview</strong> <span>with</span> <br />
               <em className="italic">Pravya-AI</em>

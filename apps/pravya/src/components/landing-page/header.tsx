@@ -62,7 +62,7 @@ const LandingHeader = ({ isScrolled }: HeaderProps) => {
         </Link>
 
         <div className="absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-muted-foreground transition duration-200 hover:text-foreground md:flex md:space-x-2">
-          {["features", "pricing", "testimonials", "faq"].map((section) => (
+          {["features", "pricing", "testimonials", "FAQ"].map((section) => (
             <a
               key={section}
               className="relative px-4 py-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { getCurrentUser } from "@/lib/auth";
 import { sendEmail } from "@/lib/mailer";
 import { prisma } from "@/lib/prismadb";
 

@@ -22,15 +22,16 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { FaMoneyBills } from "react-icons/fa6";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Upload Resume", href: "/resume/upload", icon: Upload },
-  { name: "Mock Interview", href: "/interview/start", icon: Play },
-  { name: "Interview History", href: "/interview/history", icon: History },
+  { name: "Mock Interview", href: "/interview", icon: Play },
   { name: "Learning Hub", href: "/learning", icon: BookOpen },
-  { name: "Manage Profile", href: "/profile", icon: User },
+  { name: "Manage Profile", href: "/user/settings", icon: User },
+  { name: "Subscriptions", href: "/subscriptions", icon: FaMoneyBills }
 ];
 
 interface DashboardSidebarProps {

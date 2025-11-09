@@ -7,10 +7,10 @@ export const LandingFooter = () => {
 
   const navigation = {
     product: [
-      { name: "Start Practicing", href: "/practice" },
+      { name: "Start Practicing", href: "/dashboard" },
       { name: "Watch Demo", href: "/demo" },
-      { name: "Features", href: "/features" },
-      { name: "Pricing", href: "/pricing" },
+      { name: "Features", href: "/#features" },
+      { name: "Pricing", href: "/#pricing" },
     ],
     company: [
       { name: "About", href: "/about" },
@@ -52,7 +52,7 @@ export const LandingFooter = () => {
 
   return (
     <footer
-      className="bg-black border-t border-gray-800/50"
+      className="bg-black border-t relative z-50 border-gray-800/50"
       aria-labelledby="footer-heading"
     >
       <h2 id="footer-heading" className="sr-only">
@@ -66,12 +66,12 @@ export const LandingFooter = () => {
               <Image
                 src="/logo/pravya-logo1.png"
                 alt="Pravya AI Logo"
-                width={32}
-                height={32}
+                width={43}
+                height={43}
                 className="rounded-md"
                 priority
               />
-              <span className="text-2xl font-bold text-white">Pravya AI</span>
+              <span className="text-4xl font-bold text-white">Pravya AI</span>
             </div>
             <p className="text-gray-400 text-sm">
               Your smart companion for interview preparation, practice, and
@@ -98,14 +98,14 @@ export const LandingFooter = () => {
               <Twitter className="h-6 w-6" />
             </Link>
             <Link
-              href="/github"
+              href="https://github.com/netizen-om/Pravya-AI"
               aria-label="GitHub"
               className="text-gray-400 hover:text-white transition-colors duration-200"
             >
               <Github className="h-6 w-6" />
             </Link>
             <Link
-              href="/linkedin"
+              href="https://www.linkedin.com/in/om-borisagar-754591314/"
               aria-label="LinkedIn"
               className="text-gray-400 hover:text-white transition-colors duration-200"
             >
