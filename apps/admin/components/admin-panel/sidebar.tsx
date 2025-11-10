@@ -1,11 +1,24 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Users, Mic, FileText, BookOpen, DollarSign, Activity, LogOut, Menu, X, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard,
+  Users,
+  Mic,
+  FileText,
+  BookOpen,
+  DollarSign,
+  Activity,
+  LogOut,
+  Menu,
+  X,
+  Shield,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 enum AdminRoleType {
   SUPER_ADMIN = "SUPER_ADMIN",
@@ -49,7 +62,7 @@ const navigationItems = [
     href: "/admin/system",
     icon: Activity,
   },
-]
+];
 
 const superAdminItems = [
   {
@@ -58,13 +71,15 @@ const superAdminItems = [
     icon: Shield,
     requireSuperAdmin: true,
   },
-]
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [isOpen, setIsOpen] = useState(true)
-  const [currentAdmin, setCurrentAdmin] = useState<{ role: AdminRoleType } | null>(null)
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(true);
+  const [currentAdmin, setCurrentAdmin] = useState<{
+    role: AdminRoleType;
+  } | null>(null);
 
   useEffect(() => {
     // Fetch current admin to check role
@@ -72,30 +87,30 @@ export function Sidebar() {
       .then((res) => res.json())
       .then((data) => {
         if (data.admin) {
-          setCurrentAdmin(data.admin)
+          setCurrentAdmin(data.admin);
         }
       })
       .catch(() => {
         // Handle error silently
-      })
-  }, [])
+      });
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" })
-      router.push("/sign-in")
-      router.refresh()
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/sign-in");
+      router.refresh();
     } catch (error) {
-      console.error("Logout error:", error)
-      router.push("/sign-in")
+      console.error("Logout error:", error);
+      router.push("/sign-in");
     }
-  }
+  };
 
-  const isSuperAdmin = currentAdmin?.role === AdminRoleType.SUPER_ADMIN
+  const isSuperAdmin = currentAdmin?.role === AdminRoleType.SUPER_ADMIN;
   const allNavigationItems = [
     ...navigationItems,
     ...(isSuperAdmin ? superAdminItems : []),
-  ]
+  ];
 
   return (
     <>
@@ -103,13 +118,16 @@ export function Sidebar() {
       <aside
         className={cn(
           "hidden md:flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-200",
-          isOpen ? "w-64" : "w-20",
+          isOpen ? "w-64" : "w-20"
         )}
       >
         <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
-          <Link href="/admin" className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
-              P
+          <Link
+            href="/admin"
+            className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground"
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-primary-foreground font-bold">
+              <Image src={"/logo/pravya-logo.png"} height={32} width={32} alt="Pravya Logo" />
             </div>
             {isOpen && <span>Pravya AI</span>}
           </Link>
@@ -117,8 +135,12 @@ export function Sidebar() {
 
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {allNavigationItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-            const Icon = item.icon
+            const isActive =
+              item.href === "/admin"
+                ? pathname === "/admin"
+                : pathname === item.href ||
+                  pathname.startsWith(item.href + "/");
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
@@ -127,13 +149,15 @@ export function Sidebar() {
                   "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-lg"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                 )}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
-                {isOpen && <span className="text-sm font-medium">{item.label}</span>}
+                {isOpen && (
+                  <span className="text-sm font-medium">{item.label}</span>
+                )}
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -168,21 +192,31 @@ export function Sidebar() {
         <div className="md:hidden fixed inset-0 z-40 bg-sidebar">
           <div className="flex flex-col h-full">
             <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
-              <Link href="/admin" className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground">
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground"
+              >
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
                   P
                 </div>
                 <span>Pravya AI</span>
               </Link>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-sidebar-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="text-sidebar-foreground"
+              >
                 <X className="w-5 h-5" />
               </Button>
             </div>
 
             <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
               {allNavigationItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-                const Icon = item.icon
+                const isActive =
+                  pathname === item.href ||
+                  pathname.startsWith(item.href + "/");
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
@@ -192,13 +226,13 @@ export function Sidebar() {
                       "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
                       isActive
                         ? "bg-primary text-primary-foreground shadow-lg"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                        : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                     )}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm font-medium">{item.label}</span>
                   </Link>
-                )
+                );
               })}
             </nav>
 
@@ -227,5 +261,5 @@ export function Sidebar() {
         </Button>
       </div>
     </>
-  )
+  );
 }

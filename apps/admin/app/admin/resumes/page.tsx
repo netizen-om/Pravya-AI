@@ -153,7 +153,6 @@ export default function ResumeManagementPage() {
                   <TableHead>User</TableHead>
                   <TableHead>File Name</TableHead>
                   <TableHead>Analysis</TableHead>
-                  <TableHead>Vector DB</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -166,7 +165,6 @@ export default function ResumeManagementPage() {
                       <TableCell className="text-muted-foreground">{resume.user}</TableCell>
                       <TableCell className="text-sm">{resume.fileName}</TableCell>
                       <TableCell>{getStatusBadge(resume.analysisStatus)}</TableCell>
-                      <TableCell>{getStatusBadge(resume.qdrantStatus)}</TableCell>
                       <TableCell className="text-muted-foreground">{resume.date}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
