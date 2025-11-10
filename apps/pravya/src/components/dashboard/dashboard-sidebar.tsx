@@ -29,7 +29,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Upload Resume", href: "/resume/upload", icon: Upload },
   { name: "Mock Interview", href: "/interview", icon: Play },
-  { name: "Learning Hub", href: "/learning", icon: BookOpen },
+  { name: "Learning Hub", href: "/learning-hub", icon: BookOpen },
   { name: "Manage Profile", href: "/user/settings", icon: User },
   { name: "Subscriptions", href: "/subscriptions", icon: FaMoneyBills }
 ];
