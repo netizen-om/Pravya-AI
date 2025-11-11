@@ -1,12 +1,56 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { AlertCircle, CheckCircle, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { InterviewHistoryCard } from "./interview-history-card"
+
+type Item = {
+  id: string
+  title: string
+  tags: string[]
+  score?: number | null
+  status: "COMPLETED" | "PENDING" | "INCOMPLETE"
+  feedbackId?: string | null
+}
 
 export function InterviewHistoryTabs() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [completed, setCompleted] = useState<Item[]>([])
+  const [pending, setPending] = useState<Item[]>([])
+  const [incomplete, setIncomplete] = useState<Item[]>([])
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      try {
+        setIsLoading(true)
+
+        // ✅ FIXED FETCH STRING
+        const res = await fetch("/api/interviews/list", { cache: "no-store" })
+        const json = await res.json()
+
+        if (!active) return
+        if (json?.success) {
+          setCompleted(json.data.completed || [])
+          setPending(json.data.pending || [])
+          setIncomplete(json.data.incomplete || [])
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        if (active) setIsLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      active = false
+    }
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -19,92 +63,122 @@ export function InterviewHistoryTabs() {
             <CheckCircle className="w-4 h-4" />
             <span className="hidden sm:inline">Completed</span>
           </TabsTrigger>
+
           <TabsTrigger value="pending" className="gap-2">
             <Clock className="w-4 h-4" />
             <span className="hidden sm:inline">Pending</span>
           </TabsTrigger>
+
           <TabsTrigger value="incomplete" className="gap-2">
             <AlertCircle className="w-4 h-4" />
             <span className="hidden sm:inline">Incomplete</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* Completed Tab */}
+        {/* COMPLETED TAB */}
         <TabsContent value="completed">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            {/* Card 1 */}
+          {isLoading ? (
+            <div className="text-sm text-neutral-500">Loading...</div>
+          ) : completed.length === 0 ? (
             <Card className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
               <CardHeader>
-                <CardTitle>Senior React Developer</CardTitle>
-                <CardDescription>Completed: Oct 26, 2025</CardDescription>
+                <CardTitle>No completed interviews</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-neutral-900 dark:text-neutral-200">
-                  Overall Score: <span className="text-emerald-500 font-semibold">88/100</span>
-                </p>
+              <CardContent className="text-neutral-500 dark:text-neutral-400">
+                Run an interview and view the full feedback here.
               </CardContent>
-              <CardFooter>
-                <Button className="dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white">View Full Report</Button>
-              </CardFooter>
             </Card>
-
-            {/* Card 2 */}
-            <Card className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
-              <CardHeader>
-                <CardTitle>Behavioral Interview</CardTitle>
-                <CardDescription>Completed: Oct 24, 2025</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-neutral-900 dark:text-neutral-200">
-                  Overall Score: <span className="text-emerald-500 font-semibold">76/100</span>
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button className="dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white">View Full Report</Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              {completed.map((item) => (
+                <InterviewHistoryCard
+                  key={item.id}
+                  id={item.id}
+                  title={item.title}
+                  tags={item.tags}
+                  score={item.score}
+                  status={item.status}
+                  feedbackId={item.feedbackId}
+                />
+              ))}
+            </motion.div>
+          )}
         </TabsContent>
 
-        {/* Pending Tab */}
+        {/* PENDING TAB */}
         <TabsContent value="pending">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+          {isLoading ? (
+            <div className="text-sm text-neutral-500">Loading...</div>
+          ) : pending.length === 0 ? (
             <Card className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
               <CardHeader>
-                <CardTitle>No Pending Interviews</CardTitle>
+                <CardTitle>No pending interviews</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  You have no scheduled interviews. Start a new one from a template or use your resume!
-                </p>
+              <CardContent className="text-neutral-500 dark:text-neutral-400">
+                You have no scheduled interviews. Start a new one from a template or use your resume.
               </CardContent>
             </Card>
-          </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              {pending.map((item) => (
+                <InterviewHistoryCard
+                  key={item.id}
+                  id={item.id}
+                  title={item.title}
+                  tags={item.tags}
+                  score={item.score}
+                  status={item.status}
+                  feedbackId={item.feedbackId}
+                />
+              ))}
+            </motion.div>
+          )}
         </TabsContent>
 
-        {/* Incomplete Tab */}
+        {/* INCOMPLETE TAB */}
         <TabsContent value="incomplete">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+          {isLoading ? (
+            <div className="text-sm text-neutral-500">Loading...</div>
+          ) : incomplete.length === 0 ? (
             <Card className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
               <CardHeader>
-                <CardTitle>System Design Basics</CardTitle>
-                <CardDescription>Last activity: 2 days ago</CardDescription>
+                <CardTitle>No incomplete interviews</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  You left this interview halfway. Resume to continue where you left off.
-                </p>
+              <CardContent className="text-neutral-500 dark:text-neutral-400">
+                Great! You don't have any incomplete interviews.
               </CardContent>
-              <CardFooter>
-                <Button variant="secondary">Resume Interview</Button>
-              </CardFooter>
             </Card>
-          </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              {incomplete.map((item) => (
+                <InterviewHistoryCard
+                  key={item.id}
+                  id={item.id}
+                  title={item.title}
+                  tags={item.tags}
+                  score={item.score}
+                  status={item.status}
+                  feedbackId={item.feedbackId}
+                  disableFeedback
+                />
+              ))}
+            </motion.div>
+          )}
         </TabsContent>
       </Tabs>
     </motion.div>

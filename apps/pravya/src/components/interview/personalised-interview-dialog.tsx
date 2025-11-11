@@ -48,7 +48,7 @@ export function PersonalisedInterviewDialog() {
   const handleGenerate = () => {
     if (selectedResume) {
       console.log("Starting interview with resume:", selectedResume);
-      console.log("Number of questions:", questionCount);
+      console.  log("Number of questions:", questionCount);
       setOpen(false);
       setSelectedResume("");
       setQuestionCount(4);
