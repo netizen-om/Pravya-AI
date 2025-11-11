@@ -21,7 +21,9 @@ export const generateAiAnswer = asyncHandler(async (req, res) => {
   if (question.AIanswer) {
     return res
       .status(200)
-      .json(new ApiResponse(200, "AI answer already exists.", question.AIanswer));
+      .json(
+        new ApiResponse(200, "AI answer already exists.", question.AIanswer)
+      );
   }
 
   // 5. Define Zod schema for AI response
@@ -47,9 +49,14 @@ export const generateAiAnswer = asyncHandler(async (req, res) => {
   // 8. Respond
   return res
     .status(200)
-    .json(new ApiResponse(200, "AI answer generated successfully.",  updatedQuestion.AIanswer));
+    .json(
+      new ApiResponse(
+        200,
+        "AI answer generated successfully.",
+        updatedQuestion.AIanswer
+      )
+    );
 });
-
 
 export const generateQuestions = asyncHandler(async (req, res) => {
   const { userId } = req.body;
@@ -127,6 +134,169 @@ export const generateQuestions = asyncHandler(async (req, res) => {
         level: level,
         noOfQuestions: parseInt(noOfQuestions),
         type: type,
+        questions: {
+          create: object.questions.map((que, index) => ({
+            questionText: que,
+            order: index + 1,
+          })),
+        },
+      },
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { interviewId: createdInterview.interviewId },
+          "Interview questions generated successfully"
+        )
+      );
+  } catch (error) {
+    console.error("AI service failed to generate questions:", error);
+
+    return res
+      .status(402)
+      .json(
+        new ApiResponse(
+          402,
+          "AI service unavailable. Returning fallback questions."
+        )
+      );
+  }
+});
+
+export const generatePersonalisedQuestions = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json(new ApiResponse(401, "userId is required to generate questions."));
+  }
+  const isUserPresent = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!isUserPresent) {
+    return res.status(402).json(new ApiResponse(402, "userId does not exist."));
+  }
+  
+  const { resumeId, noOfQuestions = 4 } = req.body;
+
+  if (!resumeId) {
+    console.error("Resume ID is required to generate Personalised interview");
+
+    return res
+      .status(407)
+      .json(
+        new ApiResponse(
+          407,
+          "Resume ID is required to generate Personalised interview"
+        )
+      );
+  }
+
+  const resume = await prisma.resume.findUnique({
+    where: { id: resumeId },
+    include: { ResumeAnalysis: true },
+  });
+
+  if (!resume || !resume.ResumeAnalysis?.analysis) {
+    console.error("Resume Not found to generate Personalised interview");
+
+    return res
+      .status(404)
+      .json(
+        new ApiResponse(
+          404,
+          "Resume Not found to generate Personalised interview"
+        )
+      );
+  }
+
+  // Zod schema: array of question strings
+  const InterviewQuestionsSchema = z.object({
+    title: z
+      .string()
+      .min(5)
+      .describe(
+        "A short, professional title for the interview based on the resume and role."
+      ),
+    questions: z
+      .array(z.string().describe("An interview question text."))
+      .min(1)
+      .describe(`An array of ${noOfQuestions} interview questions.`),
+  });
+
+  // const ResumeAnalysis = resume.ResumeAnalysis.analysis;
+  try {
+    let prompt = `You are interviewing a candidate based ONLY on the resume analysis provided. 
+      Your task is to generate:
+
+      1. A **short interview title** (max 7 words) based on their stack and seniority.
+      2. Exactly ${noOfQuestions} **high-depth, extremely technical, personalized interview questions**.
+
+      ### Mandatory Rules (strictly follow):
+      - Every question MUST reference: **their real tech stack, real projects, or real missing skills**
+      - Minimum 1 of questions must mention a **specific project, tool, database, or architecture choice from their resume**
+      - At least 2 questions must target their **missing skills**: ${resume.ResumeAnalysis.analysis?.missingKeywords.join(
+            ", "
+          )}
+      - Avoid generic questions unless rewritten to include their own stack or project context
+      - Questions must evaluate: **system design, edge cases, tradeoffs, scalability, failure handling, performance, security, or debugging**
+      - No basic theory questions (e.g., "What is Node.js?" ❌)
+      - No numbering, no answers
+
+      ---
+
+      ### Candidate Details You MUST Use:
+      **Tech Stack:**  
+      Languages: ${resume.ResumeAnalysis.analysis?.skills.languages.join(", ")}  
+      Frameworks: ${resume.ResumeAnalysis.analysis?.skills.frameworksAndLibraries.join(
+            ", "
+          )}  
+      Databases: ${resume.ResumeAnalysis.analysis?.skills.databases.join(", ")}  
+      Tools/Platforms: ${resume.ResumeAnalysis.analysis?.skills.toolsAndPlatforms.join(
+            ", "
+          )}
+
+      **Projects:**  
+      ${resume.ResumeAnalysis.analysis?.projects
+        .map((p) => `- ${p.name}: ${p.description}`)
+        .join("\n")}
+
+      **Missing Skills to Test:**  
+      ${resume.ResumeAnalysis.analysis?.missingKeywords.join(", ")}
+
+      **Strong Keywords Found:**  
+      ${resume.ResumeAnalysis.analysis?.matchingKeywords.slice(0, 15).join(", ")}
+
+      ---
+
+      ### Output Format (JSON enforced by schema):
+      {
+        "title": "Example Title",
+        "questions": ["question1", "question2", ...]
+      }
+      `;
+
+    // Generate and validate AI response
+    const { object } = await generateObject({
+      model: google("gemini-2.5-flash"),
+      schema: InterviewQuestionsSchema,
+      prompt,
+    });
+
+    console.log("AI Generated Questions:", object.questions);
+
+    const createdInterview = await prisma.interview.create({
+      data: {
+        userId: userId,
+        role: object.title,
+        noOfQuestions: parseInt(noOfQuestions),
         questions: {
           create: object.questions.map((que, index) => ({
             questionText: que,

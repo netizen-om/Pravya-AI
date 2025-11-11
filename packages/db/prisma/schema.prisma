@@ -60,8 +60,9 @@ model Interview {
   updatedAt           DateTime          @updatedAt
   createdAt           DateTime          @default(now())
   isDeleted           Boolean           @default(false)
-  interviewTemplateId String
-  template            InterviewTemplate @relation(fields: [interviewTemplateId], references: [interviewTemplateId])
+
+  interviewTemplateId  String?
+  template             InterviewTemplate? @relation(fields: [interviewTemplateId], references: [interviewTemplateId])
 
   questions Question[]
   feedback  Feedback?
