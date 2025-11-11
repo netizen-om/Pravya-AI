@@ -40,7 +40,7 @@ export function FAQSection() {
   ]
 
   return (
-    <section id="faq" className="relative overflow-hidden pb-120 pt-24 mb-56">
+    <section id="faq" className="relative overflow-hidden pb-120 pt-24 mb-35">
       {/* Background blur effects */}
       <div className="bg-primary/20 absolute top-1/2 -right-20 z-[-1] h-64 w-64 rounded-full opacity-80 blur-3xl"></div>
       <div className="bg-primary/20 absolute top-1/2 -left-20 z-[-1] h-64 w-64 rounded-full opacity-80 blur-3xl"></div>

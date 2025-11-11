@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Mic, Sparkles, X, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Mic, Sparkles, X, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Sample resume data with images
 const RESUMES = [
@@ -30,20 +37,23 @@ const RESUMES = [
     name: "Data_Scientist_Final.pdf",
     image: "/data-scientist-resume.jpg",
   },
-]
+];
 
 export function PersonalisedInterviewDialog() {
-  const [selectedResume, setSelectedResume] = useState<string>("")
-  const [open, setOpen] = useState(false)
-  const [fullscreenResume, setFullscreenResume] = useState<string | null>(null)
+  const [selectedResume, setSelectedResume] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  const [fullscreenResume, setFullscreenResume] = useState<string | null>(null);
+  const [questionCount, setQuestionCount] = useState<number>(4);
 
   const handleGenerate = () => {
     if (selectedResume) {
-      console.log("Starting interview with resume:", selectedResume)
-      setOpen(false)
-      setSelectedResume("")
+      console.log("Starting interview with resume:", selectedResume);
+      console.log("Number of questions:", questionCount);
+      setOpen(false);
+      setSelectedResume("");
+      setQuestionCount(4);
     }
-  }
+  };
 
   return (
     <>
@@ -59,9 +69,34 @@ export function PersonalisedInterviewDialog() {
           <DialogHeader>
             <DialogTitle>Create Personalised Interview</DialogTitle>
             <DialogDescription>
-              Select one of your uploaded resumes, and Pravya AI will tailor questions based on its content.
+              Select one of your uploaded resumes, choose how many questions you
+              want, and Pravya AI will tailor the interview.
             </DialogDescription>
           </DialogHeader>
+
+          {/* Question Count Dropdown */}
+          {/* Question Count Dropdown (ShadCN) */}
+          <div className="mt-2">
+            <label className="text-sm font-medium mb-2 block">
+              Number of Questions
+            </label>
+
+            <Select
+              value={String(questionCount)}
+              onValueChange={(value) => setQuestionCount(Number(value))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select number of questions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="4">4 Questions</SelectItem>
+                <SelectItem value="5">5 Questions</SelectItem>
+                <SelectItem value="6">6 Questions</SelectItem>
+                <SelectItem value="7">7 Questions</SelectItem>
+                <SelectItem value="8">8 Questions</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Resume selection list */}
           <div className="py-4 space-y-2 max-h-[60vh] overflow-y-auto">
@@ -75,7 +110,6 @@ export function PersonalisedInterviewDialog() {
                     : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
                 }`}
               >
-                {/* Selection indicator */}
                 <div
                   className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
                     selectedResume === resume.id
@@ -88,7 +122,6 @@ export function PersonalisedInterviewDialog() {
                   )}
                 </div>
 
-                {/* Resume preview */}
                 <img
                   src={resume.image || "/placeholder.svg"}
                   alt={resume.name}
@@ -99,17 +132,18 @@ export function PersonalisedInterviewDialog() {
                   <p className="text-sm font-medium truncate">{resume.name}</p>
                 </div>
 
-                {/* 👇 Changed from <button> to <div role="button"> */}
                 <div
                   onClick={(e) => {
-                    e.stopPropagation()
-                    setFullscreenResume(resume.image)
+                    e.stopPropagation();
+                    setFullscreenResume(resume.image);
                   }}
                   className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors flex-shrink-0 cursor-pointer"
                   role="button"
                   tabIndex={0}
                   aria-label="View resume"
-                  onKeyDown={(e) => e.key === "Enter" && setFullscreenResume(resume.image)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && setFullscreenResume(resume.image)
+                  }
                 >
                   <Eye className="w-4 h-4" />
                 </div>
@@ -119,7 +153,6 @@ export function PersonalisedInterviewDialog() {
 
           <DialogFooter>
             <Button
-              type="submit"
               className="gap-2 dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white"
               onClick={handleGenerate}
               disabled={!selectedResume}
@@ -150,5 +183,5 @@ export function PersonalisedInterviewDialog() {
         </div>
       )}
     </>
-  )
+  );
 }

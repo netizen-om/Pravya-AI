@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 const pricingPlans = [
@@ -160,17 +161,19 @@ export function PricingSection() {
               </div>
 
               {/* CTA Button at bottom */}
+              <Link href={"/subscriptions"}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 mt-auto ${
                   plan.popular
-                    ? "bg-white text-black shadow-lg shadow-white/25 hover:shadow-white/40 hover:bg-white/90"
-                    : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
-                }`}
-              >
+                  ? "bg-white text-black shadow-lg shadow-white/25 hover:shadow-white/40 hover:bg-white/90"
+                  : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                  }`}
+                  >
                 {plan.cta}
               </motion.button>
+                </Link>
             </motion.div>
           ))}
         </div>

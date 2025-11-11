@@ -47,6 +47,13 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+enum InterviewStatus {
+  PENDING
+  COMPLETED
+  INCOMPLETE
+  ERROR
+}
+
 model Interview {
   interviewId         String            @id @default(cuid())
   userId              String
@@ -56,7 +63,7 @@ model Interview {
   transcribe          Json?
   noOfQuestions       Int
   type                String?
-  status              String            @default("pending")
+  status              InterviewStatus   @default(PENDING)
   updatedAt           DateTime          @updatedAt
   createdAt           DateTime          @default(now())
   isDeleted           Boolean           @default(false)

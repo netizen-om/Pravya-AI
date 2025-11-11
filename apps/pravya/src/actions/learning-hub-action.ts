@@ -101,7 +101,12 @@ export async function getLearningHubQuestions(
 
     // Fetch questions with related data
     const questions = await prisma.question.findMany({
-      where,
+      where: {
+        ...where,
+        interview: {
+          interviewTemplateId: { not: null }, // ✅ Exclude interviews without a template
+        },
+      },
       include: {
         interview: {
           include: {
@@ -170,7 +175,9 @@ export async function getLearningHubQuestions(
           .filter((subCat) => {
             // Check if any template has interviews with questions
             return subCat.templates.some((template) =>
-              template.Interview.some((interview) => interview.questions.length > 0)
+              template.Interview.some(
+                (interview) => interview.questions.length > 0
+              )
             );
           })
           .map((subCat) => ({
@@ -265,13 +272,13 @@ export async function getAIAnswer(questionId: string): Promise<{
       // So: data.message contains the answer, data.data contains the status message
       let answer: string | null = null;
       let errorMessage: string = "Failed to generate AI answer";
-      
+
       if (data.success) {
         // The answer is in the message field (longer string)
         // The status message is in the data field (shorter string)
-        const messageStr = typeof data.message === 'string' ? data.message : '';
-        const dataStr = typeof data.data === 'string' ? data.data : '';
-        
+        const messageStr = typeof data.message === "string" ? data.message : "";
+        const dataStr = typeof data.data === "string" ? data.data : "";
+
         // Use the longer string as the answer (answers are typically longer than status messages)
         if (messageStr.length > dataStr.length && messageStr.length > 50) {
           answer = messageStr;
@@ -282,7 +289,7 @@ export async function getAIAnswer(questionId: string): Promise<{
         } else if (dataStr.length > 50) {
           answer = dataStr;
         }
-        
+
         // Get error message from the shorter string if answer not found
         if (!answer) {
           errorMessage = messageStr || dataStr || errorMessage;
@@ -323,4 +330,3 @@ export async function getAIAnswer(questionId: string): Promise<{
     };
   }
 }
-
