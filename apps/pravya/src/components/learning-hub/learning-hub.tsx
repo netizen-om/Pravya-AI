@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, FileQuestion } from "lucide-react";
+import { Search, Filter, FileQuestion, Hash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,89 +27,68 @@ import {
 } from "@/components/ui/command";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QuestionCard } from "./question-card";
-
-const MOCK_QUESTIONS = [
-  {
-    id: 1,
-    questionText:
-      "What is the difference between useState and useReducer in React?",
-    category: "Frontend",
-    tags: ["React", "Hooks"],
-  },
-  {
-    id: 2,
-    questionText: "How do you implement server-side rendering in Next.js?",
-    category: "Backend",
-    tags: ["Next.js", "SSR"],
-  },
-  {
-    id: 3,
-    questionText: "Explain the concept of closures in JavaScript",
-    category: "Frontend",
-    tags: ["JavaScript", "Fundamentals"],
-  },
-  {
-    id: 4,
-    questionText: "What is the purpose of middleware in Express.js?",
-    category: "Backend",
-    tags: ["Node.js", "Express"],
-  },
-  {
-    id: 5,
-    questionText: "How do you optimize bundle size in a React application?",
-    category: "Frontend",
-    tags: ["React", "Performance"],
-  },
-];
-
-const CATEGORIES = [
-  "Frontend",
-  "Backend",
-  "System Design",
-  "Database",
-  "DevOps",
-];
-const TAGS = [
-  "React",
-  "Node.js",
-  "JavaScript",
-  "TypeScript",
-  "Next.js",
-  "Performance",
-];
+import { getLearningHubQuestions, type LearningHubQuestion, type MainCategory } from "@/actions/learning-hub-action";
 
 export function LearningHubPage() {
-  const [questions, setQuestions] = useState<typeof MOCK_QUESTIONS>([]);
+  const [questions, setQuestions] = useState<LearningHubQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages] = useState(3);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [tagSearch, setTagSearch] = useState("");
+  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
+  const [mainCategories, setMainCategories] = useState<MainCategory[]>([]);
+  const [availableSubCategories, setAvailableSubCategories] = useState<{ subCategoryId: string; name: string }[]>([]);
+
+  // Update available subcategories when main category changes
+  useEffect(() => {
+    if (selectedMainCategory) {
+      const mainCat = mainCategories.find(cat => cat.mainCategoryId === selectedMainCategory);
+      if (mainCat) {
+        setAvailableSubCategories(mainCat.subCategories);
+      } else {
+        setAvailableSubCategories([]);
+      }
+      // Reset subcategory when main category changes
+      setSelectedSubCategory(null);
+    } else {
+      setAvailableSubCategories([]);
+      setSelectedSubCategory(null);
+    }
+  }, [selectedMainCategory, mainCategories]);
 
   useEffect(() => {
-    setIsLoading(true);
+    const fetchQuestions = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getLearningHubQuestions({
+          searchTerm: searchTerm || undefined,
+          tagSearch: tagSearch || undefined,
+          mainCategoryId: selectedMainCategory || undefined,
+          subCategoryId: selectedSubCategory || undefined,
+          page: currentPage,
+          pageSize: 10,
+        });
+        
+        setQuestions(result.questions);
+        setTotalPages(result.totalPages);
+        setMainCategories(result.mainCategories);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+        setQuestions([]);
+        setTotalPages(0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     const timer = setTimeout(() => {
-      let filtered = MOCK_QUESTIONS;
-
-      if (searchTerm) {
-        filtered = filtered.filter((q) =>
-          q.questionText.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-      if (selectedCategory) {
-        filtered = filtered.filter((q) => q.category === selectedCategory);
-      }
-      if (selectedTag) {
-        filtered = filtered.filter((q) => q.tags.includes(selectedTag));
-      }
-
-      setQuestions(filtered);
-      setIsLoading(false);
-    }, 800);
+      fetchQuestions();
+    }, (searchTerm || tagSearch) ? 500 : 0); // Debounce search
 
     return () => clearTimeout(timer);
-  }, [currentPage, searchTerm, selectedCategory, selectedTag]);
+  }, [currentPage, searchTerm, tagSearch, selectedMainCategory, selectedSubCategory]);
 
   return (
     <motion.div
@@ -130,90 +109,124 @@ export function LearningHubPage() {
         </div>
 
         {/* Filter Bar */}
-        <div className="mb-8 flex flex-col gap-3 md:flex-row">
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by question text..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10 h-11"
-            />
+        <div className="mb-8 space-y-4">
+          {/* Search Inputs */}
+          <div className="flex flex-col gap-3 md:flex-row">
+            {/* Question Text Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by question text..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-10 h-11"
+              />
+            </div>
+
+            {/* Tag Search */}
+            <div className="relative flex-1">
+              <Hash className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by tags..."
+                value={tagSearch}
+                onChange={(e) => {
+                  setTagSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-10 h-11"
+              />
+            </div>
           </div>
 
-          {/* Category Filter */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-11 w-full md:w-auto bg-transparent"
-              >
-                <Filter className="mr-2 h-4 w-4" />
-                {selectedCategory || "Category"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56 p-0">
-              <Command>
-                <CommandInput placeholder="Search category..." />
-                <CommandGroup>
-                  <CommandItem onSelect={() => setSelectedCategory(null)}>
-                    All Categories
-                  </CommandItem>
-                  {CATEGORIES.map((category) => (
-                    <CommandItem
-                      key={category}
-                      onSelect={() => {
-                        setSelectedCategory(
-                          category === selectedCategory ? null : category
-                        );
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {category}
+          {/* Category Filters */}
+          <div className="flex flex-col gap-3 md:flex-row">
+            {/* Main Category Filter */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-11 w-full md:w-auto bg-transparent"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  {selectedMainCategory 
+                    ? mainCategories.find(cat => cat.mainCategoryId === selectedMainCategory)?.name || "Main Category"
+                    : "Main Category"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-0">
+                <Command>
+                  <CommandInput placeholder="Search main category..." />
+                  <CommandGroup>
+                    <CommandItem onSelect={() => {
+                      setSelectedMainCategory(null);
+                      setSelectedSubCategory(null);
+                      setCurrentPage(1);
+                    }}>
+                      All Main Categories
                     </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                    {mainCategories.map((category) => (
+                      <CommandItem
+                        key={category.mainCategoryId}
+                        onSelect={() => {
+                          setSelectedMainCategory(
+                            category.mainCategoryId === selectedMainCategory ? null : category.mainCategoryId
+                          );
+                          setCurrentPage(1);
+                        }}
+                      >
+                        {category.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-          {/* Tag Filter */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-11 w-full md:w-auto bg-transparent"
-              >
-                <Filter className="mr-2 h-4 w-4" />
-                {selectedTag || "Tag"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56 p-0">
-              <Command>
-                <CommandInput placeholder="Search tag..." />
-                <CommandGroup>
-                  <CommandItem onSelect={() => setSelectedTag(null)}>
-                    All Tags
-                  </CommandItem>
-                  {TAGS.map((tag) => (
-                    <CommandItem
-                      key={tag}
-                      onSelect={() => {
-                        setSelectedTag(tag === selectedTag ? null : tag);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {tag}
+            {/* Sub Category Filter */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-11 w-full md:w-auto bg-transparent"
+                  disabled={!selectedMainCategory}
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  {selectedSubCategory 
+                    ? availableSubCategories.find(sub => sub.subCategoryId === selectedSubCategory)?.name || "Sub Category"
+                    : "Sub Category"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-0">
+                <Command>
+                  <CommandInput placeholder="Search sub category..." />
+                  <CommandGroup>
+                    <CommandItem onSelect={() => {
+                      setSelectedSubCategory(null);
+                      setCurrentPage(1);
+                    }}>
+                      All Sub Categories
                     </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                    {availableSubCategories.map((subCategory) => (
+                      <CommandItem
+                        key={subCategory.subCategoryId}
+                        onSelect={() => {
+                          setSelectedSubCategory(
+                            subCategory.subCategoryId === selectedSubCategory ? null : subCategory.subCategoryId
+                          );
+                          setCurrentPage(1);
+                        }}
+                      >
+                        {subCategory.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         {/* Question List */}
