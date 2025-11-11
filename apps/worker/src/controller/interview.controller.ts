@@ -5,6 +5,52 @@ import ApiResponse from "../utils/ApiResponse";
 import { prisma } from "../lib/prisma";
 import { google } from "../lib/googleForAISDK";
 
+export const generateAiAnswer = asyncHandler(async (req, res) => {
+  const { questionId } = req.body;
+
+  // 3. Find question
+  const question = await prisma.question.findUnique({
+    where: { questionId },
+  });
+
+  if (!question) {
+    return res.status(404).json(new ApiResponse(404, "Question not found."));
+  }
+
+  // 4. If AI answer already exists, return it
+  if (question.AIanswer) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "AI answer already exists.", question.AIanswer));
+  }
+
+  // 5. Define Zod schema for AI response
+  const answerSchema = z.object({
+    answer: z.string().min(10),
+  });
+
+  // 6. Generate AI Answer using AI SDK
+  const aiResponse = await generateObject({
+    model: google("gemini-2.0-flash"),
+    schema: answerSchema,
+    prompt: `You are an expert interview assistant. Answer the following question in a professional and concise manner.\n\nQuestion: ${question.questionText}`,
+  });
+
+  const aiAnswer = aiResponse.object.answer;
+
+  // 7. Save AI answer in DB
+  const updatedQuestion = await prisma.question.update({
+    where: { questionId },
+    data: { AIanswer: aiAnswer },
+  });
+
+  // 8. Respond
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "AI answer generated successfully.",  updatedQuestion.AIanswer));
+});
+
+
 export const generateQuestions = asyncHandler(async (req, res) => {
   const { userId } = req.body;
 
@@ -79,7 +125,6 @@ export const generateQuestions = asyncHandler(async (req, res) => {
         role: title,
         interviewTemplateId: interviewTemplateId,
         level: level,
-        techStack: [],
         noOfQuestions: parseInt(noOfQuestions),
         type: type,
         questions: {

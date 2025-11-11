@@ -17,9 +17,6 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  Download,
-  Trash2,
-  View,
   Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -824,16 +821,15 @@ export default function ResumeUploadPage() {
                           <Eye className="w-4 h-4" />
                         </Button>
                         {getOverallStatus(resume) === "completed" && (
+                          <Link href={`/resume/chat/${resume.id}`}>
                           <Button
-                            onClick={() =>
-                              (window.location.href = `/resume/chat/${resume.id}`)
-                            }
                             variant="ghost"
                             // ADDED light-mode classes, prefixed dark-mode classes
                             className="text-zinc-900 bg-white hover:bg-zinc-100 border border-zinc-200 shadow-sm transition-all duration-300 ease-in-out transform dark:text-silver-300 dark:text-black dark:bg-white dark:hover:bg-zinc-300 dark:hover:text-black dark:shadow-lg dark:shadow-silver-500/20 dark:border dark:border-silver-600/30"
                           >
                             Chat
                           </Button>
+                          </Link>
                         )}
                       </div>
                     </div>

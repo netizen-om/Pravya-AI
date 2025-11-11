@@ -74,6 +74,7 @@ model Question {
   interview   Interview @relation(fields: [interviewId], references: [interviewId])
 
   questionText String
+  AIanswer  String?
   order        Int
   createdAt    DateTime @default(now())
 }
