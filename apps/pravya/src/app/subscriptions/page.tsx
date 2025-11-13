@@ -1,8 +1,10 @@
 "use client";
 
+import Loader from "@/components/loader/loader";
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const pricingPlans = [
   {
@@ -32,16 +34,48 @@ const pricingPlans = [
       "Priority AI feedback & support",
     ],
     popular: true,
-    cta: "Start Free Trial",
+    cta: "Buy Now",
   },
 ];
 
 export default function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.message || "Something went wrong");
+      }
+    } catch (err) {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if(isLoading) {
+    return (
+      <Loader title="" />
+    )
+  }
 
   return (
     <section className="relative py-10 px-4 bg-white dark:bg-neutral-950 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -172,13 +206,15 @@ export default function PricingSection() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={plan.popular ? handleSubmit : undefined}
+                disabled={isLoading && plan.popular}
                 className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 mt-auto ${
                   plan.popular
                     ? "bg-black text-white dark:bg-white dark:text-black shadow-md hover:opacity-90"
                     : "bg-black/5 dark:bg-white/10 text-black dark:text-white border border-black/10 dark:border-white/20 hover:bg-black/10 dark:hover:bg-white/20"
                 }`}
               >
-                {plan.cta}
+                {plan.popular && isLoading ? "Processing..." : plan.cta}
               </motion.button>
             </motion.div>
           ))}
@@ -192,13 +228,13 @@ export default function PricingSection() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-16"
         >
-          <p className="text-black/60 dark:text-white/60 mb-4">
+          <p className="text-black/60 dark:text:white/60 mb-4">
             Need a custom solution? We're here to help.
           </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="text-black dark:text-white hover:opacity-80 font-medium transition-colors"
+            className="text-black dark:text:white hover:opacity-80 font-medium transition-colors"
           >
             Contact our sales team →
           </motion.button>

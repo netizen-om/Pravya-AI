@@ -1,13 +1,8 @@
+import { dodopayments } from "@/lib/dodopayments";
 import { authOptions } from "@repo/auth";
 import { prisma } from "@repo/db";
-import DodoPayments from "dodopayments";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-
-const dodopayments = new DodoPayments({
-  environment: "test_mode",
-  bearerToken: process.env.DODOPAYMENTS_API_KEY!,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,7 +44,7 @@ export async function POST(req: NextRequest) {
         "upi_intent",
       ],
 
-      return_url: "http://localhost:3000/",
+      return_url: "http://localhost:3000/dashboard",
     });
 
     return NextResponse.json({
