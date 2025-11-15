@@ -121,19 +121,35 @@ model InterviewAudio {
   audioUrl   String
 }
 
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
 model Payment {
   paymentId         String   @id @default(uuid())
   createdAt         DateTime @default(now())
-  userId            String
-  amount            Int
-  paymentMethod     String
-  razorpayOrderId   String
-  razorpayPaymentId String
-  metadata          Json?
-  currency          String   @default("INR")
 
-  user User @relation(fields: [userId], references: [id])
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+
+  amount            Int
+  currency          String   @default("INR")
+  paymentMethod     String?
+
+  status            PaymentStatus @default(PENDING)
+
+  dodoOrderId       String?  @unique
+  dodoPaymentId     String?  @unique
+  dodoSignature     String?
+
+  metadata          Json?
+
+  @@index([userId])
 }
+
 
 model Resume {
   id     String @id @default(cuid())
