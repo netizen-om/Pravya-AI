@@ -29,6 +29,13 @@ model User {
   subscription   Subscription?
 }
 
+model WebhookEvent {
+  id       String @id @default(cuid())
+  eventId  String @unique
+  type     String
+  receivedAt DateTime @default(now())
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
