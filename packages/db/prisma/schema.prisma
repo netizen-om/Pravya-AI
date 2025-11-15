@@ -153,15 +153,16 @@ model Payment {
 }
 
 model Subscription {
-  subscriptionId String @id @default(cuid())
+  subscriptionId     String   @id @default(cuid())
+  dodoSubscriptionId String?  @unique
 
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  userId String  @unique
+  user   User    @relation(fields: [userId], references: [id])
 
-  plan      String   @default("monthly") // monthly / yearly
-  status    String   @default("ACTIVE") // ACTIVE / CANCELLED / EXPIRED
+  plan      String   @default("monthly")
+  status    String   @default("ACTIVE")
   startDate DateTime @default(now())
-  endDate   DateTime // calculated: startDate + 30 days
+  endDate   DateTime
 
   lastPaymentId String?
   lastPayment   Payment? @relation(fields: [lastPaymentId], references: [paymentId])
@@ -169,6 +170,7 @@ model Subscription {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 
 model Resume {
   id     String @id @default(cuid())
