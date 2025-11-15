@@ -63,11 +63,6 @@ export async function POST(req: NextRequest) {
         // Handle subscription cancellation
         break;
 
-      case "subscription.updated":
-        console.log("Subscription updated:", payload.data);
-        // Handle subscription update
-        break;
-
       default:
         console.log("Unhandled webhook event:", payload.type);
     }

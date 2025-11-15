@@ -26,6 +26,7 @@ model User {
   payment        Payment[]
   Resume         Resume[]
   userActivities UserActivity[]
+  subscription   Subscription?
 }
 
 model Account {
@@ -55,21 +56,21 @@ enum InterviewStatus {
 }
 
 model Interview {
-  interviewId         String            @id @default(cuid())
-  userId              String
-  user                User              @relation(fields: [userId], references: [id]) // changed to reference id
-  role                String?
-  level               String?
-  transcribe          Json?
-  noOfQuestions       Int
-  type                String?
-  status              InterviewStatus   @default(PENDING)
-  updatedAt           DateTime          @updatedAt
-  createdAt           DateTime          @default(now())
-  isDeleted           Boolean           @default(false)
+  interviewId   String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id]) // changed to reference id
+  role          String?
+  level         String?
+  transcribe    Json?
+  noOfQuestions Int
+  type          String?
+  status        InterviewStatus @default(PENDING)
+  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
+  isDeleted     Boolean         @default(false)
 
-  interviewTemplateId  String?
-  template             InterviewTemplate? @relation(fields: [interviewTemplateId], references: [interviewTemplateId])
+  interviewTemplateId String?
+  template            InterviewTemplate? @relation(fields: [interviewTemplateId], references: [interviewTemplateId])
 
   questions Question[]
   feedback  Feedback?
@@ -82,7 +83,7 @@ model Question {
   interview   Interview @relation(fields: [interviewId], references: [interviewId])
 
   questionText String
-  AIanswer  String?
+  AIanswer     String?
   order        Int
   createdAt    DateTime @default(now())
 }
@@ -129,27 +130,45 @@ enum PaymentStatus {
 }
 
 model Payment {
-  paymentId         String   @id @default(uuid())
-  createdAt         DateTime @default(now())
+  paymentId String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  userId            String
-  user              User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  amount            Int
-  currency          String   @default("INR")
-  paymentMethod     String?
+  amount        Int
+  currency      String  @default("INR")
+  paymentMethod String?
 
-  status            PaymentStatus @default(PENDING)
+  status PaymentStatus @default(PENDING)
 
-  dodoOrderId       String?  @unique
-  dodoPaymentId     String?  @unique
-  dodoSignature     String?
+  dodoOrderId   String? @unique
+  dodoPaymentId String? @unique
+  dodoSignature String?
 
-  metadata          Json?
+  metadata      Json?
+  subscriptions Subscription[]
 
   @@index([userId])
 }
 
+model Subscription {
+  subscriptionId String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  plan      String   @default("monthly") // monthly / yearly
+  status    String   @default("ACTIVE") // ACTIVE / CANCELLED / EXPIRED
+  startDate DateTime @default(now())
+  endDate   DateTime // calculated: startDate + 30 days
+
+  lastPaymentId String?
+  lastPayment   Payment? @relation(fields: [lastPaymentId], references: [paymentId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 model Resume {
   id     String @id @default(cuid())
