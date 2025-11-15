@@ -84,7 +84,7 @@ export function StartSessionDialog({
       };
 
       const apiPromise = axios.post(
-        "http://localhost:8000/api/v1/interview/questions/generate",
+        `${process.env.WORKER_URL}/api/v1/interview/questions/generate`,
         body
       );
 

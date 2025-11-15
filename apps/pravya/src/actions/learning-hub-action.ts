@@ -251,7 +251,7 @@ export async function getAIAnswer(questionId: string): Promise<{
     // If answer doesn't exist, call the API
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/interview/questions/get-ai-answer",
+        `${process.env.WORKER_URL}/api/v1/interview/questions/get-ai-answer`,
         {
           method: "POST",
           headers: {

@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         "upi_intent",
       ],
 
-      return_url: "http://localhost:3000/dashboard",
+      return_url: `${process.env.NEXTAUTH_URL}/dashboard`,
     });
 
     return NextResponse.json({
