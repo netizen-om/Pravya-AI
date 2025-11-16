@@ -8,7 +8,8 @@
     "dev:pravya" : "pnpm -F @repo/pravya run dev",
     "dev:ws-server" : "pnpm -F @repo/ws-server run dev",
     "dev:worker" : "pnpm -F @repo/worker run dev",
-    "dev:admin" : "pnpm -F @repo/admin run dev"
+    "dev:admin" : "pnpm -F @repo/admin run dev",
+    "ngrok" : "ngrok http 3000 --domain=throbbingly-lappeted-anja.ngrok-free.dev"
   },
   "keywords": [],
   "author": "",

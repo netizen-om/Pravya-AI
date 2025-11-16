@@ -77,17 +77,3 @@ export async function cancelSubscription() {
 
   return { success: true };
 }
-
-/* ----------------------------------------------
-   3) START CHECKOUT (Dodo Payments)
----------------------------------------------- */
-export async function startCheckout(plan: string, billing: string) {
-  const user = await getUser();
-  if (!user) return { error: "Unauthorized" };
-
-  // TODO — Replace with your Dodo payments checkout call
-  // I’ll give a working mock structure:
-  const checkoutUrl = `https://checkout.dodopayments.com/session?plan=${plan}&billing=${billing}&user=${user.id}`;
-
-  return { url: checkoutUrl };
-}
