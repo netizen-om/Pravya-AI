@@ -12,18 +12,22 @@ import {
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Send, Copy, Menu } from "lucide-react";
+import { ArrowLeft, Send, Copy, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 interface Message {
   id: string;
   type: "user" | "bot";
   content: string;
   timestamp: Date;
+  latency?: number;
+  isStreaming?: boolean;
 }
 
 interface Conversation {
@@ -57,11 +61,16 @@ const smartPrompts = [
 
 export default function ResumeChatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash"); // default value
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatusIndex, setCurrentStatusIndex] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isStreamingActive, setIsStreamingActive] = useState(false);
+  const [streamingContent, setStreamingContent] = useState<{
+    [key: string]: string;
+  }>({});
+  const [mounted, setMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { id: resumeId } = useParams<{ id: string }>();
@@ -69,13 +78,19 @@ export default function ResumeChatbot() {
   const [atsScore, setAtsScore] = useState<number>(0);
   const [isDetailsLoading, setIsDetailsLoading] = useState<boolean>(false);
 
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingContent]);
 
   useEffect(() => {
     if (!isLoading) return;
@@ -121,6 +136,26 @@ export default function ResumeChatbot() {
     fetchResumeDetails();
   }, [resumeId]);
 
+  const streamText = async (
+    messageId: string,
+    fullText: string,
+    onComplete: () => void
+  ) => {
+    let displayedText = "";
+    const delay = 6;
+
+    for (let i = 0; i < fullText.length; i++) {
+      displayedText += fullText[i];
+      setStreamingContent((prev) => ({
+        ...prev,
+        [messageId]: displayedText,
+      }));
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+
+    onComplete();
+  };
+
   const handleSend = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
     if (!textToSend || isLoading) return;
@@ -138,9 +173,11 @@ export default function ResumeChatbot() {
     setIsLoading(true);
     setCurrentStatusIndex(0);
 
+    const startTime = Date.now();
+
     try {
       const res = await fetch(
-        `${process.env.WORKER_URL}/api/v1/resume/chat/${resumeId}`,
+        `${process.env.NEXT_PUBLIC_WORKER_URL}/api/v1/resume/chat/${resumeId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -155,16 +192,38 @@ export default function ResumeChatbot() {
       const answer: string =
         data?.answer ?? "I'm sorry, I couldn't generate a response.";
 
+      const latency = Date.now() - startTime;
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
         content: answer,
         timestamp: new Date(),
+        latency,
+        isStreaming: true,
       };
 
       setMessages((prev) => [...prev, botMessage]);
+
+      setIsStreamingActive(true);
+      await streamText(botMessage.id, answer, () => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === botMessage.id ? { ...msg, isStreaming: false } : msg
+          )
+        );
+
+        setStreamingContent((prev) => {
+          const newContent = { ...prev };
+          delete newContent[botMessage.id];
+          return newContent;
+        });
+
+        setIsStreamingActive(false); // STOP status messages
+      });
     } catch (error) {
       console.error("Error sending message:", error);
+      toast.error("Failed to send message");
     } finally {
       setIsLoading(false);
     }
@@ -178,34 +237,63 @@ export default function ResumeChatbot() {
   };
 
   const copyToClipboard = (text: string) => {
-    toast.success("Text copyed to clickboard");
+    toast.success("Copied to clipboard");
     navigator.clipboard.writeText(text);
   };
 
+  const formatLatency = (ms: number) => {
+    if (ms < 1000) return `${ms}ms`;
+    return `${(ms / 1000).toFixed(1)}s`;
+  };
+
+  if (!mounted) return null;
+
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      <header className="sticky top-0 z-10 bg-black">
+    <div
+      className={cn(
+        "h-screen flex flex-col bg-white dark:bg-neutral-950 text-neutral-950 dark:text-white transition-colors duration-300"
+      )}
+    >
+      {/* Header */}
+      <header
+        className={cn(
+          "flex-shrink-0 border-b transition-colors duration-300",
+          "border-neutral-200 dark:border-neutral-800"
+        )}
+      >
         <div className="relative flex items-center p-4">
-   
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-neutral-900"
+            className={cn(
+              "transition-colors",
+              "text-neutral-950 hover:bg-neutral-100 dark:text-white dark:hover:bg-neutral-900"
+            )}
             onClick={() => (window.location.href = "/dashboard")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
 
           <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
-            <h1 className="text-lg font-bold tracking-tight text-white">
-              Pravya AI
-            </h1>
-            <div className="w-16 h-px bg-gradient-to-r from-transparent via-neutral-400 to-transparent mt-1 shadow-sm shadow-neutral-400/20" />
+            <h1 className="text-lg font-bold tracking-tight">Pravya AI</h1>
+            <div
+              className={cn(
+                "w-16 h-px bg-gradient-to-r from-transparent via-neutral-400 to-transparent mt-1 shadow-sm",
+                "shadow-neutral-400/20 dark:shadow-neutral-400/20"
+              )}
+            />
           </div>
+
+          
         </div>
 
         <div className="px-4 pb-3">
-          <div className="flex items-center justify-between text-xs text-neutral-400 bg-neutral-950 rounded-lg px-3 py-2">
+          <div
+            className={cn(
+              "flex items-center justify-between text-xs rounded-lg px-3 py-2 transition-colors",
+              "text-neutral-600 bg-neutral-50 border border-neutral-200 dark:text-neutral-400 dark:bg-neutral-900 dark:border-neutral-800"
+            )}
+          >
             <span>
               Resume:{" "}
               {resumeName
@@ -222,11 +310,23 @@ export default function ResumeChatbot() {
                   style={{
                     background: `conic-gradient(from 0deg, #10b981 ${
                       atsScore * 3.6
-                    }deg, #374151 ${atsScore * 3.6}deg)`,
+                    }deg, ${theme === "dark" ? "#374151" : "#e5e7eb"} ${
+                      atsScore * 3.6
+                    }deg)`,
                   }}
                 />
-                <div className="absolute inset-0.5 bg-neutral-950 rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-medium text-white">
+                <div
+                  className={cn(
+                    "absolute inset-0.5 rounded-full flex items-center justify-center",
+                    "bg-white dark:bg-neutral-900"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium",
+                      "text-neutral-950 dark:text-white"
+                    )}
+                  >
                     {atsScore}
                   </span>
                 </div>
@@ -236,14 +336,13 @@ export default function ResumeChatbot() {
         </div>
       </header>
 
-      {/* Chat Area */}
       <main className="flex-1 overflow-y-auto">
         <AnimatePresence>
           {messages.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-6"
+              className="flex flex-col items-center justify-center min-h-full px-6"
             >
               <div className="text-center space-y-8 max-w-2xl w-full">
                 <motion.div
@@ -252,11 +351,21 @@ export default function ResumeChatbot() {
                   transition={{ delay: 0.2 }}
                   className="space-y-4"
                 >
-                  <h2 className="text-3xl font-bold tracking-tight text-white">
+                  <h2 className="text-3xl font-bold tracking-tight">
                     Pravya AI
                   </h2>
-                  <div className="w-20 h-px bg-gradient-to-r from-transparent via-neutral-400 to-transparent mx-auto shadow-sm shadow-neutral-400/20" />
-                  <p className="text-neutral-400 text-lg">
+                  <div
+                    className={cn(
+                      "w-20 h-px bg-gradient-to-r from-transparent via-neutral-400 to-transparent mx-auto shadow-sm",
+                      "shadow-neutral-400/20 dark:shadow-neutral-400/20"
+                    )}
+                  />
+                  <p
+                    className={cn(
+                      "text-lg",
+                      "text-neutral-600 dark:text-neutral-400"
+                    )}
+                  >
                     Ask anything about your resume.
                   </p>
                 </motion.div>
@@ -273,22 +382,36 @@ export default function ResumeChatbot() {
                       onChange={(e) => setInput(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Ask about your resume..."
-                      className="h-16 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-400 focus:ring-2 focus:ring-neutral-600 rounded-2xl px-6 text-base shadow-lg flex-1"
+                      className={cn(
+                        "h-16 rounded-2xl px-6 text-base shadow-lg flex-1 transition-colors",
+                        "bg-neutral-100 border-neutral-300 text-neutral-950 placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-400",
+                        "dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600"
+                      )}
                       disabled={isLoading}
                     />
                     <Button
                       onClick={() => handleSend()}
                       disabled={!input.trim() || isLoading}
-                      className="h-16 px-6 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 rounded-2xl shadow-lg font-medium"
+                      className={cn(
+                        "h-16 px-6 rounded-2xl shadow-lg font-medium transition-colors",
+                        "bg-neutral-950 text-white hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400",
+                        "dark:bg-white dark:text-black dark:hover:bg-neutral-200 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500"
+                      )}
                     >
                       <Send className="h-5 w-5" />
                     </Button>
                   </div>
 
-                  <div className="flex items-center justify-center space-x-6 text-xs text-neutral-500">
-                    <span>↵ Send</span>
-                    <span>⇧+↵ New line</span>
-                    <span>/ Commands</span>
+                  <div className="flex items-center justify-center space-x-3 text-xs">
+                    <span className="text-neutral-600 dark:text-neutral-500">
+                      <Kbd>↵</Kbd> Send
+                    </span>
+                    <span className="text-neutral-600 dark:text-neutral-500">
+                      <Kbd>⇧</Kbd> + <Kbd>↵</Kbd> New line
+                    </span>
+                    <span className="text-neutral-600 dark:text-neutral-500">
+                      <Kbd>/</Kbd> Commands
+                    </span>
                   </div>
                 </motion.div>
 
@@ -298,7 +421,14 @@ export default function ResumeChatbot() {
                   transition={{ delay: 0.6 }}
                   className="space-y-3"
                 >
-                  <p className="text-neutral-500 text-sm">Try asking:</p>
+                  <p
+                    className={cn(
+                      "text-sm",
+                      "text-neutral-600 dark:text-neutral-500"
+                    )}
+                  >
+                    Try asking:
+                  </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {smartPrompts.map((prompt, index) => (
                       <motion.button
@@ -306,7 +436,11 @@ export default function ResumeChatbot() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleSend(prompt)}
-                        className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-sm rounded-full border border-neutral-700 transition-colors"
+                        className={cn(
+                          "px-4 py-2 text-sm rounded-full border transition-colors",
+                          "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-300",
+                          "dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700"
+                        )}
                         disabled={isLoading}
                       >
                         {prompt}
@@ -333,10 +467,10 @@ export default function ResumeChatbot() {
                 >
                   <div
                     className={cn(
-                      "rounded-2xl p-3 max-w-[80%] shadow-lg",
+                      "rounded-2xl p-3 max-w-[80%] shadow-lg transition-colors",
                       message.type === "user"
-                        ? "bg-[#ECECEC] text-white text-xl"
-                        : "bg-neutral-900 text-white relative"
+                        ? "bg-neutral-950 text-white dark:bg-neutral-200 dark:text-neutral-950"
+                        : "bg-neutral-100 text-neutral-950 border border-neutral-300 dark:bg-neutral-900 dark:text-white dark:border-neutral-700"
                     )}
                   >
                     {message.type === "bot" ? (
@@ -344,17 +478,32 @@ export default function ResumeChatbot() {
                         <ReactMarkdown
                           components={{
                             h1: ({ children }) => (
-                              <h1 className="text-lg font-semibold mb-2">
+                              <h1
+                                className={cn(
+                                  "text-lg font-semibold mb-2",
+                                  "text-neutral-950 dark:text-white"
+                                )}
+                              >
                                 {children}
                               </h1>
                             ),
                             h2: ({ children }) => (
-                              <h2 className="text-lg font-semibold mb-2">
+                              <h2
+                                className={cn(
+                                  "text-lg font-semibold mb-2",
+                                  "text-neutral-950 dark:text-white"
+                                )}
+                              >
                                 {children}
                               </h2>
                             ),
                             h3: ({ children }) => (
-                              <h3 className="text-base font-semibold mb-2">
+                              <h3
+                                className={cn(
+                                  "text-base font-semibold mb-2",
+                                  "text-neutral-950 dark:text-white"
+                                )}
+                              >
                                 {children}
                               </h3>
                             ),
@@ -372,13 +521,22 @@ export default function ResumeChatbot() {
                               const isBlock = className?.includes("language-");
                               return isBlock ? (
                                 <div className="relative">
-                                  <code className="block bg-neutral-950 border border-neutral-800 font-mono p-3 rounded-xl text-sm overflow-x-auto">
+                                  <code
+                                    className={cn(
+                                      "block font-mono p-3 rounded-xl text-sm overflow-x-auto border",
+                                      "bg-neutral-50 border-neutral-300 dark:bg-neutral-950 dark:border-neutral-800"
+                                    )}
+                                  >
                                     {children}
                                   </code>
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="absolute top-2 right-2 h-6 w-6 text-neutral-400 hover:text-white hover:bg-neutral-800"
+                                    className={cn(
+                                      "absolute top-2 right-2 h-6 w-6 transition-colors",
+                                      "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-200",
+                                      "dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800"
+                                    )}
                                     onClick={() =>
                                       copyToClipboard(children as string)
                                     }
@@ -387,37 +545,64 @@ export default function ResumeChatbot() {
                                   </Button>
                                 </div>
                               ) : (
-                                <code className="bg-neutral-950 border border-neutral-800 font-mono px-2 py-1 rounded text-sm">
+                                <code
+                                  className={cn(
+                                    "font-mono px-2 py-1 rounded text-sm border",
+                                    "bg-neutral-50 border-neutral-300 dark:bg-neutral-950 dark:border-neutral-800"
+                                  )}
+                                >
                                   {children}
                                 </code>
                               );
                             },
                             strong: ({ children }) => (
-                              <strong className="font-semibold text-white">
+                              <strong className="font-semibold">
                                 {children}
                               </strong>
                             ),
                           }}
                         >
-                          {message.content}
+                          {streamingContent[message.id] ?? message.content}
                         </ReactMarkdown>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-0 right-0 h-6 w-6 text-neutral-400 hover:text-white hover:bg-neutral-800"
-                          onClick={() => copyToClipboard(message.content)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
+
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-neutral-300 dark:border-neutral-700">
+                          <span
+                            className={cn(
+                              "text-xs",
+                              "text-neutral-600 dark:text-neutral-500"
+                            )}
+                          >
+                            {message.latency && (
+                              <>
+                                <div className="flex justify-center items-center gap-1">
+                                  <Clock className="h-5 text-white/50" />
+                                  <h4 className="text-white/70">{formatLatency(message.latency)}</h4>
+                                </div>
+                              </>
+                            )}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              "h-6 w-6 transition-colors",
+                              "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-200",
+                              "dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800"
+                            )}
+                            onClick={() => copyToClipboard(message.content)}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     ) : (
-                      <p className=" text-black text-base">{message.content}</p>
+                      <p className="text-base">{message.content}</p>
                     )}
                   </div>
                 </motion.div>
               ))}
 
-              {isLoading && (
+              {isLoading && !isStreamingActive && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -425,13 +610,21 @@ export default function ResumeChatbot() {
                   className="flex justify-start"
                   aria-live="polite"
                 >
-                  <div className="bg-neutral-900 text-white rounded-2xl p-4 max-w-[80%] shadow-lg">
+                  <div
+                    className={cn(
+                      "rounded-2xl p-4 max-w-[80%] shadow-lg transition-colors",
+                      "bg-neutral-100 text-neutral-950 dark:bg-neutral-900 dark:text-white"
+                    )}
+                  >
                     <div className="flex items-center space-x-3">
                       <div className="flex space-x-1">
                         {[0, 1, 2].map((i) => (
                           <motion.div
                             key={i}
-                            className="w-1.5 h-1.5 bg-gradient-to-r from-white to-neutral-400 rounded-full"
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              "bg-gradient-to-r from-neutral-950 to-neutral-600 dark:from-white dark:to-neutral-400"
+                            )}
                             animate={{
                               scale: [1, 1.2, 1],
                               opacity: [0.5, 1, 0.5],
@@ -448,7 +641,10 @@ export default function ResumeChatbot() {
                         key={currentStatusIndex}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-sm bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent"
+                        className={cn(
+                          "text-sm bg-clip-text text-transparent",
+                          "bg-gradient-to-r from-neutral-950 to-neutral-600 dark:from-white dark:to-neutral-400"
+                        )}
                       >
                         {statusMessages[currentStatusIndex]}
                       </motion.p>
@@ -463,56 +659,86 @@ export default function ResumeChatbot() {
       </main>
 
       {messages.length > 0 && (
-        <footer className="sticky bottom-0 bg-black border-t border-neutral-800 p-4">
-          <div className="space-y-3">
-            <div className="flex space-x-3 max-w-5xl mx-auto">
-              {/* Select LLM model */}
-              <Select
-                onValueChange={(value) => setSelectedModel(value)}
-                value={selectedModel}
-              >
-                <SelectTrigger className="h-14 md:h-16 bg-neutral-900 border-neutral-700 text-white rounded-2xl px-4 text-base shadow-lg w-[180px]">
-                  <SelectValue placeholder="Model" />
-                </SelectTrigger>
-                <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
-                  <SelectItem value="gemini-2.5-flash">
-                    gemini-2.5-flash
-                  </SelectItem>
-                  <SelectItem value="gpt-oss-20b">gpt-oss-20b</SelectItem>
-                  <SelectItem value="gpt-oss-120b">gpt-oss-120b</SelectItem>
-                  <SelectItem value="mistral-nemo">mistral-nemo</SelectItem>
-                  <SelectItem value="deepseek-r1-0528">
-                    deepseek-r1-0528
-                  </SelectItem>
-                  <SelectItem value="deepseek-r1t">deepseek-r1t</SelectItem>
-                </SelectContent>
-              </Select>
+        <footer
+          className={cn(
+            "flex-shrink-0 border-t transition-colors duration-300",
+            "border-neutral-200 dark:border-neutral-800"
+          )}
+        >
+          <div className="p-4">
+            <div className="space-y-3">
+              <div className="flex space-x-3 max-w-5xl mx-auto">
+                <Select
+                  onValueChange={(value) => setSelectedModel(value)}
+                  value={selectedModel}
+                >
+                  <SelectTrigger
+                    className={cn(
+                      "h-14 md:h-16 rounded-2xl px-4 text-base shadow-lg w-[180px] transition-colors",
+                      "bg-neutral-100 border-neutral-300 text-neutral-950",
+                      "dark:bg-neutral-900 dark:border-neutral-700 dark:text-white"
+                    )}
+                  >
+                    <SelectValue placeholder="Model" />
+                  </SelectTrigger>
+                  <SelectContent
+                    className={cn(
+                      "transition-colors",
+                      "bg-white border-neutral-300 text-neutral-950",
+                      "dark:bg-neutral-900 dark:border-neutral-700 dark:text-white"
+                    )}
+                  >
+                    <SelectItem value="gemini-2.5-flash">
+                      gemini-2.5-flash
+                    </SelectItem>
+                    <SelectItem value="gpt-oss-20b">gpt-oss-20b</SelectItem>
+                    <SelectItem value="gpt-oss-120b">gpt-oss-120b</SelectItem>
+                    <SelectItem value="mistral-nemo">mistral-nemo</SelectItem>
+                    <SelectItem value="deepseek-r1-0528">
+                      deepseek-r1-0528
+                    </SelectItem>
+                    <SelectItem value="deepseek-r1t">deepseek-r1t</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              {/* Input field */}
-              <Input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask about your resume..."
-                className="h-14 md:h-16 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-400 focus:ring-2 focus:ring-neutral-600 rounded-2xl px-4 text-base shadow-lg flex-1"
-                disabled={isLoading}
-              />
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask about your resume..."
+                  className={cn(
+                    "h-14 md:h-16 rounded-2xl px-4 text-base shadow-lg flex-1 transition-colors",
+                    "bg-neutral-100 border-neutral-300 text-neutral-950 placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-400",
+                    "dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600"
+                  )}
+                  disabled={isLoading}
+                />
 
-              {/* Send button */}
-              <Button
-                onClick={() => handleSend()}
-                disabled={!input.trim() || isLoading}
-                className="h-14 md:h-16 px-6 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 rounded-2xl shadow-lg font-medium"
-              >
-                <Send className="h-5 w-5" />
-              </Button>
-            </div>
+                <Button
+                  onClick={() => handleSend()}
+                  disabled={!input.trim() || isLoading}
+                  className={cn(
+                    "h-14 md:h-16 px-6 rounded-2xl shadow-lg font-medium transition-colors",
+                    "bg-neutral-950 text-white hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400",
+                    "dark:bg-white dark:text-black dark:hover:bg-neutral-200 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500"
+                  )}
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
+              </div>
 
-            <div className="flex items-center justify-center space-x-6 text-xs text-neutral-500">
-              <span>↵ Send</span>
-              <span>⇧+↵ New line</span>
-              <span>/ Commands</span>
+              <div className="flex items-center justify-center space-x-3 text-xs">
+                <span className="text-neutral-600 dark:text-neutral-500">
+                  <Kbd>↵</Kbd> Send
+                </span>
+                <span className="text-neutral-600 dark:text-neutral-500">
+                  <Kbd>⇧</Kbd> + <Kbd>↵</Kbd> New line
+                </span>
+                <span className="text-neutral-600 dark:text-neutral-500">
+                  <Kbd>/</Kbd> Commands
+                </span>
+              </div>
             </div>
           </div>
         </footer>
