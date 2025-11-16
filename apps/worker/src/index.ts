@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "*",
     credentials: true,
   })
 );
@@ -24,7 +24,7 @@ import resumeRouter from "./routes/resume.routes";
 import interviewRouter from "./routes/interview.routes";
 import { resumeParser } from "./utils/parseResume";
 import { resumeAnalysis } from "./utils/analyseResume";
-import { analyseInterview } from "./utils/AnalyseInterview";
+import { analyseInterview } from "./utils/analyseInterview";
 
 app.use("/api/v1/resume", resumeRouter);
 app.use("/api/v1/interview", interviewRouter);

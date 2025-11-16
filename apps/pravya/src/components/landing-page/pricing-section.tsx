@@ -162,18 +162,18 @@ export function PricingSection() {
 
               {/* CTA Button at bottom */}
               <Link href={"/subscriptions"}>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 mt-auto ${
-                  plan.popular
-                  ? "bg-white text-black shadow-lg shadow-white/25 hover:shadow-white/40 hover:bg-white/90"
-                  : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 mt-auto ${
+                    plan.popular
+                      ? "bg-white text-black shadow-lg shadow-white/25 hover:shadow-white/40 hover:bg-white/90"
+                      : "bg-white/10 text-white border border-white/20 hover:bg-white/20"
                   }`}
-                  >
-                {plan.cta}
-              </motion.button>
-                </Link>
+                >
+                  {plan.cta}
+                </motion.button>
+              </Link>
             </motion.div>
           ))}
         </div>
@@ -189,13 +189,14 @@ export function PricingSection() {
           <p className="text-white/60 mb-4">
             Need a custom solution? We're here to help.
           </p>
-          <motion.button
+          <motion.a
+            href="mailto:sales@pravya.com"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="text-white hover:text-white/80 font-medium transition-colors"
           >
             Contact our sales team →
-          </motion.button>
+          </motion.a>
         </motion.div>
       </div>
     </section>

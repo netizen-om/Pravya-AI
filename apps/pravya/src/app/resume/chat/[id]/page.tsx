@@ -167,7 +167,7 @@ export default function ResumeChatbot() {
     setCurrentStatusIndex(0);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/resume/chat/${resumeId}`, {
+      const res = await fetch(`${process.env.WORKER_URL}/api/v1/resume/chat/${resumeId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: textToSend, model : selectedModel }),
