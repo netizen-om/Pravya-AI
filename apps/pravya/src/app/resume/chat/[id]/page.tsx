@@ -9,19 +9,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, Send, Copy, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -60,27 +53,6 @@ const smartPrompts = [
   "How can I tailor my resume for Meta?",
   "What keywords am I missing?",
   "Suggest bullet points for my project",
-];
-
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    title: "Resume Review Session",
-    lastMessage: "Your technical skills section needs improvement...",
-    timestamp: new Date(Date.now() - 86400000),
-  },
-  {
-    id: "2",
-    title: "Career Transition Advice",
-    lastMessage: "Consider highlighting transferable skills...",
-    timestamp: new Date(Date.now() - 172800000),
-  },
-  {
-    id: "3",
-    title: "Interview Preparation",
-    lastMessage: "Practice these behavioral questions...",
-    timestamp: new Date(Date.now() - 259200000),
-  },
 ];
 
 export default function ResumeChatbot() {
@@ -167,11 +139,14 @@ export default function ResumeChatbot() {
     setCurrentStatusIndex(0);
 
     try {
-      const res = await fetch(`${process.env.WORKER_URL}/api/v1/resume/chat/${resumeId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: textToSend, model : selectedModel }),
-      });
+      const res = await fetch(
+        `${process.env.WORKER_URL}/api/v1/resume/chat/${resumeId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: textToSend, model: selectedModel }),
+        }
+      );
       if (!res.ok) {
         const errText = await res.text();
         throw new Error(errText || "Chat service error");
@@ -210,58 +185,8 @@ export default function ResumeChatbot() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <header className="sticky top-0 z-10 bg-black">
-        <div className="flex items-center justify-between p-4">
-          <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-neutral-900"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              side="left"
-              className="w-80 bg-black border-neutral-800"
-            >
-              <SheetHeader>
-                <SheetTitle className="text-lg font-semibold text-white">
-                  Past Conversations
-                </SheetTitle>
-              </SheetHeader>
-              <div className="py-6">
-                <div className="space-y-3">
-                  {mockConversations.map((conversation) => (
-                    <motion.div
-                      key={conversation.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 cursor-pointer transition-colors"
-                    >
-                      <h3 className="font-medium text-white text-sm mb-1">
-                        {conversation.title}
-                      </h3>
-                      <p className="text-neutral-400 text-xs truncate">
-                        {conversation.lastMessage}
-                      </p>
-                      <p className="text-neutral-500 text-xs mt-1">
-                        {conversation.timestamp.toLocaleDateString()}
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <div className="flex flex-col items-center">
-            <h1 className="text-lg font-bold tracking-tight text-white">
-              Pravya AI
-            </h1>
-            <div className="w-16 h-px bg-gradient-to-r from-transparent via-neutral-400 to-transparent mt-1 shadow-sm shadow-neutral-400/20" />
-          </div>
-
+        <div className="relative flex items-center p-4">
+   
           <Button
             variant="ghost"
             size="icon"
@@ -270,6 +195,13 @@ export default function ResumeChatbot() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
+
+          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <h1 className="text-lg font-bold tracking-tight text-white">
+              Pravya AI
+            </h1>
+            <div className="w-16 h-px bg-gradient-to-r from-transparent via-neutral-400 to-transparent mt-1 shadow-sm shadow-neutral-400/20" />
+          </div>
         </div>
 
         <div className="px-4 pb-3">
@@ -279,8 +211,8 @@ export default function ResumeChatbot() {
               {resumeName
                 ? `${resumeName}.pdf`
                 : isDetailsLoading
-                  ? "Loading…"
-                  : "Unknown"}
+                ? "Loading…"
+                : "Unknown"}
             </span>
             <div className="flex items-center space-x-2">
               <span>ATS Score:</span>
@@ -288,7 +220,9 @@ export default function ResumeChatbot() {
                 <div
                   className="absolute inset-0 rounded-full"
                   style={{
-                    background: `conic-gradient(from 0deg, #10b981 ${atsScore * 3.6}deg, #374151 ${atsScore * 3.6}deg)`,
+                    background: `conic-gradient(from 0deg, #10b981 ${
+                      atsScore * 3.6
+                    }deg, #374151 ${atsScore * 3.6}deg)`,
                   }}
                 />
                 <div className="absolute inset-0.5 bg-neutral-950 rounded-full flex items-center justify-center">
@@ -533,16 +467,23 @@ export default function ResumeChatbot() {
           <div className="space-y-3">
             <div className="flex space-x-3 max-w-5xl mx-auto">
               {/* Select LLM model */}
-              <Select onValueChange={(value) => setSelectedModel(value)} value={selectedModel}>
+              <Select
+                onValueChange={(value) => setSelectedModel(value)}
+                value={selectedModel}
+              >
                 <SelectTrigger className="h-14 md:h-16 bg-neutral-900 border-neutral-700 text-white rounded-2xl px-4 text-base shadow-lg w-[180px]">
                   <SelectValue placeholder="Model" />
                 </SelectTrigger>
                 <SelectContent className="bg-neutral-900 border-neutral-700 text-white">
-                  <SelectItem value="gemini-2.5-flash">gemini-2.5-flash</SelectItem>
+                  <SelectItem value="gemini-2.5-flash">
+                    gemini-2.5-flash
+                  </SelectItem>
                   <SelectItem value="gpt-oss-20b">gpt-oss-20b</SelectItem>
                   <SelectItem value="gpt-oss-120b">gpt-oss-120b</SelectItem>
                   <SelectItem value="mistral-nemo">mistral-nemo</SelectItem>
-                  <SelectItem value="deepseek-r1-0528">deepseek-r1-0528</SelectItem>
+                  <SelectItem value="deepseek-r1-0528">
+                    deepseek-r1-0528
+                  </SelectItem>
                   <SelectItem value="deepseek-r1t">deepseek-r1t</SelectItem>
                 </SelectContent>
               </Select>

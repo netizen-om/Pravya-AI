@@ -105,7 +105,8 @@ export default function PricingSection() {
           return;
         }
 
-        setIsSubscribed(sub?.hasSubscription);
+        // setIsSubscribed(sub?.hasSubscription);
+        setIsSubscribed(false);
         mockSubscriptionData.startDate =
           sub?.subscription?.startDate?.toISOString() ?? "";
         mockSubscriptionData.endDate =
