@@ -17,7 +17,6 @@ app.use(
   })
 );
 
-// Stripe requires the raw body, not JSON
 const webhookSecret = process.env.DODOPAYMENTS_WEBHOOK_SECRETE!;
 console.log(webhookSecret);
 
@@ -108,10 +107,6 @@ app.post("/api/webhook/dodopayment", express.raw({ type: "application/json" }), 
     const type: string = payload.type;
     const data: any = payload.data ?? {};
 
-    // ---------------------
-    // Idempotency / Duplicate check
-    // ---------------------
-
     const eventId = getEventId(payload) || webhookId;
 
     if (eventId) {
@@ -139,9 +134,6 @@ app.post("/api/webhook/dodopayment", express.raw({ type: "application/json" }), 
       }
     }
 
-    // ---------------------
-    // Helper: Resolve user by email
-    // ---------------------
     async function resolveUserIdByEmail(obj: any) {
       const email =
         obj?.customer?.email || obj?.customer_email || obj?.email || null;
@@ -154,9 +146,6 @@ app.post("/api/webhook/dodopayment", express.raw({ type: "application/json" }), 
       return user?.id ?? null;
     }
 
-    // ---------------------
-    // Payment UPSERT
-    // ---------------------
     async function upsertPayment(paymentData: any) {
       const userId = await resolveUserIdByEmail(paymentData);
       if (!userId) {
@@ -228,9 +217,8 @@ app.post("/api/webhook/dodopayment", express.raw({ type: "application/json" }), 
       return created;
     }
 
-    // ---------------------
+
     // Subscription UPSERT
-    // ---------------------
     async function upsertSubscription(subData: any) {
       const userId = await resolveUserIdByEmail(subData);
       if (!userId) {
@@ -310,10 +298,6 @@ app.post("/api/webhook/dodopayment", express.raw({ type: "application/json" }), 
         throw err;
       }
     }
-
-    // ---------------------
-    // Handle Event Types
-    // ---------------------
 
     switch (type) {
       case "subscription.created":
@@ -410,8 +394,6 @@ app.post("/api/webhook/dodopayment", express.raw({ type: "application/json" }), 
       .json({ error: "Webhook failed", details: err.message });
   }
 });
-
-// --------------------------------
 
 app.listen(PORT, () => {
   console.log("Webhook server running on http://localhost:4000");
