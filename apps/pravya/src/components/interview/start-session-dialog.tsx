@@ -84,7 +84,7 @@ export function StartSessionDialog({
       };
 
       const apiPromise = axios.post(
-        `${process.env.WORKER_URL}/api/v1/interview/questions/generate`,
+        `${process.env.NEXT_PUBLIC_WORKER_URL}/api/v1/interview/questions/generate`,
         body
       );
 

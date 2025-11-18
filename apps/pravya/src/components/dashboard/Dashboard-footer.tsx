@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Twitter, Linkedin, Github } from "lucide-react";
 import { HoverGradient } from "../HoverGradient";
 import { boolean } from "zod";
+import GithubLogo from "../GithubLogo";
+import { FaGithub, FaLinkedinIn, FaTwitter } from "react-icons/fa6";
 
 interface DashboardFooterProps {
   isDark: boolean;
@@ -74,25 +76,30 @@ export const DashboardFooter = ({ isDark }: DashboardFooterProps) => {
           <div className="border-t  border-gray-800/50 md:flex md:items-center md:justify-between">
             <div className="flex space-x-6 md:order-2 mt-4">
               <Link
+                target="_blank"
                 href="/twitter"
                 aria-label="Twitter"
                 className="text-gray-400 hover:text-white transition-colors duration-200"
               >
-                <Twitter className="h-6 w-6" />
+                {/* <Twitter className="h-6 w-6" /> */}
+                < FaTwitter className="h-6 w-6"/>
               </Link>
               <Link
-                href="/github"
+                target="_blank"
+                href="https://github.com/netizen-om/Pravya-AI"
                 aria-label="GitHub"
                 className="text-gray-400 hover:text-white transition-colors duration-200"
               >
-                <Github className="h-6 w-6" />
+                <FaGithub className="h-6 w-6"/>
               </Link>
               <Link
+                target="_blank"
                 href="/linkedin"
                 aria-label="LinkedIn"
                 className="text-gray-400 hover:text-white transition-colors duration-200"
               >
-                <Linkedin className="h-6 w-6" />
+                {/* <Linkedin className="h-6 w-6" /> */}
+                <FaLinkedinIn className="h-6 w-6" />
               </Link>
             </div>
             <p className="mt-8 text-base text-gray-400 md:mt-0 md:order-1">

@@ -72,7 +72,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
               <TodaysTip isDark={isDark}/>
               <RecentActivity isDark={isDark}/>
               <InterviewSuggestions isDark={isDark}/>
-              <ResumeInsights isDark={isDark}/>
+              {/* <ResumeInsights isDark={isDark}/> */}
               <DashboardFooter isDark={isDark}/>
             </div>
           </main>

@@ -117,7 +117,7 @@ const page = () => {
 
   useEffect(() => {
     // Initialize Socket.IO connection
-    socketRef.current = io(`${process.env.WS_SERVER_URL}`);
+    socketRef.current = io(`${process.env.NEXT_PUBLIC_WS_SERVER_URL}`);
     const socket = socketRef.current;
 
     socket.on("connect", () => {

@@ -115,7 +115,7 @@ export function WelcomeSection({ session, isDark }: WelcomeSectionProps) {
                     )}
                   >
                     <Link
-                      href="/interview/start"
+                      href="/interview"
                       className="flex items-center gap-2"
                     >
                       <Play className="h-4 w-4" />

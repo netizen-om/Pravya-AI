@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import Image from "next/image"
 
 const itemVariants = {
   hidden: { opacity: 0, y: -10 },
@@ -58,16 +59,17 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Avatar className="h-10 w-10 bg-gradient-to-br from-blue-500 to-cyan-500">
+            {/* <Avatar className="h-10 w-10 bg-gradient-to-br from-blue-500 to-cyan-500">
               <AvatarFallback className="text-white font-bold">PA</AvatarFallback>
-            </Avatar>
+            </Avatar> */}
+            <Image src={"/logo/pravya-logo1.png"} alt="LOGO" height={39} width={39} />
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">Pravya AI</h1>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">Interview Feedback Report</p>
             </div>
           </div>
 
-          <Button
+          {/* <Button
             variant="outline"
             size="icon"
             onClick={() => {
@@ -82,7 +84,7 @@ export default function Header() {
               <Moon className="h-4 w-4 text-neutral-600" />
             )}
             <span className="sr-only">Toggle theme</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
     </motion.header>
