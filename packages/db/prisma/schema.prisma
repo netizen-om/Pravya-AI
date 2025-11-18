@@ -60,6 +60,7 @@ enum InterviewStatus {
   COMPLETED
   INCOMPLETE
   ERROR
+  ANALYSING
 }
 
 model Interview {
@@ -81,7 +82,6 @@ model Interview {
 
   questions Question[]
   feedback  Feedback?
-  audio     InterviewAudio?
 }
 
 model Question {
@@ -115,18 +115,6 @@ model Feedback {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model InterviewAudio {
-  audioId     String    @id @default(uuid())
-  interviewId String    @unique
-  interview   Interview @relation(fields: [interviewId], references: [interviewId])
-
-  isDeleted  Boolean  @default(false)
-  startTime  DateTime
-  endTime    DateTime
-  transcript String[]
-  audioUrl   String
 }
 
 enum PaymentStatus {

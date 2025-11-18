@@ -37,7 +37,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     // 2️⃣ Mark status as 'Analysing'
     await prisma.interview.update({
       where: { interviewId },
-      data: { status: 'Analysing' },
+      data: { status: "ANALYSING" },
     });
 
     // 3️⃣ Clean transcript and prepare inputs for LLM calls
@@ -207,7 +207,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     if (feedback) {
       await prisma.interview.update({
         where: { interviewId },
-        data: { status: 'Completed' },
+        data: { status: "COMPLETED" },
       });
     }
 
@@ -222,7 +222,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     try {
       await prisma.interview.update({
         where: { interviewId },
-        data: { status: 'Failed' },
+        data: { status: "ERROR" },
       });
     } catch (updateError) {
       console.error(

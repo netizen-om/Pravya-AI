@@ -155,7 +155,6 @@ export async function addInterviewTranscribe(
     const interview = await prisma.interview.update({
       where: { interviewId: interviewId },
       data: { transcribe: transcribe },
-      include : { template : true }
     });
 
     if (!interview || !interview.transcribe) {
@@ -189,11 +188,17 @@ export async function addInterviewTranscribe(
         action: "INTERVIEW_COMPLETED",
         targetType: "INTERVIEW",
         targetId: interview.interviewId,
-        details: interview.template.title,
+        details: interview.role,
       },
     });
 
-    if (2 <= questionAnswerPairs.length) {
+    if (questionAnswerPairs.length < 2) {
+      await prisma.interview.update({
+        where : { interviewId: interviewId },
+        data : {
+          status : "INCOMPLETE"
+        }
+      })
       throw new Error("No valid question/answer pairs found in transcript.");
     }
 
