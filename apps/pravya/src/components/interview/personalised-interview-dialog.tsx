@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Mic, Sparkles, X, Eye } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Mic, Sparkles, Eye, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,39 +19,148 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Skeleton } from "../ui/skeleton";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import GlobalLoader from "../loader/GlobalLoader";
 
-// Sample resume data with images
-const RESUMES = [
-  {
-    id: "resume1",
-    name: "Software_Engineer_v4.pdf",
-    image: "/software-engineer-resume.png",
-  },
-  {
-    id: "resume2",
-    name: "Product_Manager_v2.pdf",
-    image: "/product-manager-resume.png",
-  },
-  {
-    id: "resume3",
-    name: "Data_Scientist_Final.pdf",
-    image: "/data-scientist-resume.jpg",
-  },
+interface Resume {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  QdrantStatus: string;
+  AnalysisStatus: string;
+  createdAt: string;
+  updatedAt: string;
+  qdrantFileId?: string;
+  ResumeAnalysis?: {
+    atsScore?: number;
+    analysis?: Record<string, unknown>;
+  };
+}
+
+const loadingStates = [
+  { text: "Getting the AI ready for work..." },
+  { text: "Pouring a virtual espresso shot..." },
+  { text: "Cooking up some smart questions..." },
+  { text: "Checking the mic — just in case..." },
+  { text: "Boosting confidence levels..." },
+  { text: "All set! Redirecting you shortly..." },
 ];
 
 export function PersonalisedInterviewDialog() {
   const [selectedResume, setSelectedResume] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const [fullscreenResume, setFullscreenResume] = useState<string | null>(null);
   const [questionCount, setQuestionCount] = useState<number>(4);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [isLoadingResumes, setIsLoadingResumes] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const fetchResumes = useCallback(async () => {
+    try {
+      setIsLoadingResumes(true);
+
+      const response = await fetch("/api/resume/get-all-user-resume", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch resumes");
+
+      const data = await response.json();
+
+      if (data.success && Array.isArray(data.resume)) {
+        const sortedResumes = data.resume.sort(
+          (a: Resume, b: Resume) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setResumes(sortedResumes);
+      } else {
+        setResumes([]);
+      }
+    } catch (err) {
+      toast.error("Failed to fetch resume");
+    } finally {
+      setIsLoadingResumes(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchResumes();
+  }, []);
 
   const handleGenerate = () => {
     if (selectedResume) {
       console.log("Starting interview with resume:", selectedResume);
-      console.  log("Number of questions:", questionCount);
+      console.log("Questions:", questionCount);
       setOpen(false);
       setSelectedResume("");
       setQuestionCount(4);
+    }
+  };
+
+  const openInGoogleViewer = (url: string) => {
+    const viewerURL = `https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(
+      url
+    )}`;
+    window.open(viewerURL, "_blank", "noopener,noreferrer");
+  };
+
+  const handleBeginInterview = async () => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to start a session");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const body = {
+        userId: session.user.id,
+        resumeId: selectedResume,
+        noOfQuestions: questionCount,
+      };
+
+      const apiPromise = axios.post(
+        `${process.env.NEXT_PUBLIC_WORKER_URL}/api/v1/interview/questions/generate-personalised-questions`,
+        body
+      );
+
+      const loaderDuration = (loadingStates.length - 1) * 1450; // each step 2s
+      const startTime = Date.now();
+
+      const res = await apiPromise;
+
+      const interviewId = res.data.data.interviewId;
+
+      const elapsed = Date.now() - startTime;
+      const remaining = loaderDuration - elapsed;
+
+      setTimeout(
+        () => {
+          if (res.status === 200 || res.status === 201) {
+            toast.success("Interview session created successfully!");
+            router.push(`/interview/session/${interviewId}`);
+          } else {
+            toast.error("Failed to start interview session");
+            setIsLoading(false);
+          }
+        },
+        remaining > 0 ? remaining : 0
+      );
+    } catch (error: any) {
+      console.error(error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong!";
+      toast.error(message);
+      setIsLoading(false);
     }
   };
 
@@ -66,21 +175,25 @@ export function PersonalisedInterviewDialog() {
         </DialogTrigger>
 
         <DialogContent className="bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 max-w-2xl">
+          {isLoading && (
+            <GlobalLoader
+              loadingStates={loadingStates}
+              loading={isLoading}
+              loop={false}
+            />
+          )}
           <DialogHeader>
             <DialogTitle>Create Personalised Interview</DialogTitle>
             <DialogDescription>
-              Select one of your uploaded resumes, choose how many questions you
-              want, and Pravya AI will tailor the interview.
+              Select your resume and choose number of questions.
             </DialogDescription>
           </DialogHeader>
 
-          {/* Question Count Dropdown */}
-          {/* Question Count Dropdown (ShadCN) */}
+          {/* Question Count Selector */}
           <div className="mt-2">
             <label className="text-sm font-medium mb-2 block">
               Number of Questions
             </label>
-
             <Select
               value={String(questionCount)}
               onValueChange={(value) => setQuestionCount(Number(value))}
@@ -89,99 +202,95 @@ export function PersonalisedInterviewDialog() {
                 <SelectValue placeholder="Select number of questions" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="4">4 Questions</SelectItem>
-                <SelectItem value="5">5 Questions</SelectItem>
-                <SelectItem value="6">6 Questions</SelectItem>
-                <SelectItem value="7">7 Questions</SelectItem>
-                <SelectItem value="8">8 Questions</SelectItem>
+                {[4, 5, 6, 7, 8].map((num) => (
+                  <SelectItem key={num} value={String(num)}>
+                    {num} Questions
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Resume selection list */}
+          {/* Resume List */}
           <div className="py-4 space-y-2 max-h-[60vh] overflow-y-auto">
-            {RESUMES.map((resume) => (
-              <button
-                key={resume.id}
-                onClick={() => setSelectedResume(resume.id)}
-                className={`w-full px-4 py-3 flex items-center gap-3 rounded-lg border-2 transition-all ${
-                  selectedResume === resume.id
-                    ? "dark:border-white border-white bg-neutral-700/10 dark:bg-white/20"
-                    : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+            {isLoadingResumes && (
+              <div className="flex gap-5 flex-col">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <Skeleton className="h-12 w-12 rounded" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-[500px]" />
+                      <Skeleton className="h-4 w-[400px]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!isLoadingResumes &&
+              resumes.map((resume) => (
+                <button
+                  key={resume.id}
+                  onClick={() => setSelectedResume(resume.id)}
+                  className={`w-full px-4 py-3 flex items-center gap-3 rounded-lg border-2 transition-all ${
                     selectedResume === resume.id
-                      ? "dark:border-neutral-500 dark:bg-neutral-500 border-neutral-100 bg-neutral-700"
-                      : "border-neutral-300 dark:border-neutral-600"
+                      ? "dark:border-white border-black bg-neutral-700/10 dark:bg-white/20"
+                      : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
                   }`}
                 >
-                  {selectedResume === resume.id && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  )}
-                </div>
+                  {/* Radio Selection */}
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                      selectedResume === resume.id
+                        ? "dark:border-neutral-500 dark:bg-neutral-500 border-neutral-100 bg-neutral-700"
+                        : "border-neutral-300 dark:border-neutral-600"
+                    }`}
+                  >
+                    {selectedResume === resume.id && (
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    )}
+                  </div>
 
-                <img
-                  src={resume.image || "/placeholder.svg"}
-                  alt={resume.name}
-                  className="w-14 h-20 object-cover rounded border border-neutral-200 dark:border-neutral-700"
-                />
+                  {/* PDF Thumbnail (Simple Icon) */}
+                  <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-primary" />
+                  </div>
 
-                <div className="flex-1 text-left">
-                  <p className="text-sm font-medium truncate">{resume.name}</p>
-                </div>
+                  {/* File Name */}
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium truncate">
+                      {resume.fileName}
+                    </p>
+                  </div>
 
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setFullscreenResume(resume.image);
-                  }}
-                  className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors flex-shrink-0 cursor-pointer"
-                  role="button"
-                  tabIndex={0}
-                  aria-label="View resume"
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && setFullscreenResume(resume.image)
-                  }
-                >
-                  <Eye className="w-4 h-4" />
-                </div>
-              </button>
-            ))}
+                  {/* OPEN IN NEW TAB */}
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openInGoogleViewer(resume.fileUrl);
+                    }}
+                    className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer flex-shrink-0"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="View resume"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </div>
+                </button>
+              ))}
           </div>
 
           <DialogFooter>
             <Button
               className="gap-2 dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white"
-              onClick={handleGenerate}
+              onClick={handleBeginInterview}
               disabled={!selectedResume}
             >
-              <Mic className="w-4 h-4" />
               Generate & Start
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Fullscreen Resume View */}
-      {fullscreenResume && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
-          <button
-            onClick={() => setFullscreenResume(null)}
-            className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg transition-colors"
-            aria-label="Close fullscreen"
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
-
-          <img
-            src={fullscreenResume || "/placeholder.svg"}
-            alt="Resume fullscreen view"
-            className="max-w-4xl max-h-[90vh] object-contain rounded-lg"
-          />
-        </div>
-      )}
     </>
   );
 }
