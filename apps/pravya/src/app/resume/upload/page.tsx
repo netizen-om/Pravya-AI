@@ -53,9 +53,7 @@ const openPdfInGoogleViewer = (fileUrl: string) => {
   const safeUrl = fileUrl.endsWith(".pdf") ? fileUrl : `${fileUrl}.pdf`;
 
   // construct Google Drive Viewer URL
-  const viewerUrl = `https://drive.google.com/viewerng/viewer?embedded=true&url=${
-    fileUrl
-  }`;
+  const viewerUrl = `https://drive.google.com/viewerng/viewer?embedded=true&url=${fileUrl}`;
 
   // open fullscreen (new tab)
   window.open(viewerUrl, "_blank", "noopener,noreferrer");
@@ -412,7 +410,6 @@ export default function ResumeUploadPage() {
   const handleUpload = async () => {
     if (!uploadedFile) return;
 
-    // Clear any previous messages
     setErrorMessage(null);
     setSuccessMessage(null);
 
@@ -420,69 +417,63 @@ export default function ResumeUploadPage() {
     setUploadProgress(0);
 
     try {
-      // Create FormData to send the file
       const formData = new FormData();
       formData.append("file", uploadedFile.file);
 
-      // Simulate upload progress while making the actual API call
       const uploadInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(uploadInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
+        setUploadProgress((prev) => (prev >= 90 ? 90 : prev + 10));
       }, 200);
 
-      // Make the actual API call
       const response = await fetch("/api/upload/resume-upload", {
         method: "POST",
         body: formData,
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`);
+        const message = data?.error || "Upload failed";
+        throw new Error(message);
       }
 
-      // Complete the progress bar
-      setUploadProgress(100);
       clearInterval(uploadInterval);
+      setUploadProgress(100);
 
       setIsUploading(false);
       setIsAnalyzing(true);
 
-      // Show success message
       setSuccessMessage("Resume uploaded successfully! Starting analysis...");
+      toast.success("Resume uploaded successfully!");
       setTimeout(() => setSuccessMessage(null), 5000);
 
-      // Refresh the resumes list to get the latest data from server
       await fetchResumes();
-
-      // Simulate analysis completion (this would be replaced with real-time updates from the queue)
-      // setTimeout(() => {
-      //   setIsAnalyzing(false);
-      //   setUploadedFile(null);
-      //   setUploadProgress(0);
-      //   // Fetch again to get updated status
-      //   fetchResumes();
-      // }, 8000);
     } catch (error) {
       console.error("Upload error:", error);
+
       setIsUploading(false);
       setUploadProgress(0);
 
-      // Set error message for user display
-      setErrorMessage(
-        `Upload failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      const message = error instanceof Error ? error.message : "Unknown error";
 
-      // Clear error message after 5 seconds
+      setErrorMessage(message);
+
+      // 🔥 Sonner toast error
+      toast.error(message, {
+        duration: 8000,
+        action: {
+          label: "Upgrade",
+          onClick: () => {
+            router.push("/subscriptions") // your subscription page
+          },
+        },
+      });
+
+      setTimeout(() => {
+        router.push("/subscriptions")
+      }, 1000);
+
       setTimeout(() => setErrorMessage(null), 5000);
 
-      // Refresh resumes list in case of error too
       fetchResumes();
     }
   };
@@ -497,11 +488,11 @@ export default function ResumeUploadPage() {
 
   const handleDelete = async (id: string) => {
     const res = await deleteResume(id);
-    if(res.success) {
+    if (res.success) {
       toast.success("Resume deleted");
       await fetchResumes();
     } else {
-      toast.error("Failed to delete, please try again later")
+      toast.error("Failed to delete, please try again later");
     }
   };
 
@@ -799,7 +790,6 @@ export default function ResumeUploadPage() {
                       <StatusBadge resume={resume} />
 
                       <div className="flex space-x-1">
-                        
                         {getOverallStatus(resume) === "error" && (
                           // ADDED light-mode classes, prefixed dark-mode classes
                           <Button
@@ -811,7 +801,10 @@ export default function ResumeUploadPage() {
                             <RotateCcw className="w-4 h-4" />
                           </Button>
                         )}
-                        <DeleteResumeDialog onConfirm={handleDelete} resume={resume} />
+                        <DeleteResumeDialog
+                          onConfirm={handleDelete}
+                          resume={resume}
+                        />
                         <Button
                           variant="ghost"
                           size="sm"
@@ -822,13 +815,13 @@ export default function ResumeUploadPage() {
                         </Button>
                         {getOverallStatus(resume) === "completed" && (
                           <Link href={`/resume/chat/${resume.id}`}>
-                          <Button
-                            variant="ghost"
-                            // ADDED light-mode classes, prefixed dark-mode classes
-                            className="text-zinc-900 bg-white hover:bg-zinc-100 border border-zinc-200 shadow-sm transition-all duration-300 ease-in-out transform dark:text-silver-300 dark:text-black dark:bg-white dark:hover:bg-zinc-300 dark:hover:text-black dark:shadow-lg dark:shadow-silver-500/20 dark:border dark:border-silver-600/30"
-                          >
-                            Chat
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              // ADDED light-mode classes, prefixed dark-mode classes
+                              className="text-zinc-900 bg-white hover:bg-zinc-100 border border-zinc-200 shadow-sm transition-all duration-300 ease-in-out transform dark:text-silver-300 dark:text-black dark:bg-white dark:hover:bg-zinc-300 dark:hover:text-black dark:shadow-lg dark:shadow-silver-500/20 dark:border dark:border-silver-600/30"
+                            >
+                              Chat
+                            </Button>
                           </Link>
                         )}
                       </div>

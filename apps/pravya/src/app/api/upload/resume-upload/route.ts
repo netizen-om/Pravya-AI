@@ -19,6 +19,30 @@ export async function POST(req: Request) {
     //     id : "cmdtwaovc0000wfagrbld46w3"
     //   }
     // }
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { subscription: true },
+    });
+
+    if (!user) return null;
+
+    const resumeCount = await prisma.resume.count({
+      where: { userId: session.user.id, isDeleted: false },
+    });
+
+    const isSubscribed =
+      user.subscription?.status === "ACTIVE" &&
+      (!user.subscription.endDate || user.subscription.endDate > new Date());
+
+    if (!isSubscribed && resumeCount >= 3) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "You have reached the free limit of 3 resumes. Upgrade to upload more.",
+        }),
+        { status: 403 }
+      );
+    }
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
@@ -41,9 +65,9 @@ export async function POST(req: Request) {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: "resumes",
-            public_id: uniqueFileName, 
+            public_id: uniqueFileName,
             resource_type: "raw",
-            overwrite: false, 
+            overwrite: false,
           },
           (error, result) => {
             if (error) reject(error);
@@ -63,9 +87,9 @@ export async function POST(req: Request) {
         fileUrl: result.secure_url,
         publicId: result.public_id,
         QdrantStatus: "uploaded", // Initial Qdrant status
-        AnalysisStatus: "pending"  // Initial analysis status
-      }
-    })
+        AnalysisStatus: "pending", // Initial analysis status
+      },
+    });
 
     await prisma.userActivity.create({
       data: {
@@ -81,16 +105,16 @@ export async function POST(req: Request) {
       resumeId: resume.id,
       fileUrl: resume.fileUrl,
       userId: resume.userId,
-      publicId : resume.publicId,
-      fileName : resume.fileName
+      publicId: resume.publicId,
+      fileName: resume.fileName,
     });
 
     await resumeAnalyseQueue.add("resume-analyse", {
       resumeId: resume.id,
       fileUrl: resume.fileUrl,
       userId: resume.userId,
-      publicId : resume.publicId,
-      fileName : resume.fileName
+      publicId: resume.publicId,
+      fileName: resume.fileName,
     });
 
     return NextResponse.json({ success: true, resume: resume });

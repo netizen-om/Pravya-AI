@@ -43,12 +43,12 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
   }, []);
 
   useEffect(() => {
-    getUser()
+    getUser();
   }, []);
 
   useEffect(() => {
-  console.log(user);
-}, [user]);
+    console.log(user);
+  }, [user]);
 
   if (!isMounted) {
     return (
