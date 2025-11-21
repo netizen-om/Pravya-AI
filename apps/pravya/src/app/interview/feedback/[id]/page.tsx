@@ -169,6 +169,7 @@ export default function Home() {
       if (!id) return;
       const feedbackData = await getFeedback(id);
       console.log(feedbackData);
+      //@ts-ignore
       setFeedback(feedbackData?.fullFeedbackJson);
     }
 

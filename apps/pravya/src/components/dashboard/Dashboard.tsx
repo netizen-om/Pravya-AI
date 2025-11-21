@@ -1,7 +1,7 @@
 "use client"; // This component runs in the browser
 
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { SidebarProvider } from "./sidebar-context";
 // import { DashboardHeader } from "../dashboard/dashboard-header"; // Uncomment if you use it
 import { WelcomeSection } from "./welcome-section";
@@ -16,6 +16,7 @@ import { TodaysTip } from "./today-tip";
 import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
 import { Card } from "../ui/card";
 import { DashboardFooter } from "./Dashboard-footer";
+import { getUserDetails } from "@/actions/user-action";
 
 // Dynamically import the sidebar (client-side)
 const DashboardSidebar = dynamic(
@@ -33,7 +34,21 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
   session,
 }) => {
   const { theme, isMounted } = useHydrationSafeTheme();
+  const [user, setUser] = useState();
   const isDark = theme === "dark";
+
+  const getUser = useCallback(async () => {
+    const userData = await getUserDetails();
+    setUser(userData);
+  }, []);
+
+  useEffect(() => {
+    getUser()
+  }, []);
+
+  useEffect(() => {
+  console.log(user);
+}, [user]);
 
   if (!isMounted) {
     return (
@@ -63,17 +78,17 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
       <SidebarProvider>
         {/* <DashboardHeader session={session} /> */}
         <div className="flex">
-          <DashboardSidebar isDark={isDark}/>
+          <DashboardSidebar isDark={isDark} />
           <main className="flex-1 transition-all duration-300 ease-in-out">
             <div className="mx-auto max-w-7xl px-6 md:px-8 py-8 space-y-10">
-              <WelcomeSection session={session} isDark={isDark}/>
-              <QuickStats isDark={isDark}/>
-              <PerformanceAnalytics isDark={isDark}/>
-              <TodaysTip isDark={isDark}/>
-              <RecentActivity isDark={isDark}/>
-              <InterviewSuggestions isDark={isDark}/>
+              <WelcomeSection session={session} isDark={isDark} />
+              <QuickStats isDark={isDark} />
+              <PerformanceAnalytics isDark={isDark} />
+              <TodaysTip isDark={isDark} />
+              <RecentActivity isDark={isDark} />
+              <InterviewSuggestions isDark={isDark} />
               {/* <ResumeInsights isDark={isDark}/> */}
-              <DashboardFooter isDark={isDark}/>
+              <DashboardFooter isDark={isDark} />
             </div>
           </main>
         </div>
