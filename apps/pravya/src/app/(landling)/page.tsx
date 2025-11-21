@@ -54,46 +54,48 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full relative top-0 bg-black">
-      <div className="absolute inset-0 z-0" />
+    <div className="dark">
+      <div className="min-h-screen w-full relative top-0 bg-black">
+        <div className="absolute inset-0 z-0" />
 
-      {/* Header */}
-      <div className="flex justify-center">
-        <LandingHeader isScrolled={isScrolled} />
+        {/* Header */}
+        <div className="flex justify-center">
+          <LandingHeader isScrolled={isScrolled} />
+        </div>
+
+        {/* Hero Section */}
+        <Hero />
+
+        {/* Features Section */}
+        <div id="features">
+          <Features />
+        </div>
+
+        {/* Pricing Section */}
+        <div id="pricing">
+          <PricingSection />
+        </div>
+
+        {/* Testimonials Section */}
+        <div id="testimonials">
+          <TestimonialsSection />
+        </div>
+
+        {/* New Release Promo */}
+        <NewReleasePromo />
+
+        {/* FAQ Section */}
+        <div id="faq">
+          <FAQSection />
+        </div>
+
+        <div>
+          <LandingFooter />
+        </div>
+
+        {/* Sticky Footer */}
+        {/* <StickyFooter /> */}
       </div>
-
-      {/* Hero Section */}
-      <Hero />
-
-      {/* Features Section */}
-      <div id="features">
-        <Features />
-      </div>
-
-      {/* Pricing Section */}
-      <div id="pricing">
-        <PricingSection />
-      </div>
-
-      {/* Testimonials Section */}
-      <div id="testimonials">
-        <TestimonialsSection />
-      </div>
-
-      {/* New Release Promo */}
-      <NewReleasePromo />
-
-      {/* FAQ Section */}
-      <div id="faq">
-        <FAQSection />
-      </div>
-
-      <div>
-        <LandingFooter />
-      </div>
-
-      {/* Sticky Footer */}
-      {/* <StickyFooter /> */}
     </div>
   );
 }

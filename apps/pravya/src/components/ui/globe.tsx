@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import { useEffect, useRef } from "react"
 import createGlobe from "cobe"
 import { cn } from "@/lib/utils"
@@ -23,7 +23,7 @@ const Earth: React.FC<EarthProps> = ({
   dark = 1,
   scale = 1.1,
   diffuse = 1.2,
-  mapSamples = 40000,
+  mapSamples = 10000,
   mapBrightness = 6,
   baseColor = [0.4, 0.6509, 1],
   markerColor = [1, 0, 0],
@@ -40,9 +40,9 @@ const Earth: React.FC<EarthProps> = ({
 
     onResize()
     const globe = createGlobe(canvasRef.current!, {
-      devicePixelRatio: 2,
-      width: width * 2,
-      height: width * 2,
+      devicePixelRatio: .7,
+      width: width * .7,
+      height: width * .7,
       phi: 0,
       theta: theta,
       dark: dark,
@@ -62,14 +62,14 @@ const Earth: React.FC<EarthProps> = ({
         // Called on every animation frame.
         // `state` will be an empty object, return updated params.\
         state.phi = phi
-        phi += 0.003
+        phi += 0.0018
       },
     })
 
     return () => {
       globe.destroy()
     }
-  }, [dark])
+  }, [])
 
   return (
     <div className={cn("z-[10] mx-auto flex w-full max-w-[350px] items-center justify-center", className)}>
@@ -82,8 +82,8 @@ const Earth: React.FC<EarthProps> = ({
           aspectRatio: "1",
         }}
       />
-    </div>
+    </div>  
   )
 }
 
-export default Earth
+export default React.memo(Earth)
