@@ -53,11 +53,11 @@ export function AnimatedBeamMultipleOutputDemo({
         <div className="flex flex-col justify-center gap-2">
           <Circle ref={div1Ref} >
             {/* <Icons.googleDrive /> */}
-            <Image src="/landing-page-logo/deepseek.svg" className="scale-125" alt="DeepSeek" width={32} height={32} />
+            <Image src="/landing-page-logo/gemini.svg" className="scale-125" alt="DeepSeek" width={32} height={32} />
           </Circle>
           <Circle ref={div2Ref}>
-            <Image src="/landing-page-logo/gemini.svg" className="scale-125" alt="DeepSeek" width={32} height={32} />
             {/* <Icons.googleDocs /> */}
+            <Image src="/landing-page-logo/deepseek.svg" className="scale-125" alt="DeepSeek" width={32} height={32} />
           </Circle>
           <Circle ref={div3Ref}>
             {/* <Icons.whatsapp /> */}
@@ -68,12 +68,15 @@ export function AnimatedBeamMultipleOutputDemo({
             <Image src="/landing-page-logo/mistral.svg" className="scale-125" alt="DeepSeek" width={32} height={32} />
           </Circle>
           <Circle ref={div5Ref}>
-            <Icons.notion />
+            {/* <Icons.notion /> */}
+            {/* <Icons.openai  /> */}
+            <Image src="/landing-page-logo/openai.svg" className="scale-125" alt="DeepSeek" width={32} height={32} />
           </Circle>
         </div>
         <div className="flex flex-col justify-center">
-          <Circle ref={div6Ref} className="size-16">
-            <Icons.openai />
+          <Circle ref={div6Ref} className="size-16 bg-black">
+            <Image src="/logo/pravya-logo1.png" className="scale-125" alt="DeepSeek" width={32} height={32} />
+
           </Circle>
         </div>
         <div className="flex flex-col justify-center">

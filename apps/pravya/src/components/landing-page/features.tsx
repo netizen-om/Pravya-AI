@@ -171,7 +171,7 @@ export default function Features() {
                           baseColor={baseColor}
                           markerColor={[0, 0, 0]}
                           glowColor={glowColor}
-                          dark={dark}
+                          dark={1}
                         />
                       </Suspense>
                     </div>
