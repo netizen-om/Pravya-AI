@@ -11,6 +11,7 @@ import RoleSpecificFit from "@/components/feedback/role-specific-fit";
 import AnswerQualityChart from "@/components/feedback/answer-quality-chart";
 import ImprovementAreasChart from "@/components/feedback/improvement-areas-chart";
 import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
+import { BackButton } from "../BackButton";
 
 interface FeedbackPageProps {
   feedback: DetailedInterviewFeedback;
@@ -45,6 +46,7 @@ export default function FeedbackPage({ feedback }: FeedbackPageProps) {
       animate="visible"
       variants={containerVariants}
     >
+     
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

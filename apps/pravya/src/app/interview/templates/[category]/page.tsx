@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { InterviewTemplateCard } from "@/components/interview/interview-template-card"
 import { getCategoryDetails } from "@/actions/interview-action"
+import { BackButton } from "@/components/BackButton"
 
 interface Template {
   id: string
@@ -114,6 +115,7 @@ function CategoryContent({
   return (
     <>
       {/* Header */}
+      <BackButton />
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

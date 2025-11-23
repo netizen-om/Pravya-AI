@@ -11,6 +11,7 @@ import { getMainCategoriesWithTemplates } from "@/actions/interview-action"
 import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme"
 import { Card } from "@/components/ui/card"
 import Loader from "@/components/loader/loader"
+import { BackButton } from "@/components/BackButton"
 
 interface Template {
   id: string
@@ -100,6 +101,7 @@ export default function InterviewsPage() {
   return (
     <div className="min-h-screen bg-white text-neutral-900 dark:bg-zinc-950 dark:text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <BackButton />
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

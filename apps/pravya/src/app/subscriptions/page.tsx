@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserSubscription } from "@/actions/subscription";
+import { BackButton } from "@/components/BackButton";
 import Loader from "@/components/loader/loader";
 import { motion } from "framer-motion";
 import {
@@ -19,10 +20,11 @@ const pricingPlans = [
     price: "Free",
     description: "Perfect for trying out AI-powered mock interviews.",
     features: [
-      "2 AI voice interviews per week",
-      "Basic performance feedback",
-      "Access to community support",
-      "Resume upload & basic insights",
+      "3 AI voice interviews per month",
+      "3 resume uploads per month",
+      "Unlimited Learning Hub access",
+      "Chat with your resume (RAG)",
+      "Basic AI Response",
     ],
     popular: false,
     cta: "Get Started Free",
@@ -34,11 +36,12 @@ const pricingPlans = [
     description: "For serious learners preparing for top roles.",
     features: [
       "Unlimited AI voice interviews",
-      "Detailed feedback & score breakdown",
+      "Unlimited resume uploads",
+      "Unlimited Learning Hub access",
       "Chat with your resume (RAG)",
-      "Role-based & level-specific interviews",
       "Advanced analytics & insights",
-      "Priority AI feedback & support",
+      "Priority Mock Feedback",
+      "Early access to beta features.",
     ],
     popular: true,
     cta: "Buy Now",
@@ -55,11 +58,12 @@ const mockSubscriptionData = {
   renewalDate: "2024-12-01",
   features: [
     "Unlimited AI voice interviews",
-    "Detailed feedback & score breakdown",
+    "Unlimited resume uploads",
+    "Unlimited Learning Hub access",
     "Chat with your resume (RAG)",
-    "Role-based & level-specific interviews",
     "Advanced analytics & insights",
-    "Priority AI feedback & support",
+    "Priority Mock Feedback",
+    "Early access to beta features.",
   ],
 };
 
@@ -105,8 +109,8 @@ export default function PricingSection() {
           return;
         }
 
-        // setIsSubscribed(sub?.hasSubscription);
-        setIsSubscribed(false);
+        setIsSubscribed(sub?.hasSubscription);
+        // setIsSubscribed(false);
         mockSubscriptionData.startDate =
           sub?.subscription?.startDate?.toISOString() ?? "";
         mockSubscriptionData.endDate =
@@ -130,6 +134,9 @@ export default function PricingSection() {
   if (isSubscribed) {
     return (
       <section className="relative py-10 px-4 bg-white dark:bg-neutral-950 transition-colors duration-300 min-h-screen">
+        <div className="ml-12">
+          <BackButton />
+        </div>
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <motion.div
@@ -305,6 +312,9 @@ export default function PricingSection() {
 
   return (
     <section className="relative py-10 px-4 bg-white dark:bg-neutral-950 transition-colors duration-300">
+      <div className="ml-12">
+        <BackButton />
+      </div>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -332,8 +342,8 @@ export default function PricingSection() {
           </h2>
 
           <p className="text-lg text-black/60 dark:text-white/60 max-w-2xl mx-auto mb-8">
-            Start building beautiful components today. Upgrade anytime as your
-            needs grow.
+            Unlock unlimited practice, detailed AI insights, and resume-powered
+            guidance Everything you need to build real interview confidence.
           </p>
 
           {/* Monthly/Annual Toggle */}

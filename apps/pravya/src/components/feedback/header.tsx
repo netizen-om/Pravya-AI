@@ -7,6 +7,9 @@ import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import { BackButton } from "../BackButton"
+import React from "react"
+import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme"
 
 const itemVariants = {
   hidden: { opacity: 0, y: -10 },
@@ -14,7 +17,9 @@ const itemVariants = {
 }
 
 export default function Header() {
-  const { theme, setTheme } = useTheme()
+ const { theme, isMounted } = useHydrationSafeTheme();
+ const isDark = theme === "dark";
+
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -30,6 +35,7 @@ export default function Header() {
         animate="visible"
         transition={{ duration: 0.5 }}
       >
+        
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -57,12 +63,13 @@ export default function Header() {
       transition={{ duration: 0.5 }}
     >
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+       <BackButton />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* <Avatar className="h-10 w-10 bg-gradient-to-br from-blue-500 to-cyan-500">
               <AvatarFallback className="text-white font-bold">PA</AvatarFallback>
             </Avatar> */}
-            <Image src={"/logo/pravya-logo1.png"} alt="LOGO" height={39} width={39} />
+            <Image src={isDark ? "/logo/pravya-logo.png" : "/logo/pravya-light-logo.png"} alt="LOGO" height={39} width={39} />
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">Pravya AI</h1>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">Interview Feedback Report</p>
