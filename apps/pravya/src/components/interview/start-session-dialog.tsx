@@ -97,8 +97,9 @@ export function StartSessionDialog({
 
       const loaderDuration = (loadingStates.length - 1) * 1450;
       const startTime = Date.now();
-
+      
       const res = await apiPromise;
+      
 
       const interviewId = res.data.data.interviewId;
 
@@ -119,11 +120,32 @@ export function StartSessionDialog({
       );
     } catch (error: any) {
       console.error(error);
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong!";
-      toast.error(message);
+
+      const status = error?.response?.status;
+      const backendError = error?.response?.data?.error;
+
+      // --- Handle interview restriction (403) ---
+      if (status === 403) {
+        toast.error(backendError || "Interview limit reached", {
+          duration: 9000,
+          action: {
+            label: "Upgrade",
+            onClick: () => router.push("/subscriptions"),
+          },
+        });
+        setIsLoading(false);
+        setTimeout(() => {
+          router.push("/subscriptions")
+        }, 2000);
+        return;
+      } else {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong!";
+        toast.error(message);
+      }
+
       setIsLoading(false);
     }
   };
@@ -263,7 +285,10 @@ export function StartSessionDialog({
                       id={type}
                       className="w-5 h-5 rounded-full border-gray-400 dark:border-zinc-700 bg-white dark:bg-transparent"
                     />
-                    <Label htmlFor={type} className="font-normal cursor-pointer">
+                    <Label
+                      htmlFor={type}
+                      className="font-normal cursor-pointer"
+                    >
                       {type.charAt(0).toUpperCase() + type.slice(1)}
                     </Label>
                   </div>

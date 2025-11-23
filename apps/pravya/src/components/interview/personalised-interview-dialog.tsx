@@ -155,11 +155,32 @@ export function PersonalisedInterviewDialog() {
       );
     } catch (error: any) {
       console.error(error);
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong!";
-      toast.error(message);
+
+      const status = error?.response?.status;
+      const backendError = error?.response?.data?.error;
+
+      // --- Handle interview restriction (403) ---
+      if (status === 403) {
+        toast.error(backendError || "Interview limit reached", {
+          duration: 9000,
+          action: {
+            label: "Upgrade",
+            onClick: () => router.push("/subscriptions"),
+          },
+        });
+        setIsLoading(false);
+        setTimeout(() => {
+          router.push("/subscriptions");
+        }, 2000);
+        return;
+      } else {
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong!";
+        toast.error(message);
+      }
+
       setIsLoading(false);
     }
   };

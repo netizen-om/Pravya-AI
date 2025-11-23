@@ -66,14 +66,40 @@ export const generateQuestions = asyncHandler(async (req, res) => {
       .status(401)
       .json(new ApiResponse(401, "userId is required to generate questions."));
   }
-  const isUserPresent = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { subscription: true },
   });
 
-  if (!isUserPresent) {
-    return res.status(402).json(new ApiResponse(402, "userId does not exist."));
+  if (!user) {
+    return new Response("User not found", { status: 404 });
+  }
+
+  const isSubscribed =
+    user.subscription?.status === "ACTIVE" &&
+    (!user.subscription.endDate || user.subscription.endDate > new Date());
+
+  console.log("isSubscribe : ", isSubscribed);
+
+  // If not subscribed → check interview limit
+  if (!isSubscribed) {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const interviewCount = await prisma.interview.count({
+      where: {
+        userId,
+        createdAt: { gte: oneMonthAgo },
+        isDeleted: false,
+      },
+    });
+
+    if (interviewCount >= 3) {
+      return res.status(403).json({
+        error:
+          "You have reached the free limit of 3 interviews this month. Upgrade to continue.",
+      });
+    }
   }
 
   let {
@@ -174,16 +200,42 @@ export const generatePersonalisedQuestions = asyncHandler(async (req, res) => {
       .status(401)
       .json(new ApiResponse(401, "userId is required to generate questions."));
   }
-  const isUserPresent = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { subscription: true },
   });
 
-  if (!isUserPresent) {
-    return res.status(402).json(new ApiResponse(402, "userId does not exist."));
+  if (!user) {
+    return new Response("User not found", { status: 404 });
   }
-  
+
+  const isSubscribed =
+    user.subscription?.status === "ACTIVE" &&
+    (!user.subscription.endDate || user.subscription.endDate > new Date());
+
+  console.log("isSubscribe : ", isSubscribed);
+
+  // If not subscribed → check interview limit
+  if (!isSubscribed) {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const interviewCount = await prisma.interview.count({
+      where: {
+        userId,
+        createdAt: { gte: oneMonthAgo },
+        isDeleted: false,
+      },
+    });
+
+    if (interviewCount >= 3) {
+      return res.status(403).json({
+        error:
+          "You have reached the free limit of 3 interviews this month. Upgrade to continue.",
+      });
+    }
+  }
+
   const { resumeId, noOfQuestions = 4 } = req.body;
 
   if (!resumeId) {
@@ -243,8 +295,8 @@ export const generatePersonalisedQuestions = asyncHandler(async (req, res) => {
       - Every question MUST reference: **their real tech stack, real projects, or real missing skills**
       - Minimum 1 of questions must mention a **specific project, tool, database, or architecture choice from their resume**
       - At least 2 questions must target their **missing skills**: ${resume.ResumeAnalysis.analysis?.missingKeywords.join(
-            ", "
-          )}
+        ", "
+      )}
       - Avoid generic questions unless rewritten to include their own stack or project context
       - Questions must evaluate: **system design, edge cases, tradeoffs, scalability, failure handling, performance, security, or debugging**
       - No basic theory questions (e.g., "What is Node.js?" ❌)
@@ -254,14 +306,18 @@ export const generatePersonalisedQuestions = asyncHandler(async (req, res) => {
 
       ### Candidate Details You MUST Use:
       **Tech Stack:**  
-      Languages: ${resume.ResumeAnalysis.analysis?.skills.languages.join(", ")}  
+      Languages: ${resume.ResumeAnalysis.analysis?.skills.languages.join(
+        ", "
+      )}  
       Frameworks: ${resume.ResumeAnalysis.analysis?.skills.frameworksAndLibraries.join(
-            ", "
-          )}  
-      Databases: ${resume.ResumeAnalysis.analysis?.skills.databases.join(", ")}  
+        ", "
+      )}  
+      Databases: ${resume.ResumeAnalysis.analysis?.skills.databases.join(
+        ", "
+      )}  
       Tools/Platforms: ${resume.ResumeAnalysis.analysis?.skills.toolsAndPlatforms.join(
-            ", "
-          )}
+        ", "
+      )}
 
       **Projects:**  
       ${resume.ResumeAnalysis.analysis?.projects
@@ -272,7 +328,9 @@ export const generatePersonalisedQuestions = asyncHandler(async (req, res) => {
       ${resume.ResumeAnalysis.analysis?.missingKeywords.join(", ")}
 
       **Strong Keywords Found:**  
-      ${resume.ResumeAnalysis.analysis?.matchingKeywords.slice(0, 15).join(", ")}
+      ${resume.ResumeAnalysis.analysis?.matchingKeywords
+        .slice(0, 15)
+        .join(", ")}
 
       ---
 
