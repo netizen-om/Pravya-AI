@@ -86,12 +86,19 @@ export function DashboardSidebar({ isDark }: DashboardSidebarProps) {
               className="flex items-center space-x-3"
             >
               <Image
-                src="/logo/pravya-logo.png"
+                src={isDark ? "/logo/pravya-logo.png" : "/logo/pravya-light-logo.png"}
                 alt="Pravya AI Logo"
                 width={36}
                 height={36}
                 className="rounded-md"
               />
+              {/* <Image
+                src="/logo/pravya-logo.png"
+                alt="Pravya AI Logo"
+                width={36}
+                height={36}
+                className="rounded-md"
+              /> */}
               <AnimatePresence>
                 {isHovered && (
                   <motion.span

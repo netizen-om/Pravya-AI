@@ -20,7 +20,7 @@ export async function getPayments() {
         },
         amount: true,
         currency: true,
-        razorpayOrderId: true,
+        dodoPaymentId: true,
         createdAt: true,
         metadata: true,
       },
@@ -34,7 +34,7 @@ export async function getPayments() {
       user: payment.user.email || "N/A",
       amount: payment.currency === "INR" ? payment.amount / 100 : payment.amount,
       currency: payment.currency,
-      orderId: payment.razorpayOrderId,
+      orderId: payment.dodoPaymentId,
       date: payment.createdAt ? new Date(payment.createdAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",

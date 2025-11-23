@@ -58,7 +58,7 @@ export const DashboardFooter = ({ isDark }: DashboardFooterProps) => {
             <div className="space-y-4 xl:col-span-1">
               <div className="flex items-center space-x-2">
                 <Image
-                  src="/logo/pravya-logo1.png"
+                  src={isDark ? "/logo/pravya-logo.png" : "/logo/pravya-light-logo.png"}
                   alt="Pravya AI Logo"
                   width={32}
                   height={32}

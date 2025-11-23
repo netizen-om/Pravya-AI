@@ -41,7 +41,7 @@ export function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
 
   return (
-    <section className="relative py-24 px-4">
+    <section className="relative pb-24 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div

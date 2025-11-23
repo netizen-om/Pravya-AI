@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GlobalLoader from "../loader/GlobalLoader";
+import React from "react";
+import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
+import { Card } from "../ui/card";
 
 interface StartSessionDialogProps {
   isOpen: boolean;
@@ -47,6 +51,9 @@ export function StartSessionDialog({
   const [questionCount, setQuestionCount] = useState("3");
   const [interviewType, setInterviewType] = useState("mix");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { theme, isMounted } = useHydrationSafeTheme();
+  const isDark = theme === "dark";
 
   const { data: session } = useSession();
   const router = useRouter();
@@ -88,7 +95,7 @@ export function StartSessionDialog({
         body
       );
 
-      const loaderDuration = (loadingStates.length - 1) * 1450; // each step 2s
+      const loaderDuration = (loadingStates.length - 1) * 1450;
       const startTime = Date.now();
 
       const res = await apiPromise;
@@ -121,16 +128,38 @@ export function StartSessionDialog({
     }
   };
 
+  if (!isMounted) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.3 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-64 rounded-lg bg-gray-200 dark:bg-neutral-800 animate-pulse" />
+          <div className="flex rounded-lg p-1 bg-gray-100 dark:bg-neutral-900">
+            <div className="h-8 w-24 rounded-md bg-gray-200 dark:bg-neutral-800" />
+            <div className="h-8 w-24 rounded-md bg-gray-100 dark:bg-neutral-900" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <Card className="rounded-2xl border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-neutral-900/70 h-[348px] animate-pulse" />
+          <Card className="rounded-2xl border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-neutral-900/70 h-[348px] animate-pulse" />
+        </div>
+      </motion.section>
+    );
+  }
+
   return (
     <div className="relative">
       <Dialog
         open={isOpen}
         onOpenChange={(open) => {
-          if (!isLoading) onOpenChange(open); // prevent closing while loading
+          if (!isLoading) onOpenChange(open);
         }}
       >
-        <DialogContent className="border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
-          {/* Loading Overlay */}
+        <DialogContent className="border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white sm:max-w-md">
           {isLoading && (
             <GlobalLoader
               loadingStates={loadingStates}
@@ -140,10 +169,13 @@ export function StartSessionDialog({
           )}
 
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-transparent">
-              {/* <Brain className="h-6 w-6 text-zinc-950" /> */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg">
               <Image
-                src="/logo/pravya-logo.png"
+                src={
+                  isDark
+                    ? "/logo/pravya-logo.png"
+                    : "/logo/pravya-light-logo.png"
+                }
                 width={43}
                 height={13}
                 alt="Pravya AI Logo"
@@ -155,7 +187,7 @@ export function StartSessionDialog({
 
           <DialogHeader>
             <DialogTitle className="text-xl">{template.title}</DialogTitle>
-            <DialogDescription className="text-zinc-400">
+            <DialogDescription className="text-zinc-600 dark:text-zinc-400">
               {template.description}
             </DialogDescription>
           </DialogHeader>
@@ -165,53 +197,35 @@ export function StartSessionDialog({
               <Badge
                 key={tag}
                 variant="secondary"
-                className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+                className="bg-gray-200 text-zinc-900 hover:bg-gray-300 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
               >
                 {tag}
               </Badge>
             ))}
           </div>
 
-          {/* Configuration Form */}
           <div className="space-y-6 py-4">
-            {/* Level Selection */}
             <div className="space-y-3">
               <Label className="text-base font-medium">Select Level</Label>
               <RadioGroup value={level} onValueChange={setLevel}>
-                <div className="flex items-center justify-start space-x-2">
-                  <RadioGroupItem value="beginner" id="beginner" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
-                  />
-                  <Label
-                    htmlFor="beginner"
-                    className="font-normal cursor-pointer"
+                {["beginner", "intermediate", "expert"].map((lvl) => (
+                  <div
+                    key={lvl}
+                    className="flex items-center justify-start space-x-2"
                   >
-                    Beginner
-                  </Label>
-                </div>
-                <div className="flex items-center justify-start space-x-2">
-                  <RadioGroupItem value="intermediate" id="intermediate" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
-                  />
-                  <Label
-                    htmlFor="intermediate"
-                    className="font-normal cursor-pointer"
-                  >
-                    Intermediate
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="expert" id="expert" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
-                  />
-                  <Label
-                    htmlFor="expert"
-                    className="font-normal cursor-pointer"
-                  >
-                    Expert
-                  </Label>
-                </div>
+                    <RadioGroupItem
+                      value={lvl}
+                      id={lvl}
+                      className="radio-item w-5 h-5 rounded-full border-gray-400 dark:border-zinc-700 bg-white dark:bg-transparent"
+                    />
+                    <Label htmlFor={lvl} className="font-normal cursor-pointer">
+                      {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
+                    </Label>
+                  </div>
+                ))}
               </RadioGroup>
             </div>
 
-            {/* Number of Questions */}
             <div className="space-y-3">
               <Label htmlFor="question-count" className="text-base font-medium">
                 Number of Questions
@@ -219,11 +233,11 @@ export function StartSessionDialog({
               <Select value={questionCount} onValueChange={setQuestionCount}>
                 <SelectTrigger
                   id="question-count"
-                  className="border-zinc-800 bg-zinc-800 text-white"
+                  className="border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
                 >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-zinc-800 bg-zinc-900 text-white">
+                <SelectContent className="border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white">
                   {[2, 3, 4, 5, 6, 7].map((num) => (
                     <SelectItem key={num} value={num.toString()}>
                       {num} Questions
@@ -233,44 +247,27 @@ export function StartSessionDialog({
               </Select>
             </div>
 
-            {/* Interview Type */}
             <div className="space-y-3">
               <Label className="text-base font-medium">Interview Type</Label>
               <RadioGroup
                 value={interviewType}
                 onValueChange={setInterviewType}
               >
-                <div className="flex items-center justify-start space-x-2">
-                  <RadioGroupItem value="technical" id="technical" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
-                  />
-                  <Label
-                    htmlFor="technical"
-                    className="font-normal cursor-pointer"
+                {["technical", "behavioral", "mix"].map((type) => (
+                  <div
+                    key={type}
+                    className="flex items-center justify-start space-x-2"
                   >
-                    Technical
-                  </Label>
-                </div>
-                <div className="flex items-center justify-start space-x-2">
-                  <RadioGroupItem
-                    value="behavioral"
-                    id="behavioral"
-                    className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
-                  />
-                  
-                  <Label
-                    htmlFor="behavioral"
-                    className="font-normal cursor-pointer"
-                  >
-                    Behavioral
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="mix" id="mix" className="radio-item flex-shrink-0 w-5 h-5 rounded-full border border-zinc-700 bg-transparent flex items-center justify-center"
-                  />
-                  <Label htmlFor="mix" className="font-normal cursor-pointer">
-                    Mix
-                  </Label>
-                </div>
+                    <RadioGroupItem
+                      value={type}
+                      id={type}
+                      className="w-5 h-5 rounded-full border-gray-400 dark:border-zinc-700 bg-white dark:bg-transparent"
+                    />
+                    <Label htmlFor={type} className="font-normal cursor-pointer">
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Label>
+                  </div>
+                ))}
               </RadioGroup>
             </div>
           </div>
@@ -278,7 +275,7 @@ export function StartSessionDialog({
           <DialogFooter>
             <Button
               onClick={handleBeginInterview}
-              className="w-full bg-white text-zinc-950 hover:bg-zinc-100"
+              className="w-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100"
               disabled={isLoading}
             >
               {isLoading ? "Starting..." : "Begin Interview"}
