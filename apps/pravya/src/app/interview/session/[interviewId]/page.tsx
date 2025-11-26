@@ -20,6 +20,7 @@ import { io, Socket } from "socket.io-client";
 import Loader from "@/components/loader/loader";
 import { toast } from "sonner";
 import { InterviewLobbyPage } from "@/components/interview/interview-lobby/interview-lobby-page";
+import { getUserDetails } from "@/actions/user-action";
 
 // A new component for the "Listening..." animation
 const ListeningIndicator = () => {
@@ -36,6 +37,8 @@ const page = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUserDetailsLoading, setisUserDetailsLoading] = useState(false);
+  const [userDetails, setUserDetails] = useState<{} | null>(null);
   const [isLobby, setIsLobby] = useState(false);
   const [messages, setMessages] = useState<
     {
@@ -69,6 +72,22 @@ const page = () => {
   const lastMessage = messages[messages.length - 1];
   const isAgentListening = lastMessage?.role === "user" && lastMessage?.interim;
 
+  useEffect(() => {
+    const getSession = async () => {
+      try {
+        setisUserDetailsLoading(true);
+        const res = await getUserDetails();
+        setUserDetails(res);
+      } catch (error) {
+        toast.error("Falied to fetch User Details");
+        console.error("Error : ", error);
+      } finally {
+        setisUserDetailsLoading(false);
+      }
+    };
+    getSession();
+  }, []);
+
   const messagesRef = useRef(messages);
   useEffect(() => {
     messagesRef.current = messages;
@@ -99,7 +118,10 @@ const page = () => {
       setIsLoading(true);
       console.log("Transcribe : ", messagesRef.current);
 
-      const interview = await addInterviewTranscribe(interviewId, messagesRef.current);
+      const interview = await addInterviewTranscribe(
+        interviewId,
+        messagesRef.current
+      );
 
       if (interview) {
         toast.success("Interview Completed");
@@ -330,17 +352,17 @@ const page = () => {
 
   const handleLobbyConfirm = () => {
     setIsLobby(true);
-  }
+  };
 
-  if(!isLobby) {
-    return <InterviewLobbyPage handleConfirm={handleLobbyConfirm}/>;
+  if (!isLobby) {
+    return <InterviewLobbyPage handleConfirm={handleLobbyConfirm} />;
   }
 
   if (!interviewData) {
     return <Loader title="Interview Loading..." />;
   }
 
-  if (isLoading) {
+  if (isLoading && isUserDetailsLoading) {
     return (
       <>
         <Loader title="" />
@@ -348,177 +370,172 @@ const page = () => {
     );
   }
   return (
-  <>
-    <div className="min-h-screen w-full bg-white dark:bg-neutral-950 flex items-center p-4">
-      <div className="bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 p-2 w-full flex flex-col shadow-neutral-300 dark:shadow-neutral-900 shadow-2xl">
+    <>
+      <div className="min-h-screen w-full bg-white dark:bg-neutral-950 flex items-center p-4">
+        <div className="bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 p-2 w-full flex flex-col shadow-neutral-300 dark:shadow-neutral-900 shadow-2xl">
+          <div>
+            {/* Title */}
+            <h2 className="text-2xl px-4 py-2 pt-4 text-black dark:text-white">
+              {interviewData ? (
+                interviewData?.title
+              ) : (
+                <Skeleton className="h-5 w-[350px]" />
+              )}
+            </h2>
 
-        <div>
-          {/* Title */}
-          <h2 className="text-2xl px-4 py-2 pt-4 text-black dark:text-white">
-            {interviewData ? (
-              interviewData?.title
-            ) : (
-              <Skeleton className="h-5 w-[350px]" />
-            )}
-          </h2>
+            {/* Subtitle */}
+            <div className="text-l px-4 py-2 text-neutral-700 dark:text-white">
+              {interviewData ? (
+                "AI Interview Powered By Pravya AI"
+              ) : (
+                <Skeleton className="h-5 w-[350px]" />
+              )}
+            </div>
 
-          {/* Subtitle */}
-          <div className="text-l px-4 py-2 text-neutral-700 dark:text-white">
-            {interviewData ? (
-              "AI Interview Powered By Pravya AI"
-            ) : (
-              <Skeleton className="h-5 w-[350px]" />
-            )}
-          </div>
+            {/* GRID — Responsive */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full py-2">
+              {/* CARD 1 — Agent */}
+              <div className="w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
+                <div className="flex flex-col justify-center items-center h-full w-full">
+                  <div className="w-[110px] h-[110px] rounded-full">
+                    <Agent
+                      isListening={isAgentListening}
+                      isSpeaking={isAgentSpeaking}
+                      isThinking={isAgentThinking}
+                    />
+                  </div>
 
-          {/* GRID — Responsive */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full py-2">
-
-            {/* CARD 1 — Agent */}
-            <div className="w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
-              <div className="flex flex-col justify-center items-center h-full w-full">
-                <div className="w-[110px] h-[110px] rounded-full">
-                  <Agent
-                    isListening={isAgentListening}
-                    isSpeaking={isAgentSpeaking}
-                    isThinking={isAgentThinking}
-                  />
-                </div>
-
-                <div className="px-5 py-1 rounded-3xl mt-3
+                  <div
+                    className="px-5 py-1 rounded-3xl mt-3
                   bg-neutral-300 dark:bg-neutral-700
                   text-black dark:text-white
-                ">
-                  {isAgentSpeaking
-                    ? "Speaking..."
-                    : isAgentThinking
-                    ? "Thinking..."
-                    : isAgentListening
-                    ? "Listening..."
-                    : isRecording
-                    ? isReady
-                      ? "Recording..."
-                      : "Connecting..."
-                    : "Idle"}
+                "
+                  >
+                    {isAgentSpeaking
+                      ? "Speaking..."
+                      : isAgentThinking
+                      ? "Thinking..."
+                      : isAgentListening
+                      ? "Listening..."
+                      : isRecording
+                      ? isReady
+                        ? "Recording..."
+                        : "Connecting..."
+                      : "Idle"}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* CARD 2 — User Avatar (hidden on mobile) */}
-            <div className="hidden md:block w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
-              <div className="flex justify-center items-center h-full w-full">
-                <Image
-                  src="/user-avatar.png"
-                  width={110}
-                  height={110}
-                  alt="placerholder"
-                  className="rounded-full object-cover"
-                />
+              {/* CARD 2 — User Avatar (hidden on mobile) */}
+              <div className="hidden md:block w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
+                <div className="flex justify-center items-center h-full w-full">
+                  <div className="relative w-[110px] h-[110px]">
+                    <Image
+                      src={userDetails?.image || "/user-avatar.png"}
+                      alt="placeholder"
+                      fill
+                      loading="lazy"
+                      className="rounded-full object-cover"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* CARD 3 — Chat */}
-            <div className="w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
-              <div className="w-full h-full bg-transparent rounded-lg">
-                <div className="flex flex-col h-full font-sans">
-
-                  {/* Messages Area */}
-                  <div className="flex-1 p-4 overflow-y-auto">
-
-                    {messages.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-center">
-                        <MessageCircle className="h-16 w-16 text-neutral-400 dark:text-neutral-600" />
-                        <div className="mt-4 text-neutral-600 dark:text-neutral-400">
-                          <div>Your interview chat will appear here.</div>
-                          <div>Click the "Start" button below to begin.</div>
+              {/* CARD 3 — Chat */}
+              <div className="w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
+                <div className="w-full h-full bg-transparent rounded-lg">
+                  <div className="flex flex-col h-full font-sans">
+                    {/* Messages Area */}
+                    <div className="flex-1 p-4 overflow-y-auto">
+                      {messages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <MessageCircle className="h-16 w-16 text-neutral-400 dark:text-neutral-600" />
+                          <div className="mt-4 text-neutral-600 dark:text-neutral-400">
+                            <div>Your interview chat will appear here.</div>
+                            <div>Click the "Start" button below to begin.</div>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col space-y-4">
-
-                        {filteredMessages.map((msg) => (
-                          <div
-                            key={msg.id}
-                            className={`flex items-end gap-3 ${
-                              msg.role === "user"
-                                ? "justify-end"
-                                : "justify-start"
-                            }`}
-                          >
-                            {msg.role === "assistant" && (
-                              <img
-                                className="w-8 h-8 rounded-full"
-                                src={assistantAvatar}
-                                alt="Assistant Avatar"
-                              />
-                            )}
-
+                      ) : (
+                        <div className="flex flex-col space-y-4">
+                          {filteredMessages.map((msg) => (
                             <div
-                              className={`max-w-xs md:max-w-sm p-3 rounded-2xl ${
+                              key={msg.id}
+                              className={`flex items-end gap-3 ${
                                 msg.role === "user"
-                                  ? "bg-slate-200 text-neutral-900 rounded-br-none"
-                                  : "bg-neutral-300 dark:bg-neutral-700 text-black dark:text-white rounded-bl-none"
+                                  ? "justify-end"
+                                  : "justify-start"
                               }`}
                             >
-                              <p className="text-sm">{msg.text}</p>
+                              {msg.role === "assistant" && (
+                                <img
+                                  className="w-8 h-8 rounded-full"
+                                  src={assistantAvatar}
+                                  alt="Assistant Avatar"
+                                />
+                              )}
+
+                              <div
+                                className={`max-w-xs md:max-w-sm p-3 rounded-2xl ${
+                                  msg.role === "user"
+                                    ? "bg-slate-200 text-neutral-900 rounded-br-none"
+                                    : "bg-neutral-300 dark:bg-neutral-700 text-black dark:text-white rounded-bl-none"
+                                }`}
+                              >
+                                <p className="text-sm">{msg.text}</p>
+                              </div>
+
+                              {msg.role === "user" && (
+                                <img
+                                  className="w-8 h-8 rounded-full"
+                                  src={userAvatar}
+                                  alt="User Avatar"
+                                />
+                              )}
                             </div>
+                          ))}
 
-                            {msg.role === "user" && (
-                              <img
-                                className="w-8 h-8 rounded-full"
-                                src={userAvatar}
-                                alt="User Avatar"
-                              />
-                            )}
-                          </div>
-                        ))}
-
-                        {isAgentListening && (
-                          <div className="flex justify-end pr-12">
-                            <div className="text-sm flex text-neutral-600 dark:text-neutral-400 animate-pulse">
-                              <ListeningIndicator />
-                              Listening...
+                          {isAgentListening && (
+                            <div className="flex justify-end pr-12">
+                              <div className="text-sm flex text-neutral-600 dark:text-neutral-400 animate-pulse">
+                                <ListeningIndicator />
+                                Listening...
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
-                        <div ref={messagesEndRef} />
-                      </div>
-                    )}
-
+                          <div ref={messagesEndRef} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
+          {/* Start / Stop Button */}
+          <div className="flex w-full h-[100px] justify-center items-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={handleRecording}
+                    aria-label="End interview"
+                    className="rounded-3xl bg-red-500"
+                  >
+                    <PhoneIcon className="h-5 w-5 mr-2" />
+                    {isRecording ? "Stop" : "Start"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>End Interview</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
-
-        {/* Start / Stop Button */}
-        <div className="flex w-full h-[100px] justify-center items-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="destructive"
-                  onClick={handleRecording}
-                  aria-label="End interview"
-                  className="rounded-3xl bg-red-500"
-                >
-                  <PhoneIcon className="h-5 w-5 mr-2" />
-                  {isRecording ? "Stop" : "Start"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>End Interview</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
       </div>
-    </div>
-  </>
-);
-
+    </>
+  );
 };
 
 export default page;
