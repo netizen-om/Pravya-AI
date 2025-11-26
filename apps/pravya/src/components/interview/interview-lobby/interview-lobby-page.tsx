@@ -61,6 +61,8 @@ export function InterviewLobbyPage({ handleConfirm }: InterviewLobbyPageProps) {
 
   const handleMicChange = (deviceId: string) => {
     setSelectedDeviceId(deviceId)
+    console.log("Mic ID : ", deviceId);
+    
     setMicSelected(true)
   }
 

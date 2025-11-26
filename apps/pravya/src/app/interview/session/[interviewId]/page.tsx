@@ -427,7 +427,7 @@ const page = () => {
               </div>
 
               {/* CARD 2 — User Avatar (hidden on mobile) */}
-              <div className="hidden md:block w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
+              {/* <div className="hidden md:block w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
                 <div className="flex justify-center items-center h-full w-full">
                   <div className="relative w-[110px] h-[110px]">
                     <Image
@@ -437,6 +437,35 @@ const page = () => {
                       loading="lazy"
                       className="rounded-full object-cover"
                     />
+                  </div>
+                </div>
+              </div> */}
+              <div className="hidden md:block w-auto h-[450px] bg-neutral-100 dark:bg-neutral-900 rounded-lg">
+                <div className="flex justify-center items-center h-full w-full">
+                  <div className="relative w-[150px] h-[150px] flex items-center justify-center">
+                    {/* Subtle dark-mode glow */}
+                    {isAgentListening && (
+                      <div className="absolute w-[180px] h-[180px] rounded-full bg-neutral-500/90 dark:bg-neutral-500/70 blur-2xl animate-pulse" />
+                    )}
+
+                    {/* Soft ripple rings */}
+                    {isAgentListening && (
+                      <>
+                        <div className="absolute w-[170px] h-[170px] rounded-full border border-purple-500/20 dark:border-neutral-500/70 animate-ping" />
+                        <div className="absolute w-[195px] h-[195px] rounded-full border border-purple-500/10 dark:border-neutral-500/70 animate-ping [animation-delay:200ms]" />
+                      </>
+                    )}
+
+                    {/* User Image */}
+                    <div className="relative w-[110px] h-[110px] rounded-full overflow-hidden z-10 shadow-lg shadow-purple-500/10 dark:shadow-purple-400/10">
+                      <Image
+                        src={userDetails?.image || "/user-avatar.png"}
+                        alt="User Avatar"
+                        fill
+                        loading="lazy"
+                        className="rounded-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
