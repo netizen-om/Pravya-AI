@@ -15,10 +15,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { MoreHorizontal, Trash2, Download, ExternalLink } from "lucide-react"
+import { MoreHorizontal, Trash2, ExternalLink } from "lucide-react"
 import { getResumes, getResumeDetails, deleteResume } from "@/actions/resume-actions"
 import { toast } from "sonner"
 import { format } from "date-fns"
+
+// Shadcn Pagination
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationLink,
+} from "@/components/ui/pagination"
 
 interface Resume {
   id: string
@@ -38,8 +48,14 @@ export default function ResumeManagementPage() {
   const [detailsLoading, setDetailsLoading] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
 
+  // PAGINATION
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const totalPages = Math.ceil(resumes.length / pageSize)
+
   useEffect(() => {
     loadResumes()
+    setPage(1)
   }, [activeTab])
 
   async function loadResumes() {
@@ -81,9 +97,7 @@ export default function ResumeManagementPage() {
   }
 
   const handleDelete = async (resumeId: string) => {
-    if (!confirm("Are you sure you want to delete this resume?")) {
-      return
-    }
+    if (!confirm("Are you sure you want to delete this resume?")) return
 
     try {
       const result = await deleteResume(resumeId)
@@ -115,13 +129,14 @@ export default function ResumeManagementPage() {
     }
   }
 
+  // PAGINATION SLICING
+  const paginatedData = resumes.slice((page - 1) * pageSize, page * pageSize)
+
   if (loading) {
     return (
       <div className="p-8 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold">Resume Management</h1>
-          <p className="text-muted-foreground mt-1">Loading...</p>
-        </div>
+        <h1 className="text-3xl font-bold">Resume Management</h1>
+        <p className="text-muted-foreground mt-1">Loading...</p>
       </div>
     )
   }
@@ -145,7 +160,24 @@ export default function ResumeManagementPage() {
               </TabsList>
             </Tabs>
           </CardHeader>
+
           <CardContent>
+            {/* PAGE SIZE SELECTOR */}
+            <div className="flex justify-end mb-3">
+              <select
+                className="border rounded px-2 py-1 bg-background"
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value))
+                  setPage(1)
+                }}
+              >
+                <option value={10}>10 per page</option>
+                <option value={20}>20 per page</option>
+                <option value={30}>30 per page</option>
+              </select>
+            </div>
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -157,15 +189,17 @@ export default function ResumeManagementPage() {
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
-                {resumes.length > 0 ? (
-                  resumes.map((resume) => (
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((resume) => (
                     <TableRow key={resume.id}>
                       <TableCell className="font-mono text-sm">{resume.id}</TableCell>
                       <TableCell className="text-muted-foreground">{resume.user}</TableCell>
                       <TableCell className="text-sm">{resume.fileName}</TableCell>
                       <TableCell>{getStatusBadge(resume.analysisStatus)}</TableCell>
                       <TableCell className="text-muted-foreground">{resume.date}</TableCell>
+
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -173,10 +207,12 @@ export default function ResumeManagementPage() {
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
+
                           <DropdownMenuContent align="end" className="border-0">
                             <DropdownMenuItem onClick={() => handleViewDetails(resume.id)}>
                               View Details
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => handleDelete(resume.id)}
@@ -198,53 +234,90 @@ export default function ResumeManagementPage() {
                 )}
               </TableBody>
             </Table>
+
+            {/* PAGINATION BAR */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => page > 1 && setPage(page - 1)}
+                        className={page === 1 ? "opacity-50 pointer-events-none" : ""}
+                      />
+                    </PaginationItem>
+
+                    {Array.from({ length: totalPages }).map((_, idx) => (
+                      <PaginationItem key={idx}>
+                        <PaginationLink
+                          isActive={page === idx + 1}
+                          onClick={() => setPage(idx + 1)}
+                        >
+                          {idx + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => page < totalPages && setPage(page + 1)}
+                        className={page === totalPages ? "opacity-50 pointer-events-none" : ""}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
 
+      {/* DETAILS DIALOG */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Resume Details</DialogTitle>
-            <DialogDescription>
-              Resume ID: {selectedResume}
-            </DialogDescription>
+            <DialogDescription>Resume ID: {selectedResume}</DialogDescription>
           </DialogHeader>
+
           {detailsLoading ? (
             <div className="p-8 text-center">Loading...</div>
           ) : resumeDetails ? (
             <div className="space-y-6">
+              {/* DETAILS INFO */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">User</p>
-                  <p className="text-base">{resumeDetails.user.name || "N/A"} ({resumeDetails.user.email || "N/A"})</p>
+                  <p className="text-base">{resumeDetails.user.name} ({resumeDetails.user.email})</p>
                 </div>
+
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">File Name</p>
                   <p className="text-base">{resumeDetails.fileName}</p>
                 </div>
+
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Analysis Status</p>
                   <p className="text-base">{getStatusBadge(resumeDetails.AnalysisStatus)}</p>
                 </div>
+
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Qdrant Status</p>
                   <p className="text-base">{getStatusBadge(resumeDetails.QdrantStatus)}</p>
                 </div>
+
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Created At</p>
                   <p className="text-base">
-                    {resumeDetails.createdAt
-                      ? format(new Date(resumeDetails.createdAt), "PPp")
-                      : "N/A"}
+                    {format(new Date(resumeDetails.createdAt), "PPp")}
                   </p>
                 </div>
+
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">File URL</p>
                   <a
                     href={resumeDetails.fileUrl}
                     target="_blank"
-                    rel="noopener noreferrer"
                     className="text-primary hover:underline flex items-center gap-1"
                   >
                     View File
@@ -253,22 +326,20 @@ export default function ResumeManagementPage() {
                 </div>
               </div>
 
+              {/* ANALYSIS */}
               {resumeDetails.ResumeAnalysis && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2">Analysis Results</p>
+
                   <div className="p-4 border rounded space-y-3">
                     {resumeDetails.ResumeAnalysis.atsScore !== null && (
-                      <div>
-                        <p className="font-medium">ATS Score: {resumeDetails.ResumeAnalysis.atsScore}/100</p>
-                      </div>
+                      <p className="font-medium">ATS Score: {resumeDetails.ResumeAnalysis.atsScore}/100</p>
                     )}
+
                     {resumeDetails.ResumeAnalysis.analysis && (
-                      <div>
-                        <p className="text-sm font-medium mb-1">Analysis Data</p>
-                        <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-96">
-                          {JSON.stringify(resumeDetails.ResumeAnalysis.analysis, null, 2)}
-                        </pre>
-                      </div>
+                      <pre className="bg-muted p-3 rounded text-xs max-h-96 overflow-auto">
+                        {JSON.stringify(resumeDetails.ResumeAnalysis.analysis, null, 2)}
+                      </pre>
                     )}
                   </div>
                 </div>

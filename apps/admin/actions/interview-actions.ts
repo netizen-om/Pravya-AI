@@ -14,11 +14,11 @@ export async function getInterviews(filter?: "all" | "completed" | "pending" | "
     const where: any = { isDeleted: false };
     
     if (filter === "completed") {
-      where.status = "completed";
+      where.status = "COMPLETED";
     } else if (filter === "pending") {
-      where.status = "pending";
+      where.status = "PENDING";
     } else if (filter === "error") {
-      where.status = "error";
+      where.status = "ERROR";
     }
 
     const interviews = await prisma.interview.findMany({
@@ -51,9 +51,9 @@ export async function getInterviews(filter?: "all" | "completed" | "pending" | "
     const formattedInterviews = interviews.map((interview) => ({
       id: interview.interviewId,
       user: interview.user.email || "N/A",
-      template: interview.template.title,
+      template: interview.template?.title || "Personalised",
       status: interview.status.charAt(0).toUpperCase() + interview.status.slice(1),
-      score: interview.feedback?.overallScore ? interview.feedback.overallScore / 10 : null,
+      score: interview.feedback?.overallScore ? interview.feedback.overallScore : null,
       date: interview.createdAt ? new Date(interview.createdAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -98,7 +98,7 @@ export async function getInterviewDetails(interviewId: string) {
           },
         },
         feedback: true,
-        audio: true,
+       
       },
     });
 
