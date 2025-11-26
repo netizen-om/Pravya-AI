@@ -35,20 +35,22 @@ const ListeningIndicator = () => {
 
 const page = () => {
   const [isRecording, setIsRecording] = useState(false);
+  
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUserDetailsLoading, setisUserDetailsLoading] = useState(false);
   const [userDetails, setUserDetails] = useState<{} | null>(null);
   const [isLobby, setIsLobby] = useState(false);
   const [messages, setMessages] = useState<
-    {
-      id: string;
-      role: "user" | "assistant";
-      text: string;
-      interim?: boolean;
-    }[]
+  {
+    id: string;
+    role: "user" | "assistant";
+    text: string;
+    interim?: boolean;
+  }[]
   >([]);
-
+  
+  const [selectedMic, setSelectedMic] = useState<string | null>(null);
   const params = useParams<{ interviewId: string }>();
   const interviewId = params.interviewId;
 
@@ -91,6 +93,8 @@ const page = () => {
   const messagesRef = useRef(messages);
   useEffect(() => {
     messagesRef.current = messages;
+    console.log("Currently using : ", selectedMic );
+    
   }, [messages]);
 
   useEffect(() => {
@@ -309,7 +313,7 @@ const page = () => {
       // Start recording
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
+          audio: selectedMic ? { deviceId: selectedMic } : true,
         });
         mediaRecorderRef.current = new MediaRecorder(stream, {
           mimeType: "audio/webm;codecs=opus",
@@ -355,7 +359,7 @@ const page = () => {
   };
 
   if (!isLobby) {
-    return <InterviewLobbyPage handleConfirm={handleLobbyConfirm} />;
+    return <InterviewLobbyPage handleConfirm={handleLobbyConfirm} setSelectedMic={setSelectedMic} />;
   }
 
   if (!interviewData) {

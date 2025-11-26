@@ -97,7 +97,6 @@ io.on("connection", (socket) => {
     if (!text) return;
 
     isAgentSpeaking = true;
-
     console.log("AI says:", text);
 
     socket.emit("agent-transcript", {
@@ -112,22 +111,40 @@ io.on("connection", (socket) => {
 
     try {
       const ttsResponse = await deepgramClient.speak.request({ text }, {
-        model: "aura-asteria-en",
+        model: "aura-2-juno-en",
         format: "mp3",
       } as any);
 
       const stream = await ttsResponse.getStream();
       if (stream) {
         socket.emit("ai-audio-begin", { mimeType: "audio/mpeg" });
+
+        // --- FIX STARTS HERE ---
+        // We buffer chunks to ensure we aren't sending tiny packets that break MP3 frames
+        let buffer = Buffer.alloc(0);
+        const CHUNK_SIZE = 4096; // 4KB chunks (good balance of latency vs stability)
+
         for await (const chunk of toAsyncIterable(stream as any)) {
-          socket.emit("ai-audio-chunk", Buffer.from(chunk));
+          buffer = Buffer.concat([buffer, Buffer.from(chunk)]);
+
+          // Only emit if we have enough data
+          if (buffer.length >= CHUNK_SIZE) {
+            socket.emit("ai-audio-chunk", buffer);
+            buffer = Buffer.alloc(0);
+          }
         }
+
+        // Emit any remaining data in the buffer
+        if (buffer.length > 0) {
+          socket.emit("ai-audio-chunk", buffer);
+        }
+        // --- FIX ENDS HERE ---
+
         socket.emit("ai-audio-end");
         console.log("Audio stream finished.");
       }
     } catch (error) {
       console.error("Error during Text-to-Speech generation:", error);
-      // Fallback: emit text message if TTS fails
       socket.emit("ai-message", { text, timestamp: new Date().toISOString() });
     } finally {
       isAgentSpeaking = false;

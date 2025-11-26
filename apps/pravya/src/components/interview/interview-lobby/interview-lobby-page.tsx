@@ -1,147 +1,171 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
-import { ArrowRight, MicOff, AlertTriangle } from "lucide-react"
-import { BestPracticesList } from "./best-practices-list"
-import { MicrophoneSetup } from "./microphone-setup"
+import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { ArrowRight, MicOff, AlertTriangle } from "lucide-react";
+import { BestPracticesList } from "./best-practices-list";
+import { MicrophoneSetup } from "./microphone-setup";
 
 interface InterviewLobbyPageProps {
-  handleConfirm: () => void
+  handleConfirm: () => void;
+  setSelectedMic: (deviceId: string) => void;
 }
 
-export function InterviewLobbyPage({ handleConfirm }: InterviewLobbyPageProps) {
-  const [permissionStatus, setPermissionStatus] = useState<"idle" | "granted" | "denied">("idle")
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("")
-  const [audioLevel, setAudioLevel] = useState(0)
-  const [micSelected, setMicSelected] = useState(false)
+export function InterviewLobbyPage({
+  handleConfirm,
+  setSelectedMic,
+}: InterviewLobbyPageProps) {
+  const [permissionStatus, setPermissionStatus] = useState<
+    "idle" | "granted" | "denied"
+  >("idle");
 
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const analyserRef = useRef<AnalyserNode | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const animationFrameRef = useRef<number | null>(null)
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [audioLevel, setAudioLevel] = useState<number>(0);
 
-  // Helper — safely close AudioContext
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  // Safely close AudioContext
   const closeAudioContext = async () => {
     try {
-      const ctx = audioContextRef.current
+      const ctx = audioContextRef.current;
       if (ctx && ctx.state !== "closed") {
-        await ctx.close()
+        await ctx.close();
       }
-      audioContextRef.current = null
+      audioContextRef.current = null;
     } catch (err) {
-      console.warn("AudioContext already closed or failed to close:", err)
+      console.warn("AudioContext close failed:", err);
     }
-  }
+  };
 
   const handleRequestPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
 
-      setPermissionStatus("granted")
+      setPermissionStatus("granted");
 
-      const allDevices = await navigator.mediaDevices.enumerateDevices()
-      const audioDevices = allDevices.filter((d) => d.kind === "audioinput")
-      setDevices(audioDevices)
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      const audioDevices = allDevices.filter(
+        (d) => d.kind === "audioinput"
+      );
+
+      setDevices(audioDevices);
 
       if (audioDevices.length > 0) {
-        setSelectedDeviceId(audioDevices[0].deviceId)
+        const firstDevice = audioDevices[0].deviceId;
+        setSelectedDeviceId(firstDevice);
+        setSelectedMic(firstDevice);
       }
     } catch (err) {
-      console.error("[v0] Microphone permission error:", err)
-      setPermissionStatus("denied")
+      console.error("Microphone permission error:", err);
+      setPermissionStatus("denied");
     }
-  }
+  };
 
   const handleMicChange = (deviceId: string) => {
-    setSelectedDeviceId(deviceId)
-    console.log("Mic ID : ", deviceId);
-    
-    setMicSelected(true)
-  }
+    setSelectedDeviceId(deviceId);
+    setSelectedMic(deviceId);
+  };
 
   useEffect(() => {
-    if (!selectedDeviceId) return
+    if (!selectedDeviceId) return;
 
-    const setupAudioStream = async () => {
+    const setupAudio = async () => {
       try {
-        // Stop and cleanup previous stream
+        // Stop old stream
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop())
-          streamRef.current = null
+          streamRef.current.getTracks().forEach((t) => t.stop());
+          streamRef.current = null;
         }
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current)
-          animationFrameRef.current = null
-        }
-        await closeAudioContext()
 
-        // Get new stream for selected device
-        const constraints = {
+        if (animationFrameRef.current !== null) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+
+        await closeAudioContext();
+
+        // Start a new stream for selected mic
+        const newStream = await navigator.mediaDevices.getUserMedia({
           audio: { deviceId: { exact: selectedDeviceId } },
-        }
-        const stream = await navigator.mediaDevices.getUserMedia(constraints)
-        streamRef.current = stream
+        });
 
-        // Setup Web Audio API
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
-        audioContextRef.current = ctx
-        const analyser = ctx.createAnalyser()
-        analyserRef.current = analyser
-        analyser.fftSize = 256
+        streamRef.current = newStream;
 
-        const source = ctx.createMediaStreamSource(stream)
-        source.connect(analyser)
+        const ctx = new AudioContext();
+        audioContextRef.current = ctx;
 
-        const dataArray = new Uint8Array(analyser.frequencyBinCount)
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        analyserRef.current = analyser;
+
+        const source = ctx.createMediaStreamSource(newStream);
+        source.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
         const visualize = () => {
-          if (!analyserRef.current) return
-          analyserRef.current.getByteFrequencyData(dataArray)
-          const avg = dataArray.reduce((a, b) => a + b) / dataArray.length
-          setAudioLevel(avg)
-          animationFrameRef.current = requestAnimationFrame(visualize)
-        }
+          if (!analyserRef.current) return;
 
-        visualize()
+          analyserRef.current.getByteFrequencyData(dataArray);
+          const avg =
+            dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length;
+
+          setAudioLevel(avg);
+
+          animationFrameRef.current = requestAnimationFrame(visualize);
+        };
+
+        visualize();
       } catch (err) {
-        console.error("[v0] Error setting up audio stream:", err)
+        console.error("Mic setup error:", err);
       }
-    }
+    };
 
-    setupAudioStream()
+    setupAudio();
 
-    // Cleanup
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop())
-        streamRef.current = null
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
       }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-        animationFrameRef.current = null
+
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
-      closeAudioContext()
-    }
-  }, [selectedDeviceId])
+
+      closeAudioContext();
+    };
+  }, [selectedDeviceId]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-neutral-950">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1.0 }}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
+        transition={{ duration: 0.5 }}
         className="w-full max-w-2xl"
       >
         <Card className="bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 shadow-2xl shadow-black/10">
           <CardHeader className="p-6 md:p-8">
-            <CardTitle className="text-3xl font-bold tracking-tight">Interview Setup</CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight">
+              Interview Setup
+            </CardTitle>
             <CardDescription className="text-lg text-neutral-500 dark:text-neutral-400">
               Let's check your audio and review best practices.
             </CardDescription>
@@ -153,16 +177,24 @@ export function InterviewLobbyPage({ handleConfirm }: InterviewLobbyPageProps) {
             <Separator className="bg-neutral-200 dark:bg-neutral-800" />
 
             <div className="space-y-4">
-              <h3 className="font-semibold text-neutral-900 dark:text-white">Microphone Setup</h3>
+              <h3 className="font-semibold text-neutral-900 dark:text-white">
+                Microphone Setup
+              </h3>
 
+              {/* === Permission UI === */}
               {permissionStatus === "idle" && (
                 <Alert className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-900">
                   <MicOff className="h-5 w-5 text-amber-600" />
-                  <AlertTitle className="text-amber-900 dark:text-amber-200">Permission Required</AlertTitle>
+                  <AlertTitle className="text-amber-900 dark:text-amber-200">
+                    Permission Required
+                  </AlertTitle>
                   <AlertDescription className="text-amber-800 dark:text-amber-300">
                     We need permission to access your microphone.
                   </AlertDescription>
-                  <Button onClick={handleRequestPermission} className="mt-4 bg-amber-600 hover:bg-amber-700 text-white">
+                  <Button
+                    onClick={handleRequestPermission}
+                    className="mt-4 bg-amber-600 hover:bg-amber-700 text-white"
+                  >
                     Grant Permission
                   </Button>
                 </Alert>
@@ -173,11 +205,12 @@ export function InterviewLobbyPage({ handleConfirm }: InterviewLobbyPageProps) {
                   <AlertTriangle className="h-5 w-5" />
                   <AlertTitle>Permission Denied</AlertTitle>
                   <AlertDescription>
-                    Please enable microphone access in your browser settings to continue.
+                    Please enable microphone access in your browser settings.
                   </AlertDescription>
                 </Alert>
               )}
 
+              {/* === Mic Selection UI === */}
               {permissionStatus === "granted" && (
                 <MicrophoneSetup
                   devices={devices}
@@ -203,5 +236,5 @@ export function InterviewLobbyPage({ handleConfirm }: InterviewLobbyPageProps) {
         </Card>
       </motion.div>
     </div>
-  )
+  );
 }
