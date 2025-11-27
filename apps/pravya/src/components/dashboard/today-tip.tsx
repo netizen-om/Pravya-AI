@@ -10,27 +10,20 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HoverGradient } from "../HoverGradient";
-
-// Tiny trend data for Interview Mode Activity
-const interviewTrend = [
-  { day: "Monday", value: 3 },
-  { day: "Tuesday", value: 4 },
-  { day: "Wednesday", value: 0 },
-  { day: "Thursday", value: 5 },
-  { day: "Friday", value: 3 },
-  { day: "Saturday", value: 6 },
-  { day: "Sunday", value: 4 },
-];
+import type { InterviewTrendData } from "@/actions/dashboard-action";
 
 interface TodaysTipProps {
   isDark: boolean;
+  interviewTrend: InterviewTrendData[];
 }
 
-export function TodaysTip({ isDark }: TodaysTipProps) {
+export function TodaysTip({ isDark, interviewTrend }: TodaysTipProps) {
+  const hasTrendData = interviewTrend && interviewTrend.length > 0;
+  const totalInterviews = interviewTrend?.reduce((sum, day) => sum + day.value, 0) || 0;
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -84,39 +77,60 @@ export function TodaysTip({ isDark }: TodaysTipProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center h-[100px]">
-              <div className="w-full h-[70px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={interviewTrend}>
-                    <XAxis dataKey="day" hide />
-                    <YAxis hide />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: isDark ? "#171717" : "#f9f9f9",
-                        borderRadius: "8px",
-                        border: "none",
-                        color: isDark ? "#fff" : "#000",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke={isDark ? "#38BDF8" : "#3B82F6"}
-                      strokeWidth={2.2}
-                      dot={false}
-                      activeDot={{ r: 4 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <p
-                className={cn(
-                  "text-xs mt-2",
-                  isDark ? "text-gray-400" : "text-gray-500"
-                )}
-              >
-                Your weekly interview activity pattern
-              </p>
+              {hasTrendData && totalInterviews > 0 ? (
+                <>
+                  <div className="w-full h-[70px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={interviewTrend}>
+                        <XAxis dataKey="day" hide />
+                        <YAxis hide />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDark ? "#171717" : "#f9f9f9",
+                            borderRadius: "8px",
+                            border: "none",
+                            color: isDark ? "#fff" : "#000",
+                            fontSize: "12px",
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke={isDark ? "#38BDF8" : "#3B82F6"}
+                          strokeWidth={2.2}
+                          dot={false}
+                          activeDot={{ r: 4 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <p
+                    className={cn(
+                      "text-xs mt-2",
+                      isDark ? "text-gray-400" : "text-gray-500"
+                    )}
+                  >
+                    Your weekly interview activity pattern
+                  </p>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <TrendingUp
+                    className={cn(
+                      "h-8 w-8 mb-2",
+                      isDark ? "text-neutral-600" : "text-gray-300"
+                    )}
+                  />
+                  <p
+                    className={cn(
+                      "text-xs",
+                      isDark ? "text-gray-400" : "text-gray-500"
+                    )}
+                  >
+                    Complete interviews to see your activity trend
+                  </p>
+                </div>
+              )}
             </CardContent>
           </HoverGradient>
         </Card>

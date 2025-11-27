@@ -1,48 +1,26 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, Target, FileText, Flame } from "lucide-react";
+import { TrendingUp, Target, FileText, Flame, LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { MagicCard } from "../../components/ui/magic-card";
 import { HoverGradient } from "../HoverGradient";
+import type { QuickStatsData } from "@/actions/dashboard-action";
 
 interface QuickStatsProps {
   isDark: boolean;
+  data: QuickStatsData | null;
 }
 
-const stats = [
-  {
-    title: "Interviews Taken",
-    value: "23",
-    icon: Target,
-    description: "This month",
-    color: "blue",
-  },
-  {
-    title: "Average Score",
-    value: "87%",
-    icon: TrendingUp,
-    description: "Last 10 interviews",
-    color: "purple",
-  },
-  {
-    title: "Last Resume",
-    value: "resume_v2.pdf",
-    icon: FileText,
-    description: "Uploaded 2 days ago",
-    href: "/resume/analysis",
-    color: "green",
-  },
-  {
-    title: "Streak",
-    value: "3 days",
-    icon: Flame,
-    description: "Practiced in a row",
-    color: "orange",
-  },
-];
+interface StatItem {
+  title: string;
+  value: string;
+  icon: LucideIcon;
+  description: string;
+  color: string;
+  href?: string;
+}
 
 // Define a mapping for Tailwind colors to be applied safely
 const colorMap: Record<string, string> = {
@@ -52,7 +30,85 @@ const colorMap: Record<string, string> = {
   orange: "text-orange-500",
 };
 
-export function QuickStats({ isDark }: QuickStatsProps) {
+// Helper to format stats from data
+function buildStats(data: QuickStatsData | null): StatItem[] {
+  if (!data) {
+    return [
+      {
+        title: "Interviews Taken",
+        value: "0",
+        icon: Target,
+        description: "This month",
+        color: "blue",
+      },
+      {
+        title: "Average Score",
+        value: "—",
+        icon: TrendingUp,
+        description: "Complete interviews to see",
+        color: "purple",
+      },
+      {
+        title: "Last Resume",
+        value: "No resume",
+        icon: FileText,
+        description: "Upload a resume to get started",
+        color: "green",
+        href: "/resume/upload",
+      },
+      {
+        title: "Streak",
+        value: "0 days",
+        icon: Flame,
+        description: "Start practicing!",
+        color: "orange",
+      },
+    ];
+  }
+
+  const resumeDescription = data.lastResume
+    ? data.lastResume.uploadedDaysAgo === 0
+      ? "Uploaded today"
+      : data.lastResume.uploadedDaysAgo === 1
+      ? "Uploaded 1 day ago"
+      : `Uploaded ${data.lastResume.uploadedDaysAgo} days ago`
+    : "Upload a resume to get started";
+
+  return [
+    {
+      title: "Interviews Taken",
+      value: data.interviewsThisMonth.toString(),
+      icon: Target,
+      description: "This month",
+      color: "blue",
+    },
+    {
+      title: "Average Score",
+      value: data.averageScore !== null ? `${data.averageScore}%` : "—",
+      icon: TrendingUp,
+      description: data.averageScore !== null ? "Last 10 interviews" : "Complete interviews to see",
+      color: "purple",
+    },
+    {
+      title: "Last Resume",
+      value: data.lastResume?.fileName || "No resume",
+      icon: FileText,
+      description: resumeDescription,
+      color: "green",
+      href: data.lastResume ? undefined : "/resume/upload",
+    },
+    {
+      title: "Streak",
+      value: `${data.streak} day${data.streak !== 1 ? "s" : ""}`,
+      icon: Flame,
+      description: data.streak > 0 ? "Practiced in a row" : "Start practicing!",
+      color: "orange",
+    },
+  ];
+}
+
+export function QuickStats({ isDark, data }: QuickStatsProps) {
+  const stats = buildStats(data);
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
@@ -105,7 +161,7 @@ function StatContent({
   stat,
   isDark,
 }: {
-  stat: (typeof stats)[0];
+  stat: StatItem;
   isDark: boolean;
 }) {
   return (

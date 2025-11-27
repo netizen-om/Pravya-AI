@@ -17,50 +17,22 @@ import {
   Tooltip,
 } from "recharts";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { MagicCard } from "../ui/magic-card";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { useHydrationSafeTheme } from "@/components/hooks/useHydrationSafeTheme";
 import { HoverGradient } from "../HoverGradient";
-
-// 7-day data (Interview + ATS)
-const scoresData7Days = [
-  { date: "Mon", interviewScore: 78, atsScore: 84 },
-  { date: "Tue", interviewScore: 82, atsScore: 81 },
-  { date: "Wed", interviewScore: 85, atsScore: 88 },
-  { date: "Thu", interviewScore: 79, atsScore: 83 },
-  { date: "Fri", interviewScore: 88, atsScore: 90 },
-  { date: "Sat", interviewScore: 91, atsScore: 86 },
-  { date: "Sun", interviewScore: 87, atsScore: 92 },
-];
-
-// 30-day data (Weekly average)
-const scoresData30Days = [
-  { date: "Week 1", interviewScore: 75, atsScore: 80 },
-  { date: "Week 2", interviewScore: 82, atsScore: 85 },
-  { date: "Week 3", interviewScore: 88, atsScore: 90 },
-  { date: "Week 4", interviewScore: 87, atsScore: 88 },
-];
-
-// Enhanced Radar data
-const strengthsData = [
-  { skill: "Communication", score: 92 },
-  { skill: "Technical", score: 85 },
-  { skill: "Problem-Solving", score: 78 },
-  { skill: "Confidence", score: 88 },
-  { skill: "Soft Skills", score: 90 },
-  { skill: "Hard Skills", score: 82 },
-];
+import { BarChart3 } from "lucide-react";
+import type { PerformanceData } from "@/actions/dashboard-action";
 
 interface PerformanceAnalyticsProps {
   isDark: boolean;
+  data: PerformanceData | null;
 }
 
-export function PerformanceAnalytics({ isDark }: PerformanceAnalyticsProps) {
-  const [timeRange, setTimeRange] = useState<"7days" | "30days">("7days");
-
-  const scoresData = timeRange === "7days" ? scoresData7Days : scoresData30Days;
+export function PerformanceAnalytics({ isDark, data }: PerformanceAnalyticsProps) {
+  const scoresData = data?.scoresOverTime || [];
+  const strengthsData = data?.strengthsData || [];
+  
+  const hasScoresData = scoresData.length > 0;
+  const hasStrengthsData = strengthsData.length > 0;
 
   return (
     <motion.section
@@ -109,62 +81,81 @@ export function PerformanceAnalytics({ isDark }: PerformanceAnalyticsProps) {
                 </h3>
 
                 <div className="h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={scoresData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke={"#404040"}
+                  {hasScoresData ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={scoresData}>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={"#404040"}
+                        />
+                        <XAxis
+                          dataKey="date"
+                          stroke={"#a3a3a3"}
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          stroke={"#a3a3a3"}
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                          domain={[0, 100]}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDark ? "#18181b" : "#f9fafb",
+                            borderRadius: "8px",
+                            border: "none",
+                            color: isDark ? "#fff" : "#000",
+                          }}
+                        />
+                        <Legend
+                          verticalAlign="top"
+                          height={36}
+                          wrapperStyle={{
+                            fontSize: "12px",
+                            color: "#a3a3a3",
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="interviewScore"
+                          name="Interview Score"
+                          stroke={isDark ? "#22C55E" : "#2563EB"}
+                          strokeWidth={2.5}
+                          dot={{ r: 3 }}
+                          activeDot={{ r: 6 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="atsScore"
+                          name="Resume ATS Score"
+                          stroke={isDark ? "#38BDF8" : "#0EA5E9"}
+                          strokeWidth={2.5}
+                          dot={{ r: 3 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <BarChart3
+                        className={cn(
+                          "h-10 w-10 mb-3",
+                          isDark ? "text-neutral-600" : "text-gray-300"
+                        )}
                       />
-                      <XAxis
-                        dataKey="date"
-                        stroke={"#a3a3a3"}
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke={"#a3a3a3"}
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                        domain={[60, 100]}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: isDark ? "#18181b" : "#f9fafb",
-                          borderRadius: "8px",
-                          border: "none",
-                          color: isDark ? "#fff" : "#000",
-                        }}
-                      />
-                      <Legend
-                        verticalAlign="top"
-                        height={36}
-                        wrapperStyle={{
-                          fontSize: "12px",
-                          color: "#a3a3a3",
-                        }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="interviewScore"
-                        name="Interview Score"
-                        stroke={isDark ? "#22C55E" : "#2563EB"}
-                        strokeWidth={2.5}
-                        dot={{ r: 3 }}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="atsScore"
-                        name="Resume ATS Score"
-                        stroke={isDark ? "#38BDF8" : "#0EA5E9"}
-                        strokeWidth={2.5}
-                        dot={{ r: 3 }}
-                        activeDot={{ r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                      <p
+                        className={cn(
+                          "text-sm",
+                          isDark ? "text-neutral-400" : "text-gray-500"
+                        )}
+                      >
+                        Complete interviews to see your score trends
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </HoverGradient>
@@ -202,86 +193,105 @@ export function PerformanceAnalytics({ isDark }: PerformanceAnalyticsProps) {
                 </h3>
 
                 <div className="h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart
-                      cx="50%"
-                      cy="50%"
-                      outerRadius="80%"
-                      data={strengthsData}
-                    >
-                      <PolarGrid stroke={isDark ? "#404040" : "#e5e7eb"} />
-                      <PolarAngleAxis
-                        dataKey="skill"
-                        stroke={isDark ? "#a3a3a3" : "#6b7280"}
-                        fontSize={13}
+                  {hasStrengthsData ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart
+                        cx="50%"
+                        cy="50%"
+                        outerRadius="80%"
+                        data={strengthsData}
+                      >
+                        <PolarGrid stroke={isDark ? "#404040" : "#e5e7eb"} />
+                        <PolarAngleAxis
+                          dataKey="skill"
+                          stroke={isDark ? "#a3a3a3" : "#6b7280"}
+                          fontSize={13}
+                        />
+                        <PolarRadiusAxis
+                          angle={60}
+                          domain={[0, 100]}
+                          stroke={isDark ? "#a3a3a3" : "#6b7280"}
+                          tickCount={5}
+                        />
+                        <Radar
+                          name="Skill Score"
+                          dataKey="score"
+                          stroke={isDark ? "#22C55E" : "#3B82F6"}
+                          fill={
+                            isDark
+                              ? "url(#radarGradientDark)"
+                              : "url(#radarGradientLight)"
+                          }
+                          fillOpacity={0.5}
+                          animationBegin={200}
+                          animationDuration={1000}
+                        />
+                        <defs>
+                          <linearGradient
+                            id="radarGradientLight"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#60A5FA"
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#3B82F6"
+                              stopOpacity={0.2}
+                            />
+                          </linearGradient>
+                          <linearGradient
+                            id="radarGradientDark"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#22C55E"
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#15803D"
+                              stopOpacity={0.2}
+                            />
+                          </linearGradient>
+                        </defs>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: isDark ? "#18181b" : "#f9fafb",
+                            borderRadius: "8px",
+                            border: "none",
+                            color: isDark ? "#fff" : "#000",
+                          }}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <BarChart3
+                        className={cn(
+                          "h-10 w-10 mb-3",
+                          isDark ? "text-neutral-600" : "text-gray-300"
+                        )}
                       />
-                      <PolarRadiusAxis
-                        angle={60}
-                        domain={[0, 100]}
-                        stroke={isDark ? "#a3a3a3" : "#6b7280"}
-                        tickCount={5}
-                      />
-                      <Radar
-                        name="Skill Score"
-                        dataKey="score"
-                        stroke={isDark ? "#22C55E" : "#3B82F6"}
-                        fill={
-                          isDark
-                            ? "url(#radarGradientDark)"
-                            : "url(#radarGradientLight)"
-                        }
-                        fillOpacity={0.5}
-                        animationBegin={200}
-                        animationDuration={1000}
-                      />
-                      <defs>
-                        <linearGradient
-                          id="radarGradientLight"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#60A5FA"
-                            stopOpacity={0.8}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#3B82F6"
-                            stopOpacity={0.2}
-                          />
-                        </linearGradient>
-                        <linearGradient
-                          id="radarGradientDark"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#22C55E"
-                            stopOpacity={0.8}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#15803D"
-                            stopOpacity={0.2}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: isDark ? "#18181b" : "#f9fafb",
-                          borderRadius: "8px",
-                          border: "none",
-                          color: isDark ? "#fff" : "#000",
-                        }}
-                      />
-                    </RadarChart>
-                  </ResponsiveContainer>
+                      <p
+                        className={cn(
+                          "text-sm",
+                          isDark ? "text-neutral-400" : "text-gray-500"
+                        )}
+                      >
+                        Complete interviews to see your skill analysis
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </HoverGradient>
