@@ -105,25 +105,25 @@ export default function DashboardPage() {
       label: "Total Users",
       value: metrics.totalUsers.toLocaleString(),
       icon: Users,
-      color: "text-accent",
+      color: "text-purple-500",
     },
     {
       label: "Subscribed Users",
       value: metrics.subscribedUsers.toLocaleString(),
       icon: Star,
-      color: "text-primary",
+      color: "text-blue-500",
     },
     {
       label: "Total Revenue",
       value: `₹${metrics.totalRevenue.toLocaleString()}`,
       icon: DollarSign,
-      color: "text-primary",
+      color: "text-green-500",
     },
     {
       label: "Interviews Done",
       value: metrics.totalInterviews.toLocaleString(),
       icon: Mic,
-      color: "text-accent",
+      color: "text-orange-500",
     },
   ];
   const containerVariants = {

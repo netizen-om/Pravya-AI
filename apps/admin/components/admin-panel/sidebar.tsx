@@ -14,54 +14,33 @@ import {
   Menu,
   X,
   Shield,
+  Sun,
+  Moon,
+  Laptop,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useTheme } from "next-themes";
+import { AnimatedThemeToggler } from "../theme/animated-theme-toggler";
 
+// ---- Roles ----
 enum AdminRoleType {
   SUPER_ADMIN = "SUPER_ADMIN",
   MANAGER = "MANAGER",
   SUPPORT = "SUPPORT",
 }
 
+// ---- Navigation Items ----
 const navigationItems = [
-  {
-    label: "Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Users",
-    href: "/admin/users",
-    icon: Users,
-  },
-  {
-    label: "Interviews",
-    href: "/admin/interviews",
-    icon: Mic,
-  },
-  {
-    label: "Resumes",
-    href: "/admin/resumes",
-    icon: FileText,
-  },
-  {
-    label: "Content",
-    href: "/admin/content",
-    icon: BookOpen,
-  },
-  {
-    label: "Financials",
-    href: "/admin/financials",
-    icon: DollarSign,
-  },
-  {
-    label: "System Health",
-    href: "/admin/system",
-    icon: Activity,
-  },
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Interviews", href: "/admin/interviews", icon: Mic },
+  { label: "Resumes", href: "/admin/resumes", icon: FileText },
+  { label: "Content", href: "/admin/content", icon: BookOpen },
+  { label: "Financials", href: "/admin/financials", icon: DollarSign },
+  { label: "System Health", href: "/admin/system", icon: Activity },
 ];
 
 const superAdminItems = [
@@ -76,13 +55,24 @@ const superAdminItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+
   const [isOpen, setIsOpen] = useState(true);
   const [currentAdmin, setCurrentAdmin] = useState<{
     role: AdminRoleType;
   } | null>(null);
 
+  // ---------------------
+  // HYDRATION-SAFE THEME
+  // ---------------------
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    // Fetch current admin to check role
+    setMounted(true); // Prevent hydration mismatch
+  }, []);
+
+  // Fetch Admin Info
+  useEffect(() => {
     fetch("/api/auth/me")
       .then((res) => res.json())
       .then((data) => {
@@ -90,11 +80,10 @@ export function Sidebar() {
           setCurrentAdmin(data.admin);
         }
       })
-      .catch(() => {
-        // Handle error silently
-      });
+      .catch(() => {});
   }, []);
 
+  // Logout handler
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -107,13 +96,48 @@ export function Sidebar() {
   };
 
   const isSuperAdmin = currentAdmin?.role === AdminRoleType.SUPER_ADMIN;
+
   const allNavigationItems = [
     ...navigationItems,
     ...(isSuperAdmin ? superAdminItems : []),
   ];
 
-  return (
-    <>
+  // -----------------------------
+  // THEME ICON & LABEL (SAFE!)
+  // -----------------------------
+  const ThemeIcon = !mounted
+    ? Laptop
+    : theme === "light"
+    ? Sun
+    : theme === "dark"
+    ? Moon
+    : Laptop;
+
+  const themeLabel = !mounted
+    ? "System"
+    : theme === "light"
+    ? "Light"
+    : theme === "dark"
+    ? "Dark"
+    : "System";
+
+    
+    const toggleTheme = () => {
+      if (!mounted) return;
+      if (theme === "light") setTheme("dark");
+      else if (theme === "dark") setTheme("system");
+      else setTheme("light");
+    };
+
+    if(!mounted) {
+      return (
+        <>
+        </>
+      )
+    }
+    
+    return (
+      <>
       {/* Desktop Sidebar */}
       <aside
         className={cn(
@@ -121,26 +145,35 @@ export function Sidebar() {
           isOpen ? "w-64" : "w-20"
         )}
       >
+        {/* Logo */}
         <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
           <Link
             href="/admin"
             className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground"
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-primary-foreground font-bold">
-              <Image src={"/logo/pravya-logo.png"} height={32} width={32} alt="Pravya Logo" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+             <Image
+                src={(theme === "dark") ? "/logo/pravya-logo.png" : "/logo/pravya-light-logo.png"}
+                alt="Pravya AI Logo"
+                width={36}
+                height={36}
+                className="rounded-md"
+              />
             </div>
             {isOpen && <span>Pravya AI</span>}
           </Link>
         </div>
 
+        {/* Nav Items */}
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {allNavigationItems.map((item) => {
             const isActive =
               item.href === "/admin"
                 ? pathname === "/admin"
-                : pathname === item.href ||
-                  pathname.startsWith(item.href + "/");
+                : pathname.startsWith(item.href);
+
             const Icon = item.icon;
+
             return (
               <Link
                 key={item.href}
@@ -161,7 +194,11 @@ export function Sidebar() {
           })}
         </nav>
 
+        {/* FOOTER — THEME + COLLAPSE + LOGOUT */}
         <div className="p-4 border-t border-sidebar-border space-y-2">
+          {/* ——— THEME SWITCH —— */}
+
+          {/* Collapse */}
           <Button
             variant="ghost"
             className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent/50"
@@ -176,6 +213,9 @@ export function Sidebar() {
               <Menu className="w-5 h-5" />
             )}
           </Button>
+
+          <AnimatedThemeToggler isHovered={isOpen}/>
+          {/* Logout */}
           <Button
             variant="ghost"
             className="w-full justify-start text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive"
@@ -187,13 +227,15 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* Mobile Sidebar - Full screen overlay on small screens */}
+      {/* Mobile Sidebar */}
       {isOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-sidebar">
           <div className="flex flex-col h-full">
+            {/* Mobile Header */}
             <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
               <Link
                 href="/admin"
+                onClick={() => setIsOpen(false)}
                 className="flex items-center gap-2 font-bold text-lg text-sidebar-foreground"
               >
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
@@ -201,6 +243,7 @@ export function Sidebar() {
                 </div>
                 <span>Pravya AI</span>
               </Link>
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -211,12 +254,11 @@ export function Sidebar() {
               </Button>
             </div>
 
+            {/* Mobile Nav */}
             <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
               {allNavigationItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
+                const isActive = pathname.startsWith(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -229,14 +271,25 @@ export function Sidebar() {
                         : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                     )}
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <Icon className="w-5 h-5" />
                     <span className="text-sm font-medium">{item.label}</span>
                   </Link>
                 );
               })}
             </nav>
 
+            {/* Mobile Footer */}
             <div className="p-4 border-t border-sidebar-border space-y-2">
+              <Button
+                variant="ghost"
+                disabled={!mounted}
+                className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent/50"
+                onClick={toggleTheme}
+              >
+                <ThemeIcon className="w-5 h-5" />
+                <span className="ml-2 text-sm">{themeLabel} Mode</span>
+              </Button>
+
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive"
@@ -250,7 +303,7 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Mobile Menu Toggle - Fixed FAB */}
+      {/* Mobile FAB */}
       <div className="md:hidden fixed bottom-4 left-4 z-50">
         <Button
           size="icon"

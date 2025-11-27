@@ -16,9 +16,11 @@ export async function getDashboardMetrics() {
     });
 
     // Get subscribed users
-    const subscribedUsers = await prisma.user.count({
-      where: { isSubscribed: true, isDeleted: false },
-    });
+    const subscribedUsers = await prisma.subscription.count({
+      where : {
+        status : "ACTIVE"
+      }
+    })
 
     // Get total revenue (sum of all payments in INR, convert paise to rupees)
     const payments = await prisma.payment.findMany({
