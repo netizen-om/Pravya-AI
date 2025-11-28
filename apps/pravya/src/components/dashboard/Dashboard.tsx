@@ -16,6 +16,7 @@ import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
 import { Card } from "../ui/card";
 import { DashboardFooter } from "./Dashboard-footer";
 import { getDashboardData, type DashboardData } from "@/actions/dashboard-action";
+import Loader from "../loader/loader";
 
 // Dynamically import the sidebar (client-side)
 const DashboardSidebar = dynamic(
@@ -34,14 +35,18 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
 }) => {
   const { theme, isMounted } = useHydrationSafeTheme();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const isDark = theme === "dark";
 
   const fetchDashboardData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const data = await getDashboardData();
       setDashboardData(data);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setIsLoading(false)
     }
   }, []);
 
@@ -70,6 +75,12 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
         </div>
       </motion.section>
     );
+  }
+
+  if(isLoading) {
+    <>
+      <Loader title="" />
+    </>
   }
 
   return (

@@ -10,7 +10,7 @@
     "dev:worker": "pnpm -F @repo/worker run dev",
     "dev:admin": "pnpm -F @repo/admin run dev",
     "dev:webhooks": "pnpm -F @repo/webhooks run dev",
-    "ngrok": "ngrok http 3000 --domain=throbbingly-lappeted-anja.ngrok-free.dev"
+    "ngrok": "ngrok http 4000 --domain=throbbingly-lappeted-anja.ngrok-free.dev"
   },
   "keywords": [],
   "author": "",

@@ -498,7 +498,7 @@ const page = () => {
                     {/* User Image */}
                     <div className="relative w-[110px] h-[110px] rounded-full overflow-hidden z-10 shadow-lg shadow-purple-500/10 dark:shadow-purple-400/10">
                       <Image
-                        src={userDetails?.image || "/user-avatar.png"}
+                        src={userDetails?.image || "/interview/placeholder.jpg"}
                         alt="User Avatar"
                         fill
                         loading="lazy"

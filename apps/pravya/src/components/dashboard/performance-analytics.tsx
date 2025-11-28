@@ -209,7 +209,7 @@ export function PerformanceAnalytics({ isDark, data }: PerformanceAnalyticsProps
                         />
                         <PolarRadiusAxis
                           angle={60}
-                          domain={[0, 100]}
+                          domain={[0, 10]}
                           stroke={isDark ? "#a3a3a3" : "#6b7280"}
                           tickCount={5}
                         />

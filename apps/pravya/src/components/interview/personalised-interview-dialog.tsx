@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Mic, Sparkles, Eye, FileText } from "lucide-react";
+import { Mic, Sparkles, Eye, FileText, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -94,16 +94,6 @@ export function PersonalisedInterviewDialog() {
     fetchResumes();
   }, []);
 
-  const handleGenerate = () => {
-    if (selectedResume) {
-      console.log("Starting interview with resume:", selectedResume);
-      console.log("Questions:", questionCount);
-      setOpen(false);
-      setSelectedResume("");
-      setQuestionCount(4);
-    }
-  };
-
   const openInGoogleViewer = (url: string) => {
     const viewerURL = `https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(
       url
@@ -131,7 +121,7 @@ export function PersonalisedInterviewDialog() {
         body
       );
 
-      const loaderDuration = (loadingStates.length - 1) * 1450; // each step 2s
+      const loaderDuration = (loadingStates.length - 1) * 1450;
       const startTime = Date.now();
 
       const res = await apiPromise;
@@ -159,7 +149,6 @@ export function PersonalisedInterviewDialog() {
       const status = error?.response?.status;
       const backendError = error?.response?.data?.error;
 
-      // --- Handle interview restriction (403) ---
       if (status === 403) {
         toast.error(backendError || "Interview limit reached", {
           duration: 9000,
@@ -210,7 +199,7 @@ export function PersonalisedInterviewDialog() {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Question Count Selector */}
+          {/* NUMBER OF QUESTIONS SELECT */}
           <div className="mt-2">
             <label className="text-sm font-medium mb-2 block">
               Number of Questions
@@ -232,8 +221,9 @@ export function PersonalisedInterviewDialog() {
             </Select>
           </div>
 
-          {/* Resume List */}
+          {/* RESUME LIST */}
           <div className="py-4 space-y-2 max-h-[60vh] overflow-y-auto">
+            {/* LOADING STATE */}
             {isLoadingResumes && (
               <div className="flex gap-5 flex-col">
                 {[1, 2, 3].map((i) => (
@@ -248,7 +238,29 @@ export function PersonalisedInterviewDialog() {
               </div>
             )}
 
+            {/* EMPTY STATE (NEW!) */}
+            {!isLoadingResumes && resumes.length === 0 && (
+              <div className="w-full flex flex-col items-center justify-center py-12 text-center border rounded-lg border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900">
+                <UploadCloud className="w-10 h-10 text-neutral-500 dark:text-neutral-400 mb-4" />
+                <h3 className="text-lg font-semibold">
+                  No resume uploaded yet
+                </h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 max-w-sm mt-1">
+                  Upload a resume to generate personalised AI interview
+                  questions tailored specifically to your experience.
+                </p>
+                <Button
+                  onClick={() => router.push("/resume/upload")}
+                  className="mt-4 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90"
+                >
+                  Upload Resume
+                </Button>
+              </div>
+            )}
+
+            {/* RESUME OPTIONS */}
             {!isLoadingResumes &&
+              resumes.length > 0 &&
               resumes.map((resume) => (
                 <button
                   key={resume.id}
@@ -259,7 +271,7 @@ export function PersonalisedInterviewDialog() {
                       : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
                   }`}
                 >
-                  {/* Radio Selection */}
+                  {/* RADIO BUTTON */}
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
                       selectedResume === resume.id
@@ -272,19 +284,19 @@ export function PersonalisedInterviewDialog() {
                     )}
                   </div>
 
-                  {/* PDF Thumbnail (Simple Icon) */}
+                  {/* PDF ICON */}
                   <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
                     <FileText className="w-5 h-5 text-primary" />
                   </div>
 
-                  {/* File Name */}
+                  {/* NAME */}
                   <div className="flex-1 text-left">
                     <p className="text-sm font-medium truncate">
                       {resume.fileName}
                     </p>
                   </div>
 
-                  {/* OPEN IN NEW TAB */}
+                  {/* VIEW BUTTON */}
                   <div
                     onClick={(e) => {
                       e.stopPropagation();
