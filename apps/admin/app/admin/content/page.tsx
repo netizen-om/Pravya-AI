@@ -619,7 +619,8 @@ export default function ContentManagementPage() {
                         New Template
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-2xl">
+                    <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+
                       <DialogHeader>
                         <DialogTitle>Create Template</DialogTitle>
                         <DialogDescription>Describe the interview template you want to add.</DialogDescription>

@@ -2,13 +2,35 @@
 
 import { interviewAnalyseQueue } from "@/lib/queues";
 import { prisma } from "@repo/db";
-import { unstable_cache as cache } from "next/cache"; // 1. Import the cache function
+import { unstable_cache as cache, revalidatePath } from "next/cache"; // 1. Import the cache function
 
 
-/**
- * Fetches all main categories and includes a preview of their associated templates.
- * The result is cached for 1 hour (3600 seconds).
- */
+export async function deleteInterview(interviewId: string) {
+	try {
+		const interview = await prisma.interview.findUnique({
+			where: { interviewId },
+		});
+
+		if (!interview) {
+			return { success: false, message: "Interview not found" };
+		}
+
+		await prisma.interview.update({
+			where: { interviewId },
+			data: {
+				isDeleted: true,
+				updatedAt: new Date(),
+			},
+		});
+
+    revalidatePath("/interview")
+		return { success: true, message: "Interview deleted successfully" };
+	} catch (err) {
+		console.error("Delete interview error:", err);
+		return { success: false, message: "Internal server error" };
+	}
+}
+
 export const getMainCategoriesWithTemplates = cache(
   async () => {
     try {
