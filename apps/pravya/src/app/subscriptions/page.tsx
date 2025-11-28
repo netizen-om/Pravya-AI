@@ -14,6 +14,110 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Loader2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function CancelSubscriptionDialog({ open, setOpen }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleCancel = async () => {
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/subscription/cancel", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to cancel subscription");
+        return;
+      }
+
+      toast.success("Subscription cancelled successfully");
+      setOpen(false);
+
+      // Refresh UI
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+    } catch (error) {
+      toast.error("Network error");
+      console.log(error);
+      
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent
+        className="
+          max-w-md
+          rounded-2xl 
+          border border-black/10 dark:border-white/10
+          bg-white/80 dark:bg-neutral-900/70 
+          backdrop-blur-xl 
+          shadow-xl
+        "
+      >
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-black dark:text-white flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+            Cancel Subscription?
+          </DialogTitle>
+
+          <DialogDescription className="text-black/70 dark:text-white/70 mt-2">
+            Are you sure you want to cancel your subscription?  
+            You will still have access until the end of your billing cycle, 
+            but renewal will stop immediately.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-4 p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
+          <p className="text-black/80 dark:text-white/80 text-sm leading-relaxed">
+            • Your existing benefits remain active until your current period ends.  
+            <br />• You can reactivate anytime.
+          </p>
+        </div>
+
+        <DialogFooter className="mt-6 flex gap-3 justify-end">
+          <Button
+            variant="outline"
+            disabled={loading}
+            onClick={() => setOpen(false)}
+            className="border-black/20 dark:border-white/20 bg-transparent hover:bg-black/5 dark:hover:bg-white/10"
+          >
+            Keep Subscription
+          </Button>
+
+          <Button
+            disabled={loading}
+            onClick={handleCancel}
+            className="bg-red-600 hover:bg-red-700 text-white shadow-md"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              "Cancel Subscription"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const pricingPlans = [
   {
     name: "Starter",
@@ -70,6 +174,7 @@ const mockSubscriptionData = {
 export default function PricingSection() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptions, setSubscriptions] = useState({});
+  const [openDialog, setOpenDialog] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -133,6 +238,7 @@ export default function PricingSection() {
 
   if (isSubscribed) {
     return (
+      <>
       <section className="relative py-10 px-4 bg-white dark:bg-neutral-950 transition-colors duration-300 min-h-screen">
         <div className="ml-12">
           <BackButton />
@@ -301,12 +407,15 @@ export default function PricingSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-4 items-center justify-center"
           >
-            <button className="px-8 py-3 rounded-lg font-medium transition-all duration-200 bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-md">
+            <button  onClick={() => setOpenDialog(true)} className="px-8 py-3 rounded-lg font-medium transition-all duration-200 bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-md">
               Manage Subscription
             </button>
           </motion.div>
         </div>
       </section>
+      <CancelSubscriptionDialog open={openDialog} setOpen={setOpenDialog} />
+
+      </>
     );
   }
 
@@ -481,5 +590,6 @@ export default function PricingSection() {
         </motion.div>
       </div>
     </section>
+    
   );
 }

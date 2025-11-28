@@ -3,6 +3,7 @@
 import { prisma } from "@repo/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { dodopayments } from "@/lib/dodopayments";
 
 /* ----------------------------------------------
    Helper: Get Authenticated User ID
@@ -34,7 +35,7 @@ export async function getUserSubscription() {
     },
   });
 
-  if (!subscription) return null;
+  if (!subscription) return { hasSubscription : false };
 
   const now = new Date();
   const isActive =
@@ -61,19 +62,49 @@ export async function getUserSubscription() {
    2) CANCEL SUBSCRIPTION
 ---------------------------------------------- */
 export async function cancelSubscription() {
-  const user = await getUser();
-  if (!user) return { error: "Unauthorized" };
+  try {
+    const user = await getUser();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
 
-  const existing = await prisma.subscription.findFirst({
-    where: { userId: user.id },
-  });
+    // 1) Get subscription from DB
+    const existing = await prisma.subscription.findUnique({
+      where: { userId: user.id },
+    });
 
-  if (!existing) return { error: "No subscription found" };
+    if (!existing || !existing.dodoSubscriptionId) {
+      return { error: "No active subscription to cancel" };
+    }
 
-  await prisma.subscription.update({
-    where: { userId: user.id },
-    data: { status: "CANCELLED" },
-  });
+    const dodoSubscriptionId = existing.dodoSubscriptionId;
 
-  return { success: true };
+    // 2) Cancel subscription on Dodo Payment server
+    const result = await dodopayments.subscriptions.update(
+      dodoSubscriptionId,
+      {
+        status: "cancelled",
+      }
+    );
+
+    if (!result || result.status !== "cancelled") {
+      return {
+        error: "Failed to cancel subscription at payment gateway",
+      };
+    }
+
+    // 3) Update your local DB subscription state
+    await prisma.subscription.update({
+      where: { userId: user.id },
+      data: {
+        status: "CANCELLED",
+        updatedAt: new Date(),
+      },
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error("Cancel subscription error:", err);
+    return { error: "Internal server error" };
+  }
 }
