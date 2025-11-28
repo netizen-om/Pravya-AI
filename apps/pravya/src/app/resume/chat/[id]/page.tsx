@@ -689,15 +689,15 @@ export default function ResumeChatbot() {
                     )}
                   >
                     <SelectItem value="gemini-2.5-flash">
-                      gemini-2.5-flash
+                      Gemini-2.5-flash
                     </SelectItem>
-                    <SelectItem value="gpt-oss-20b">gpt-oss-20b</SelectItem>
-                    <SelectItem value="gpt-oss-120b">gpt-oss-120b</SelectItem>
-                    <SelectItem value="mistral-nemo">mistral-nemo</SelectItem>
-                    <SelectItem value="deepseek-r1-0528">
-                      deepseek-r1-0528
+                    <SelectItem value="gpt-oss-20b">GPT-OSS-20B</SelectItem>
+                    <SelectItem value="x-ai/grok-4.1-fast">xAI: Grok 4.1</SelectItem>
+                    <SelectItem value="nvidia/nemotron-nano-12b-v2-vl">NVIDIA: Nemotron Nano</SelectItem>
+                    <SelectItem value="mistralai/mistral-small-3.1-24b-instruct">
+                      Mistral Small 3.1
                     </SelectItem>
-                    <SelectItem value="deepseek-r1t">deepseek-r1t</SelectItem>
+                    <SelectItem value="deepseek-r1t">Deepseek-R1T</SelectItem>
                   </SelectContent>
                 </Select>
 

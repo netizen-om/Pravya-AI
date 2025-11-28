@@ -82,27 +82,27 @@ export const handleChat = asyncHandler(async (req, res) => {
         prompt: question,
       });
       resText = text;
-    } else if (model === "gpt-oss-120b") {
-      console.log("USING 120B");
+    } else if (model === "x-ai/grok-4.1-fast") {
+      console.log("USING Grok 4.1");
       
       const { text } = await generateText({
-        model: openrouter.chat("openai/gpt-oss-120b:free"),
+        model: openrouter.chat("x-ai/grok-4.1-fast:free"),
         system: prompt,
         prompt: question,
       });
       resText = text;
-    } else if (model === "mistral-nemo") {
-      console.log("USING NEMO");
+    } else if (model === "nvidia/nemotron-nano-12b-v2-vl") {
+      console.log("USING Nvidia");
       const { text } = await generateText({
-        model: openrouter.chat("mistralai/mistral-nemo:free"),
+        model: openrouter.chat("nvidia/nemotron-nano-12b-v2-vl:free"),
         system: prompt,
         prompt: question,
       });
       resText = text;
-    } else if (model === "deepseek-r1-0528") {
-      console.log("USING DEEPSEAK");
+    } else if (model === "mistralai/mistral-small-3.1-24b-instruct") {
+      console.log("USING Mistral");
       const { text } = await generateText({
-        model: openrouter.chat("deepseek/deepseek-r1-0528-qwen3-8b:free"),
+        model: openrouter.chat("mistralai/mistral-small-3.1-24b-instruct:free"),
         system: prompt,
         prompt: question,
       });

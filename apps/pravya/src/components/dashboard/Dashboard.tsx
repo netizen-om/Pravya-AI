@@ -9,14 +9,13 @@ import { QuickStats } from "./quick-stats";
 import { RecentActivity } from "./recent-activity";
 import { PerformanceAnalytics } from "./performance-analytics";
 import { InterviewSuggestions } from "./interview-suggestions";
-import { ResumeInsights } from "./resume-insights";
 import dynamic from "next/dynamic";
 import { Session } from "next-auth"; // Import the Session type
 import { TodaysTip } from "./today-tip";
 import { useHydrationSafeTheme } from "../hooks/useHydrationSafeTheme";
 import { Card } from "../ui/card";
 import { DashboardFooter } from "./Dashboard-footer";
-import { getUserDetails } from "@/actions/user-action";
+import { getDashboardData, type DashboardData } from "@/actions/dashboard-action";
 
 // Dynamically import the sidebar (client-side)
 const DashboardSidebar = dynamic(
@@ -34,21 +33,21 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
   session,
 }) => {
   const { theme, isMounted } = useHydrationSafeTheme();
-  const [user, setUser] = useState();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const isDark = theme === "dark";
 
-  const getUser = useCallback(async () => {
-    const userData = await getUserDetails();
-    setUser(userData);
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const data = await getDashboardData();
+      setDashboardData(data);
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    }
   }, []);
 
   useEffect(() => {
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   if (!isMounted) {
     return (
@@ -82,11 +81,11 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({
           <main className="flex-1 transition-all duration-300 ease-in-out">
             <div className="mx-auto max-w-7xl px-6 md:px-8 py-8 space-y-10">
               <WelcomeSection session={session} isDark={isDark} />
-              <QuickStats isDark={isDark} />
-              <PerformanceAnalytics isDark={isDark} />
-              <TodaysTip isDark={isDark} />
-              <RecentActivity isDark={isDark} />
-              <InterviewSuggestions isDark={isDark} />
+              <QuickStats isDark={isDark} data={dashboardData?.quickStats || null} />
+              <PerformanceAnalytics isDark={isDark} data={dashboardData?.performance || null} />
+              <TodaysTip isDark={isDark} interviewTrend={dashboardData?.interviewTrend || []} />
+              <RecentActivity isDark={isDark} data={dashboardData?.recentActivity || []} />
+              <InterviewSuggestions isDark={isDark} data={dashboardData?.suggestedTemplates || []} />
               {/* <ResumeInsights isDark={isDark}/> */}
               <DashboardFooter isDark={isDark} />
             </div>
