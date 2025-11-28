@@ -140,6 +140,81 @@ export async function getInterviewDetails(interviewId: string) {
   };
 }
 
+// export async function addInterviewTranscribe(
+//   interviewId: string,
+//   transcribe: {
+//     id: string;
+//     role: "user" | "assistant";
+//     text: string;
+//     interim?: boolean;
+//   }[]
+// ) {
+//   try {
+//     console.log("USER transcribe : ", transcribe);
+
+//     const interview = await prisma.interview.update({
+//       where: { interviewId: interviewId },
+//       data: { transcribe: transcribe },
+//     });
+
+//     if (!interview || !interview.transcribe) {
+//       throw new Error("Interview or Transcribe no found to process feedback");
+//     }
+
+//     const cleanedTranscript: { role: "user" | "assistant"; text: string }[] =
+//       interview.transcribe.map(({ role, text }) => ({
+//         role,
+//         text,
+//       }));
+
+//     const questionAnswerPairs = [];
+//     for (let i = 0; i < cleanedTranscript.length; i++) {
+//       if (
+//         cleanedTranscript[i].role === "assistant" &&
+//         cleanedTranscript[i + 1]?.role === "user"
+//       ) {
+//         questionAnswerPairs.push({
+//           questionId: `q_${i + 1}`, // Generate a simple unique ID
+//           questionText: cleanedTranscript[i].text,
+//           userAnswerTranscript: cleanedTranscript[i + 1].text,
+//         });
+//         i++; // Skip the answer we just processed
+//       }
+//     }
+
+//     await prisma.userActivity.create({
+//       data: {
+//         userId: interview.userId,
+//         action: "INTERVIEW_COMPLETED",
+//         targetType: "INTERVIEW",
+//         targetId: interview.interviewId,
+//         details: interview.role,
+//       },
+//     });
+
+//     if (questionAnswerPairs.length < 2) {
+//       await prisma.interview.update({
+//         where : { interviewId: interviewId },
+//         data : {
+//           status : "INCOMPLETE"
+//         }
+//       })
+//       throw new Error("No valid question/answer pairs found in transcript.");
+//     }
+
+//     await interviewAnalyseQueue.add("interview-analyse", {
+//       interviewId: interviewId,
+//     });
+
+//     console.log("Transcribe aded succesfully");
+
+//     return interview;
+//   } catch (error) {
+//     console.error("Error updating interview transcribe:", error);
+//     throw error;
+//   }
+// }
+
 export async function addInterviewTranscribe(
   interviewId: string,
   transcribe: {
@@ -153,32 +228,35 @@ export async function addInterviewTranscribe(
     console.log("USER transcribe : ", transcribe);
 
     const interview = await prisma.interview.update({
-      where: { interviewId: interviewId },
-      data: { transcribe: transcribe },
+      where: { interviewId },
+      data: { transcribe },
     });
 
     if (!interview || !interview.transcribe) {
-      throw new Error("Interview or Transcribe no found to process feedback");
+      return {
+        success: false,
+        message: "Unable to update your interview. Please try again.",
+      };
     }
 
-    const cleanedTranscript: { role: "user" | "assistant"; text: string }[] =
-      interview.transcribe.map(({ role, text }) => ({
-        role,
-        text,
-      }));
+    const cleanedTranscript = interview.transcribe.map(({ role, text }) => ({
+      role,
+      text,
+    }));
 
-    const questionAnswerPairs = [];
+    const questionAnswerPairs: any[] = [];
+
     for (let i = 0; i < cleanedTranscript.length; i++) {
       if (
         cleanedTranscript[i].role === "assistant" &&
         cleanedTranscript[i + 1]?.role === "user"
       ) {
         questionAnswerPairs.push({
-          questionId: `q_${i + 1}`, // Generate a simple unique ID
+          questionId: `q_${i + 1}`,
           questionText: cleanedTranscript[i].text,
           userAnswerTranscript: cleanedTranscript[i + 1].text,
         });
-        i++; // Skip the answer we just processed
+        i++;
       }
     }
 
@@ -194,24 +272,33 @@ export async function addInterviewTranscribe(
 
     if (questionAnswerPairs.length < 2) {
       await prisma.interview.update({
-        where : { interviewId: interviewId },
-        data : {
-          status : "INCOMPLETE"
-        }
-      })
-      throw new Error("No valid question/answer pairs found in transcript.");
+        where: { interviewId },
+        data: { status: "INCOMPLETE" },
+      });
+
+      return {
+        success: false,
+        message: "Your interview doesn't seem complete.",
+      };
     }
 
     await interviewAnalyseQueue.add("interview-analyse", {
-      interviewId: interviewId,
+      interviewId,
     });
 
-    console.log("Transcribe aded succesfully");
+    console.log("Transcribe added successfully");
 
-    return interview;
-  } catch (error) {
+    return {
+      success: true,
+      message: "Interview submitted successfully.",
+      data: interview,
+    };
+  } catch (error: any) {
     console.error("Error updating interview transcribe:", error);
-    throw error;
+    return {
+      success: false,
+      message: "Something went wrong while saving your interview. Please try again.",
+    };
   }
 }
 

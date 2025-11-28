@@ -14,14 +14,13 @@ import {
 } from "@/components/ui/tooltip";
 import { MessageCircle, PhoneIcon } from "lucide-react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import Loader from "@/components/loader/loader";
 import { toast } from "sonner";
 import { InterviewLobbyPage } from "@/components/interview/interview-lobby/interview-lobby-page";
 import { getUserDetails } from "@/actions/user-action";
-
 // A new component for the "Listening..." animation
 const ListeningIndicator = () => {
   return (
@@ -35,21 +34,21 @@ const ListeningIndicator = () => {
 
 const page = () => {
   const [isRecording, setIsRecording] = useState(false);
-  
+
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUserDetailsLoading, setisUserDetailsLoading] = useState(false);
   const [userDetails, setUserDetails] = useState<{} | null>(null);
   const [isLobby, setIsLobby] = useState(false);
   const [messages, setMessages] = useState<
-  {
-    id: string;
-    role: "user" | "assistant";
-    text: string;
-    interim?: boolean;
-  }[]
+    {
+      id: string;
+      role: "user" | "assistant";
+      text: string;
+      interim?: boolean;
+    }[]
   >([]);
-  
+
   const [selectedMic, setSelectedMic] = useState<string | null>(null);
   const params = useParams<{ interviewId: string }>();
   const interviewId = params.interviewId;
@@ -74,6 +73,8 @@ const page = () => {
   const lastMessage = messages[messages.length - 1];
   const isAgentListening = lastMessage?.role === "user" && lastMessage?.interim;
 
+  const router = useRouter();
+
   useEffect(() => {
     const getSession = async () => {
       try {
@@ -93,8 +94,7 @@ const page = () => {
   const messagesRef = useRef(messages);
   useEffect(() => {
     messagesRef.current = messages;
-    console.log("Currently using : ", selectedMic );
-    
+    console.log("Currently using : ", selectedMic);
   }, [messages]);
 
   useEffect(() => {
@@ -117,27 +117,56 @@ const page = () => {
     }
   }, [isAgentSpeaking, isAgentThinking, isAgentListening, isRecording]);
 
+  // const endInterview = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     console.log("Transcribe : ", messagesRef.current);
+
+  //     const interview = await addInterviewTranscribe(
+  //       interviewId,
+  //       messagesRef.current
+  //     );
+
+  //     if (interview) {
+  //       toast.success("Interview Completed");
+  //     } else {
+  //       throw new Error("Failed to add transcribe");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Failed to end interview");
+  //     setIsLoading(false);
+  //     throw new Error("Failed to add transcribe");
+  //   } finally {
+  //     setIsLoading(false);
+  //     router.push("/dashboard")
+  //   }
+  // };
+
   const endInterview = async () => {
     try {
       setIsLoading(true);
+
       console.log("Transcribe : ", messagesRef.current);
 
-      const interview = await addInterviewTranscribe(
+      const res = await addInterviewTranscribe(
         interviewId,
         messagesRef.current
       );
 
-      if (interview) {
-        toast.success("Interview Completed");
-      } else {
-        throw new Error("Failed to add transcribe");
+      // ---------- Handle server action errors safely ----------
+      if (!res || !res.success) {
+        toast.error(res?.message || "Failed to save interview transcript.");
+        return; // Stop here — no redirect, no success
       }
-    } catch (error) {
-      toast.error("Failed to end interview");
-      setIsLoading(false);
-      throw new Error("Failed to add transcribe");
+
+      // ---------- On success ----------
+      toast.success("Interview completed successfully!");
+    } catch (error: any) {
+      console.error("End interview error:", error);
+      toast.error(error?.message || "Failed to end interview.");
     } finally {
       setIsLoading(false);
+      router.push("/dashboard");
     }
   };
 
@@ -309,6 +338,7 @@ const page = () => {
       }
       setIsRecording(false);
       setIsReady(false);
+      endInterview();
     } else {
       // Start recording
       try {
@@ -359,7 +389,12 @@ const page = () => {
   };
 
   if (!isLobby) {
-    return <InterviewLobbyPage handleConfirm={handleLobbyConfirm} setSelectedMic={setSelectedMic} />;
+    return (
+      <InterviewLobbyPage
+        handleConfirm={handleLobbyConfirm}
+        setSelectedMic={setSelectedMic}
+      />
+    );
   }
 
   if (!interviewData) {
