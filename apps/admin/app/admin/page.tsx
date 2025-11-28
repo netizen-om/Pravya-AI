@@ -120,7 +120,7 @@ export default function DashboardPage() {
       color: "text-green-500",
     },
     {
-      label: "Interviews Done",
+      label: "Interviews",
       value: metrics.totalInterviews.toLocaleString(),
       icon: Mic,
       color: "text-orange-500",
