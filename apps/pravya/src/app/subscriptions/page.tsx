@@ -408,7 +408,7 @@ export default function PricingSection() {
             className="flex flex-col sm:flex-row gap-4 items-center justify-center"
           >
             <button  onClick={() => setOpenDialog(true)} className="px-8 py-3 rounded-lg font-medium transition-all duration-200 bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-md">
-              Cancle Subscription
+              Cancel Subscription
             </button>
           </motion.div>
         </div>

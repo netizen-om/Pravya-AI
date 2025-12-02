@@ -596,7 +596,7 @@ const page = () => {
                     {isRecording ? "Stop" : "Start"}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>End Interview</TooltipContent>
+                <TooltipContent>{isRecording ? "Stop" : "Start"} Interview</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
