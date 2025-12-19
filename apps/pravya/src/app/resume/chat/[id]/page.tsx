@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Send, Copy, Clock } from "lucide-react";
+import { ArrowLeft, Send, Copy, Clock, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
@@ -79,6 +79,8 @@ export default function ResumeChatbot() {
   const [isDetailsLoading, setIsDetailsLoading] = useState<boolean>(false);
 
   const { theme, setTheme } = useTheme();
+
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -156,10 +158,20 @@ export default function ResumeChatbot() {
     onComplete();
   };
 
+  const stopResponse = () => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+  };
+
   const handleSend = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
     if (!textToSend || isLoading) return;
     if (!resumeId) return;
+
+    abortControllerRef.current?.abort();
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -182,6 +194,7 @@ export default function ResumeChatbot() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: textToSend, model: selectedModel }),
+          signal: controller.signal,
         }
       );
       if (!res.ok) {
@@ -222,10 +235,15 @@ export default function ResumeChatbot() {
         setIsStreamingActive(false); // STOP status messages
       });
     } catch (error) {
+      if (error.name === "AbortError") {
+        console.log("Request aborted by user");
+        return; // swallow it
+      }
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
     } finally {
-      setIsLoading(false);
+      setIsLoading(false);  
+      abortControllerRef.current = null;
     }
   };
 
@@ -283,8 +301,6 @@ export default function ResumeChatbot() {
               )}
             />
           </div>
-
-          
         </div>
 
         <div className="px-4 pb-3">
@@ -390,15 +406,21 @@ export default function ResumeChatbot() {
                       disabled={isLoading}
                     />
                     <Button
-                      onClick={() => handleSend()}
-                      disabled={!input.trim() || isLoading}
+                      onClick={isLoading ? stopResponse : handleSend}
                       className={cn(
                         "h-16 px-6 rounded-2xl shadow-lg font-medium transition-colors",
-                        "bg-neutral-950 text-white hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400",
+                        isLoading
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-neutral-950 text-white hover:bg-neutral-800",
+                        "disabled:bg-neutral-200 disabled:text-neutral-400",
                         "dark:bg-white dark:text-black dark:hover:bg-neutral-200 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500"
                       )}
                     >
-                      <Send className="h-5 w-5" />
+                      {isLoading ? (
+                        <Square className="h-5 w-5" /> // STOP icon
+                      ) : (
+                        <Send className="h-5 w-5" /> // SEND icon
+                      )}
                     </Button>
                   </div>
 
@@ -576,7 +598,9 @@ export default function ResumeChatbot() {
                               <>
                                 <div className="flex justify-center items-center gap-1">
                                   <Clock className="h-5 text-white/50" />
-                                  <h4 className="text-white/70">{formatLatency(message.latency)}</h4>
+                                  <h4 className="text-white/70">
+                                    {formatLatency(message.latency)}
+                                  </h4>
                                 </div>
                               </>
                             )}
@@ -692,8 +716,12 @@ export default function ResumeChatbot() {
                       Gemini-2.5-flash
                     </SelectItem>
                     <SelectItem value="gpt-oss-20b">GPT-OSS-20B</SelectItem>
-                    <SelectItem value="x-ai/grok-4.1-fast">xAI: Grok 4.1</SelectItem>
-                    <SelectItem value="nvidia/nemotron-nano-12b-v2-vl">NVIDIA: Nemotron Nano</SelectItem>
+                    <SelectItem value="x-ai/grok-4.1-fast">
+                      xAI: Grok 4.1
+                    </SelectItem>
+                    <SelectItem value="nvidia/nemotron-nano-12b-v2-vl">
+                      NVIDIA: Nemotron Nano
+                    </SelectItem>
                     <SelectItem value="mistralai/mistral-small-3.1-24b-instruct">
                       Mistral Small 3.1
                     </SelectItem>
@@ -716,15 +744,21 @@ export default function ResumeChatbot() {
                 />
 
                 <Button
-                  onClick={() => handleSend()}
-                  disabled={!input.trim() || isLoading}
+                  onClick={isLoading ? stopResponse : handleSend}
                   className={cn(
-                    "h-14 md:h-16 px-6 rounded-2xl shadow-lg font-medium transition-colors",
-                    "bg-neutral-950 text-white hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400",
+                    "h-16 px-6 rounded-2xl shadow-lg font-medium transition-colors",
+                    isLoading
+                      ? "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-neutral-950 text-white hover:bg-neutral-800",
+                    "disabled:bg-neutral-200 disabled:text-neutral-400",
                     "dark:bg-white dark:text-black dark:hover:bg-neutral-200 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500"
                   )}
                 >
-                  <Send className="h-5 w-5" />
+                  {isLoading ? (
+                    <Square className="h-5 w-5" /> // STOP icon
+                  ) : (
+                    <Send className="h-5 w-5" /> // SEND icon
+                  )}
                 </Button>
               </div>
 
