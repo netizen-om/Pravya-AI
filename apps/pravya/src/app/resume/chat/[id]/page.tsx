@@ -141,12 +141,19 @@ export default function ResumeChatbot() {
   const streamText = async (
     messageId: string,
     fullText: string,
-    onComplete: () => void
+    onComplete: () => void,
+    signal: AbortSignal
   ) => {
     let displayedText = "";
     const delay = 6;
 
     for (let i = 0; i < fullText.length; i++) {
+      console.log("signal.aborted", signal.aborted);
+      if (signal.aborted) {
+      console.log("UI stream stopped");
+      return;
+    }
+
       displayedText += fullText[i];
       setStreamingContent((prev) => ({
         ...prev,
@@ -219,21 +226,26 @@ export default function ResumeChatbot() {
       setMessages((prev) => [...prev, botMessage]);
 
       setIsStreamingActive(true);
-      await streamText(botMessage.id, answer, () => {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === botMessage.id ? { ...msg, isStreaming: false } : msg
-          )
-        );
+      await streamText(
+  botMessage.id,
+  answer,
+  () => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === botMessage.id ? { ...msg, isStreaming: false } : msg
+      )
+    );
 
-        setStreamingContent((prev) => {
-          const newContent = { ...prev };
-          delete newContent[botMessage.id];
-          return newContent;
-        });
+    setStreamingContent((prev) => {
+      const newContent = { ...prev };
+      delete newContent[botMessage.id];
+      return newContent;
+    });
 
-        setIsStreamingActive(false); // STOP status messages
-      });
+    setIsStreamingActive(false);
+  },
+  controller.signal // 🔴 SAME AbortSignal
+);
     } catch (error) {
       if (error.name === "AbortError") {
         console.log("Request aborted by user");
