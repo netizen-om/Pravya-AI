@@ -77,6 +77,7 @@ export default function ResumeChatbot() {
   const [resumeName, setResumeName] = useState<string>("");
   const [atsScore, setAtsScore] = useState<number>(0);
   const [isDetailsLoading, setIsDetailsLoading] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { theme, setTheme } = useTheme();
 
@@ -150,9 +151,9 @@ export default function ResumeChatbot() {
     for (let i = 0; i < fullText.length; i++) {
       console.log("signal.aborted", signal.aborted);
       if (signal.aborted) {
-      console.log("UI stream stopped");
-      return;
-    }
+        console.log("UI stream stopped");
+        return;
+      }
 
       displayedText += fullText[i];
       setStreamingContent((prev) => ({
@@ -166,13 +167,26 @@ export default function ResumeChatbot() {
   };
 
   const stopResponse = () => {
+    setIsProcessing(false);
+    setIsStreamingActive(false);
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
   };
 
-  const handleSend = async (messageText?: string) => {
-    const textToSend = messageText || input.trim();
-    if (!textToSend || isLoading) return;
+  const handleSendPrompt = (prompt: string) => {
+    if (isProcessing) return;
+
+    setInput(prompt);
+    handleSend(prompt);
+  };
+
+  const handleSend = async (overrideText?: string) => {
+    const textToSend =
+      typeof overrideText === "string" ? overrideText.trim() : input.trim();
+
+    if (!textToSend || isProcessing) return;
+    // const textToSend = messageText || input.trim();
+    // if (!textToSend || isLoading) return;
     if (!resumeId) return;
 
     abortControllerRef.current?.abort();
@@ -190,6 +204,9 @@ export default function ResumeChatbot() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setIsProcessing(true);
+    setIsStreamingActive(false);
+
     setCurrentStatusIndex(0);
 
     const startTime = Date.now();
@@ -225,27 +242,28 @@ export default function ResumeChatbot() {
 
       setMessages((prev) => [...prev, botMessage]);
 
+      setIsProcessing(false);
       setIsStreamingActive(true);
       await streamText(
-  botMessage.id,
-  answer,
-  () => {
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === botMessage.id ? { ...msg, isStreaming: false } : msg
-      )
-    );
+        botMessage.id,
+        answer,
+        () => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === botMessage.id ? { ...msg, isStreaming: false } : msg
+            )
+          );
 
-    setStreamingContent((prev) => {
-      const newContent = { ...prev };
-      delete newContent[botMessage.id];
-      return newContent;
-    });
+          setStreamingContent((prev) => {
+            const newContent = { ...prev };
+            delete newContent[botMessage.id];
+            return newContent;
+          });
 
-    setIsStreamingActive(false);
-  },
-  controller.signal // 🔴 SAME AbortSignal
-);
+          setIsStreamingActive(false);
+        },
+        controller.signal // 🔴 SAME AbortSignal
+      );
     } catch (error) {
       if (error.name === "AbortError") {
         console.log("Request aborted by user");
@@ -254,7 +272,7 @@ export default function ResumeChatbot() {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
     } finally {
-      setIsLoading(false);  
+      setIsLoading(false);
       abortControllerRef.current = null;
     }
   };
@@ -469,7 +487,7 @@ export default function ResumeChatbot() {
                         key={index}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleSend(prompt)}
+                        onClick={() => handleSendPrompt(prompt)}
                         className={cn(
                           "px-4 py-2 text-sm rounded-full border transition-colors",
                           "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-300",
@@ -638,7 +656,7 @@ export default function ResumeChatbot() {
                 </motion.div>
               ))}
 
-              {isLoading && !isStreamingActive && (
+              {isProcessing && !isStreamingActive && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
