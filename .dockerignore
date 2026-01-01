@@ -1,0 +1,30 @@
+# dependencies
+node_modules
+**/node_modules
+
+# next build output
+.next
+**/.next
+
+# dist
+dist
+**/dist
+
+# env files
+.env
+.env.*
+.env.local
+
+# git
+.git
+.gitignore
+
+# pnpm
+.pnpm-store
+
+# docker
+docker
+Dockerfile*
+
+# misc
+README.md
