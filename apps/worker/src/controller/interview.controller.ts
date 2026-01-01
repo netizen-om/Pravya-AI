@@ -215,14 +215,19 @@ export const generatePersonalisedQuestions = asyncHandler(async (req, res) => {
     return new Response("User not found", { status: 404 });
   }
 
-  const isSubscribed =
-    user.subscription?.status === "ACTIVE" &&
-    (!user.subscription.endDate || user.subscription.endDate > new Date());
+  const subscription = user.subscription;
 
-  console.log("isSubscribe : ", isSubscribed);
+  const now = new Date();
+
+  const hasValidSubscription =
+    subscription &&
+    subscription.endDate > now &&
+    subscription.status !== "EXPIRED";
+
+  console.log("isSubscribe : ", hasValidSubscription);
 
   // If not subscribed → check interview limit
-  if (!isSubscribed) {
+  if (!hasValidSubscription) {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 

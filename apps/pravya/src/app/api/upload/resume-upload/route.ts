@@ -30,11 +30,16 @@ export async function POST(req: Request) {
       where: { userId: session.user.id, isDeleted: false },
     });
 
-    const isSubscribed =
-      user.subscription?.status === "ACTIVE" &&
-      (!user.subscription.endDate || user.subscription.endDate > new Date());
+    const subscription = user.subscription;
 
-    if (!isSubscribed && resumeCount >= 3) {
+    const now = new Date();
+
+    const hasValidSubscription =
+      subscription &&
+      subscription.endDate > now &&
+      subscription.status !== "EXPIRED";
+
+    if (!hasValidSubscription && resumeCount >= 3) {
       return new Response(
         JSON.stringify({
           error:
