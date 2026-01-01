@@ -35,15 +35,19 @@ export async function getUserSubscription() {
     },
   });
 
-  if (!subscription) return { hasSubscription : false };
+  if (!subscription) {
+    return { hasSubscription: false };
+  }
 
   const now = new Date();
-  const isActive =
-    subscription.status === "ACTIVE" &&
-    new Date(subscription.endDate) > now;
+
+  // Access validity (NOT renewal status)
+  const hasAccess =
+    subscription.status !== "EXPIRED" &&
+    subscription.endDate > now;
 
   return {
-    hasSubscription: true,
+    hasSubscription: hasAccess,
     subscription: {
       plan: subscription.plan,
       status: subscription.status,
@@ -53,10 +57,17 @@ export async function getUserSubscription() {
       dodoSubscriptionId: subscription.dodoSubscriptionId,
       lastPaymentId: subscription.lastPaymentId,
       lastPayment: subscription.lastPayment,
-      isActive,
+
+      // Important flags
+      hasAccess,                 // ✅ use this for gating features
+      isCancelled:
+        subscription.status === "CANCELLED",
+      isExpired:
+        subscription.status === "EXPIRED",
     },
   };
 }
+
 
 /* ----------------------------------------------
    2) CANCEL SUBSCRIPTION

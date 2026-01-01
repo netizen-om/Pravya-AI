@@ -30,9 +30,7 @@ export default function Hero() {
           rotation={30}
         />
       </div>
-      {/* ✅ Background Beams */}
 
-      {/* ✅ Foreground Content */}
       <div className="container mx-auto px-4 py-24 sm:py-32 relative z-10 flex-1 flex flex-col">
         <div className="mx-auto max-w-4xl text-center flex-1 flex flex-col justify-center">
           {/* Badge */}
@@ -138,7 +136,6 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Social Proof Section */}
       </div>
     </section>
   );
