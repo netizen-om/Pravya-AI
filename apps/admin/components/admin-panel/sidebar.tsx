@@ -40,7 +40,7 @@ const navigationItems = [
   { label: "Resumes", href: "/admin/resumes", icon: FileText },
   { label: "Content", href: "/admin/content", icon: BookOpen },
   { label: "Financials", href: "/admin/financials", icon: DollarSign },
-  { label: "System Health", href: "/admin/system", icon: Activity },
+  // { label: "System Health", href: "/admin/system", icon: Activity },
 ];
 
 const superAdminItems = [

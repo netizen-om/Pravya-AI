@@ -232,7 +232,7 @@ export default function AdminsManagementPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={AdminRoleType.MANAGER}>Manager</SelectItem>
-                    <SelectItem value={AdminRoleType.SUPPORT}>Support</SelectItem>
+                    {/* <SelectItem value={AdminRoleType.SUPPORT}>Support</SelectItem> */}
                     <SelectItem value={AdminRoleType.SUPER_ADMIN}>Super Admin</SelectItem>
                   </SelectContent>
                 </Select>

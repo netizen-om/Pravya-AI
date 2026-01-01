@@ -211,9 +211,9 @@ export default function InterviewManagementPage() {
                           </DropdownMenuTrigger>
 
                           <DropdownMenuContent align="end" className="border-0">
-                            <DropdownMenuItem onClick={() => handleViewDetails(interview.id)}>
+                            {/* <DropdownMenuItem onClick={() => handleViewDetails(interview.id)}>
                               View Details
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                             <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(interview.id)}>
                               <Trash2 className="w-4 h-4 mr-2" />
                               Delete
