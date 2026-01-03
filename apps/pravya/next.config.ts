@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactStrictMode: false,
+  transpilePackages : ["@repo/db", "@repo/auth"],
   devIndicators: false,
   eslint : {
     ignoreDuringBuilds : true
