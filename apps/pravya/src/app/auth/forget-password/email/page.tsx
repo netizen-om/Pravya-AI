@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import React, { useCallback, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AuthInput } from "@/components/ui/auth-input";
 import { AuthButton } from "@/components/ui/auth-button";
 import { toast } from "sonner";
