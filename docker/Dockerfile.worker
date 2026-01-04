@@ -21,11 +21,14 @@ RUN pnpm install --frozen-lockfile
 # ---------- Build ----------
 FROM deps AS builder
 
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Prisma (only if worker uses it)
 RUN pnpm -F @repo/db exec prisma generate || true
 
 # Build worker (ts → js)
-RUN pnpm -F @repo/worker build
+RUN cd apps/worker && pnpm add -D typescript
+RUN cd apps/worker && pnpm exec tsc --project tsconfig.json --noCheck
 
 # ---------- Production ----------
 FROM node:20-alpine AS runner
