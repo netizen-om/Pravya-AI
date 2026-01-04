@@ -16,6 +16,9 @@
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
   "dependencies": {
     "@repo/db": "workspace:*"
   }
