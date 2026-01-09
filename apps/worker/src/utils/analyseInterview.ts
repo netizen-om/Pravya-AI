@@ -13,6 +13,7 @@ import {
   communicationDeliverySchema, // Schema for Call 2
   finalSynthesisSchema, // Schema for Call 3
 } from '../lib/zod';
+import { groqClient } from '../lib/groqForrAISDK';
 
 const llmQuestionAnalysisSchema = singleQuestionFeedbackSchema.omit({
   questionId: true,
@@ -89,7 +90,8 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
       console.log(`[${interviewId}] Starting Call 1: Per-Question Analysis...`);
       const questionBreakdownPromises = questionAnswerPairs.map((pair) =>
         generateObject({
-          model: google('gemini-2.5-flash'), // Use 1.5 Pro for this
+          // model: google('gemini-2.5-flash'),
+          model: groqClient("openai/gpt-oss-120b"),
           system: `You are an expert interview coach. Analyze the candidate's answer to the given question.
                    Role Context: ${jobContext}
                    Focus *only* on this single question and answer.
@@ -112,7 +114,8 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
       // --- Call 2: Communication & Delivery ---
       console.log(`[${interviewId}] Starting Call 2: Communication & Delivery...`);
       const communicationResult = await generateObject({
-        model: google('gemini-2.5-flash'),
+        // model: google('gemini-2.5-flash'),
+        model: groqClient("openai/gpt-oss-120b"),
         system: `You are a speech and communication coach.
                  Analyze the *entire* collection of the candidate's answers.
                  Focus *only* on delivery: pace, filler words, tone, and clarity.
@@ -127,7 +130,8 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
       // --- Call 3: Final Synthesis ---
       console.log(`[${interviewId}] Starting Call 3: Final Synthesis...`);
       const synthesisResult = await generateObject({
-        model: google('gemini-2.5-flash'), // Use a strong model for synthesis
+        // model: google('gemini-2.5-flash'),
+        model: groqClient("openai/gpt-oss-120b"),
         system: `You are a senior hiring manager.
                  You have received detailed analysis from your team (per-question feedback and a communication report).
                  Your job is to synthesize all this information into a high-level summary.
