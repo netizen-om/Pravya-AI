@@ -3,7 +3,7 @@ import { generateObject } from "ai";
 import { asyncHandler } from "../utils/asyncHandler";
 import ApiResponse from "../utils/ApiResponse";
 import { prisma } from "../lib/prisma";
-import { google } from "../lib/googleForAISDK";
+import { groqClient } from "../lib/groqForrAISDK";
 
 export const generateAiAnswer = asyncHandler(async (req, res) => {
   const { questionId } = req.body;
@@ -33,7 +33,7 @@ export const generateAiAnswer = asyncHandler(async (req, res) => {
 
   // 6. Generate AI Answer using AI SDK
   const aiResponse = await generateObject({
-    model: google("gemini-2.0-flash"),
+    model: groqClient("moonshotai/kimi-k2-instruct-0905"),
     schema: answerSchema,
     prompt: `You are an expert interview assistant. Answer the following question in a professional and concise manner.\n\nQuestion: ${question.questionText}`,
   });
@@ -151,7 +151,7 @@ export const generateQuestions = asyncHandler(async (req, res) => {
 
     // Generate and validate AI response
     const { object } = await generateObject({
-      model: google("gemini-2.5-flash"),
+      model: groqClient("moonshotai/kimi-k2-instruct-0905"),
       schema: InterviewQuestionsSchema,
       prompt,
     });
@@ -354,7 +354,7 @@ export const generatePersonalisedQuestions = asyncHandler(async (req, res) => {
 
     // Generate and validate AI response
     const { object } = await generateObject({
-      model: google("gemini-2.5-flash"),
+      model: groqClient("moonshotai/kimi-k2-instruct-0905"),
       schema: InterviewQuestionsSchema,
       prompt,
     });

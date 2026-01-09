@@ -5,10 +5,12 @@ import { google } from "../lib/googleForAISDK";
 import { prisma } from "../lib/prisma";
 import { streamText } from "ai";
 import { openrouter } from "../lib/openRouter";
+import { groqClient } from "../lib/groqForrAISDK";
+
 
 export const handleChat = asyncHandler(async (req, res) => {
   const { resumeId } = req.params;
-  const { question, model = "gemini-2.5-flash" } = req.body;
+  const { question, model = "llama-3.1-8b-instant" } = req.body;
 
   if (!resumeId || !question) {
     return res
@@ -75,7 +77,9 @@ Answer:
 
     // ✅ Model resolver (clean + scalable)
     const modelResolver = {
-      "gemini-2.5-flash": google("gemini-2.5-flash"),
+      // "gemini-2.5-flash": google("gemini-2.5-flash"),
+      "gemini-2.5-flash": groqClient("llama-3.1-8b-instant"),
+      "llama-3.1-8b-instant": groqClient("llama-3.1-8b-instant"),
       "gpt-oss-20b": openrouter.chat("openai/gpt-oss-20b:free"),
       "x-ai/grok-4.1-fast": openrouter.chat("x-ai/grok-4.1-fast:free"),
       "nvidia/nemotron-nano-12b-v2-vl": openrouter.chat(

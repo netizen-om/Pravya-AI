@@ -61,7 +61,7 @@ const smartPrompts = [
 
 export default function ResumeChatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const [selectedModel, setSelectedModel] = useState("llama-3.1-8b-instant");
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatusIndex, setCurrentStatusIndex] = useState(0);
@@ -146,7 +146,7 @@ export default function ResumeChatbot() {
     signal: AbortSignal
   ) => {
     let displayedText = "";
-    const delay = 6;
+    const delay = 1;
 
     for (let i = 0; i < fullText.length; i++) {
       console.log("signal.aborted", signal.aborted);
@@ -742,8 +742,8 @@ export default function ResumeChatbot() {
                       "dark:bg-neutral-900 dark:border-neutral-700 dark:text-white"
                     )}
                   >
-                    <SelectItem value="gemini-2.5-flash">
-                      Gemini-2.5-flash
+                    <SelectItem value="llama-3.1-8b-instant">
+                      llama-3.1-8b
                     </SelectItem>
                     <SelectItem value="gpt-oss-20b">GPT-OSS-20B</SelectItem>
                     <SelectItem value="x-ai/grok-4.1-fast">
