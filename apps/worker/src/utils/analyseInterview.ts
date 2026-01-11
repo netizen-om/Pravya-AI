@@ -1,10 +1,9 @@
-import { Job } from 'bullmq';
-import { DetailedInterviewFeedback, InterviewAnalyseJobData } from '../types';
-import { prisma } from '@repo/db';
-import { generateObject } from 'ai';
-import { google } from '../lib/googleForAISDK';
-import { z } from 'zod';
-
+import { Job } from "bullmq";
+import { DetailedInterviewFeedback, InterviewAnalyseJobData } from "../types";
+import { prisma } from "@repo/db";
+import { generateObject } from "ai";
+import { google } from "../lib/googleForAISDK";
+import { z } from "zod";
 
 // Import all our new and old schemas
 import {
@@ -12,8 +11,8 @@ import {
   singleQuestionFeedbackSchema, // Type helper for Call 1
   communicationDeliverySchema, // Schema for Call 2
   finalSynthesisSchema, // Schema for Call 3
-} from '../lib/zod';
-import { groqClient } from '../lib/groqForrAISDK';
+} from "../lib/zod";
+import { groqClient } from "../lib/groqForrAISDK";
 
 const llmQuestionAnalysisSchema = singleQuestionFeedbackSchema.omit({
   questionId: true,
@@ -32,7 +31,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     });
 
     if (!interview || !interview.transcribe) {
-      throw new Error('Interview or transcript not found');
+      throw new Error("Interview or transcript not found");
     }
 
     // 2️⃣ Mark status as 'Analysing'
@@ -43,7 +42,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
 
     // 3️⃣ Clean transcript and prepare inputs for LLM calls
     // @ts-ignore
-    const cleanedTranscript: { role: 'user' | 'assistant'; text: string }[] =
+    const cleanedTranscript: { role: "user" | "assistant"; text: string }[] =
       interview.transcribe.map(({ role, text }) => ({
         role,
         text,
@@ -53,8 +52,8 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     const questionAnswerPairs = [];
     for (let i = 0; i < cleanedTranscript.length; i++) {
       if (
-        cleanedTranscript[i].role === 'assistant' &&
-        cleanedTranscript[i + 1]?.role === 'user'
+        cleanedTranscript[i].role === "assistant" &&
+        cleanedTranscript[i + 1]?.role === "user"
       ) {
         questionAnswerPairs.push({
           questionId: `q_${i + 1}`, // Generate a simple unique ID
@@ -66,53 +65,90 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     }
 
     if (questionAnswerPairs.length === 0) {
-      throw new Error('No valid question/answer pairs found in transcript.');
+      throw new Error("No valid question/answer pairs found in transcript.");
     }
 
     // --- Input for Call 2: Get all user answers for delivery analysis ---
     const allUserAnswers = cleanedTranscript
-      .filter((t) => t.role === 'user')
+      .filter((t) => t.role === "user")
       .map((t) => t.text)
-      .join('\n\n'); // Join with newlines for context
+      .join("\n\n"); // Join with newlines for context
 
     // --- Context for Calls: Job Role ---
     const jobContext = `Role: ${
-      interview.role || 'Software Engineer'
-    }, Level: ${interview.level || 'Entry-level'}`;
+      interview.role || "Software Engineer"
+    }, Level: ${interview.level || "Entry-level"}`;
 
     // 4️⃣ --- Execute 3-Call LLM Workflow ---
     let questionBreakdown: z.infer<typeof singleQuestionFeedbackSchema>[];
     let communicationAndDelivery: z.infer<typeof communicationDeliverySchema>;
     let finalSynthesis: z.infer<typeof finalSynthesisSchema>;
 
+    const batchedQuestionFeedbackSchema = z.object({
+      questions: z.array(singleQuestionFeedbackSchema),
+    });
+
     try {
       // --- Call 1: Per-Question Analysis (in parallel) ---
       console.log(`[${interviewId}] Starting Call 1: Per-Question Analysis...`);
-      const questionBreakdownPromises = questionAnswerPairs.map((pair) =>
-        generateObject({
-          // model: google('gemini-2.5-flash'),
-          model: groqClient("openai/gpt-oss-120b"),
-          system: `You are an expert interview coach. Analyze the candidate's answer to the given question.
-                   Role Context: ${jobContext}
-                   Focus *only* on this single question and answer.
-                   Be specific, constructive, and fair.
-                   Provide a concise model answer if you can.`,
-          schema: llmQuestionAnalysisSchema, // Use the OMITTED schema
-          prompt: `Question: ${pair.questionText}\n\nAnswer: ${pair.userAnswerTranscript}`,
-        }).then((result) => {
-          // Merge the static data with the LLM's analysis
-          const fullBreakdown: z.infer<typeof singleQuestionFeedbackSchema> = {
-            ...pair, // This has questionId, questionText, userAnswerTranscript
-            ...result.object, // This has specificFeedback, positivePoints, etc.
-          };
-          return fullBreakdown;
-        }),
-      );
-      questionBreakdown = await Promise.all(questionBreakdownPromises);
+      // const questionBreakdownPromises = questionAnswerPairs.map((pair) =>
+      //   generateObject({
+      //     // model: google('gemini-2.5-flash'),
+      //     model: groqClient("openai/gpt-oss-120b"),
+      //     system: `You are an expert interview coach. Analyze the candidate's answer to the given question.
+      //              Role Context: ${jobContext}
+      //              Focus *only* on this single question and answer.
+      //              Be specific, constructive, and fair.
+      //              Provide a concise model answer if you can.`,
+      //     schema: llmQuestionAnalysisSchema, // Use the OMITTED schema
+      //     prompt: `Question: ${pair.questionText}\n\nAnswer: ${pair.userAnswerTranscript}`,
+      //   }).then((result) => {
+      //     // Merge the static data with the LLM's analysis
+      //     const fullBreakdown: z.infer<typeof singleQuestionFeedbackSchema> = {
+      //       ...pair, // This has questionId, questionText, userAnswerTranscript
+      //       ...result.object, // This has specificFeedback, positivePoints, etc.
+      //     };
+      //     return fullBreakdown;
+      //   })
+      // );
+      // questionBreakdown = await Promise.all(questionBreakdownPromises);
+
+      const batchedResult = await generateObject({
+        model: groqClient("openai/gpt-oss-120b"),
+        temperature: 0,
+        system: `
+                You are an expert interview coach.
+
+                You MUST return a SINGLE JSON OBJECT.
+                The object MUST have a key called "questions".
+
+                "questions" MUST be an array.
+                Each array element corresponds to EXACTLY ONE input question.
+
+                STRICT RULES:
+                - Output VALID JSON ONLY
+                - No commentary, no markdown
+                - Do NOT omit any question
+                - Do NOT merge questions
+                - Preserve questionId, questionText, and userAnswerTranscript EXACTLY
+                `,
+        schema: batchedQuestionFeedbackSchema,
+        prompt: `
+                Job Context: ${jobContext}
+
+                Here are the question–answer pairs:
+                ${JSON.stringify(questionAnswerPairs, null, 2)}
+                `,
+      });
+
+      questionBreakdown = batchedResult.object.questions;
+
       console.log(`[${interviewId}] Finished Call 1.`);
 
       // --- Call 2: Communication & Delivery ---
-      console.log(`[${interviewId}] Starting Call 2: Communication & Delivery...`);
+      console.log(
+        `[${interviewId}] Starting Call 2: Communication & Delivery...`
+      );
       const communicationResult = await generateObject({
         // model: google('gemini-2.5-flash'),
         model: groqClient("openai/gpt-oss-120b"),
@@ -154,7 +190,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
       console.log(`[${interviewId}] Finished Call 3.`);
     } catch (modelError) {
       console.error(`[${interviewId}] AI model generation failed:`, modelError);
-      throw new Error('AI model failed to generate feedback');
+      throw new Error("AI model failed to generate feedback");
     }
 
     // 5️⃣ --- Assemble Final Report ---
@@ -176,13 +212,13 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     } catch (validationError) {
       console.error(
         `[${interviewId}] FINAL Schema validation failed:`,
-        validationError,
+        validationError
       );
       console.error(
-        'Object that failed validation:',
-        JSON.stringify(fullFeedbackObject, null, 2),
+        "Object that failed validation:",
+        JSON.stringify(fullFeedbackObject, null, 2)
       );
-      throw new Error('Assembled feedback did not match original schema');
+      throw new Error("Assembled feedback did not match original schema");
     }
     console.log(`[${interviewId}] Final report assembled and validated.`);
 
@@ -219,7 +255,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
   } catch (error: any) {
     console.error(
       `❌ Interview analysis failed for ${interviewId}:`,
-      error.message,
+      error.message
     );
 
     // 9️⃣ Ensure DB status reflects the failure
@@ -231,7 +267,7 @@ export const analyseInterview = async (job: Job<InterviewAnalyseJobData>) => {
     } catch (updateError) {
       console.error(
         `[${interviewId}] Failed to update interview status after error:`,
-        updateError.message,
+        updateError.message
       );
     }
 
