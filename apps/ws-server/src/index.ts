@@ -8,6 +8,7 @@ import { z } from "zod"; // Zod is used for defining the analysis schema
 import { toAsyncIterable } from "./lib/asyncIterable";
 import { deepgramClient } from "./lib/deepGramClient";
 import { google } from "./lib/gemini";
+import { groqClient } from "./lib/groqForAISDK";
 
 dotenv.config();
 
@@ -184,7 +185,8 @@ io.on("connection", (socket) => {
 
       console.log("Generating AI decision...");
       const { object } = await generateObject({
-        model: google("gemini-2.5-flash-lite"),
+        // model: google("gemini-2.5-flash-lite"),
+        model: groqClient("openai/gpt-oss-20b"),
         system: `You are an expert interviewer. Your sole task is to analyze the user's latest response and generate a single, raw JSON object to decide the next action.
                The last question you asked the user was: "${lastQuestion}".
                Analyze the user's latest response and decide the next action by calling the appropriate tool.
