@@ -45,6 +45,9 @@ export const handleChat = asyncHandler(async (req, res) => {
       with_payload: true,
     });
 
+    // console.log("SearchResult : ", searchResult);
+    
+
     const analysisRecord = await prisma.resumeAnalysis.findUnique({
       where: { resumeId },
       select: { analysis: true },
@@ -62,18 +65,18 @@ export const handleChat = asyncHandler(async (req, res) => {
 
     const prompt = `You are a helpful and encouraging resume assistant. Answer the user's question based on the provided context.
     
-If the question is about resume improvements, errors, or formatting, primarily use the "Resume Analysis Data".
-If the question is about skills, experience, or career advice, primarily use the "Relevant Resume Excerpts".
-You are allowed to give suggestions even if reference is not available.
+                    If the question is about resume improvements, errors, or formatting, primarily use the "Resume Analysis Data".
+                    If the question is about skills, experience, or career advice, primarily use the "Relevant Resume Excerpts".
+                    You are allowed to give suggestions even if reference is not available.
 
-## Resume Analysis Data:
-${JSON.stringify(fullAnalysis, null, 2)}
+                    ## Resume Analysis Data:
+                    ${JSON.stringify(fullAnalysis, null, 2)}
 
-## Relevant Resume Excerpts:
-${JSON.stringify(searchResult, null, 2)}
+                    ## Relevant Resume Excerpts:
+                    ${JSON.stringify(searchResult, null, 2)}
 
-Answer:
-`;
+                    Answer:
+                    `;
 
     // ✅ Model resolver (clean + scalable)
     const modelResolver = {
@@ -119,7 +122,7 @@ Answer:
       throw err;
     }
 
-    console.log("resText : ", resText);
+    // console.log("resText : ", resText);
 
     res.status(200).json({ answer: resText });
   } catch (error) {
