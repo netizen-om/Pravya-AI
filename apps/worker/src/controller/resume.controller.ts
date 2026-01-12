@@ -78,19 +78,18 @@ export const handleChat = asyncHandler(async (req, res) => {
                     Answer:
                     `;
 
-    // ✅ Model resolver (clean + scalable)
     const modelResolver = {
       // "gemini-2.5-flash": google("gemini-2.5-flash"),
-      "gemini-2.5-flash": groqClient("llama-3.1-8b-instant"),
+      // "gemini-2.5-flash": groqClient("llama-3.1-8b-instant"),
       "llama-3.1-8b-instant": groqClient("llama-3.1-8b-instant"),
-      "gpt-oss-20b": openrouter.chat("openai/gpt-oss-20b:free"),
-      "x-ai/grok-4.1-fast": openrouter.chat("x-ai/grok-4.1-fast:free"),
-      "nvidia/nemotron-nano-12b-v2-vl": openrouter.chat(
-        "nvidia/nemotron-nano-12b-v2-vl:free"
-      ),
+      "llama-3.3-70b-versatile": groqClient("llama-3.3-70b-versatile"),
+      "gpt-oss-20b": groqClient("openai/gpt-oss-20b"),
+      "groq/compound-mini": groqClient("groq/compound-mini"),
+      "gemini-2.5-flash-lite": google("gemini-2.5-flash-lite"),
+      "gemini-2.5-flash": google("gemini-2.5-flash"),
       "mistralai/mistral-small-3.1-24b-instruct": openrouter.chat(
         "mistralai/mistral-small-3.1-24b-instruct:free"
-      ),
+      ),  
       "deepseek-r1t": openrouter.chat("tngtech/deepseek-r1t-chimera:free"),
     } as const;
 
@@ -115,7 +114,7 @@ export const handleChat = asyncHandler(async (req, res) => {
     } catch (err: any) {
       // ✅ User stopped generation before output
       if (err?.name === "AI_NoOutputGeneratedError") {
-        console.log("⚠️ Generation stopped before output");
+        console.log("Generation stopped before output");
         return res.status(200).json({ answer: "" });
       }
 

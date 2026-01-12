@@ -55,8 +55,9 @@ const statusMessages = [
 
 const smartPrompts = [
   "How can I tailor my resume for Meta?",
-  "What keywords am I missing?",
-  "Suggest bullet points for my project",
+  // "Which lines feel like filler and should be removed?",
+  "Compare my resume against a top 1% candidate",
+  "Does my resume feel authentic or over-engineered?",
 ];
 
 export default function ResumeChatbot() {
@@ -93,7 +94,7 @@ export default function ResumeChatbot() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, streamingContent]);
+  }, [messages]);
 
   useEffect(() => {
     if (!isLoading) return;
@@ -743,14 +744,22 @@ export default function ResumeChatbot() {
                     )}
                   >
                     <SelectItem value="llama-3.1-8b-instant">
-                      llama-3.1-8b
+                      llama-3.1-8B
                     </SelectItem>
-                    <SelectItem value="gpt-oss-20b">GPT-OSS-20B</SelectItem>
-                    <SelectItem value="x-ai/grok-4.1-fast">
-                      xAI: Grok 4.1
+                    <SelectItem value="llama-3.3-70b-versatile">
+                      llama-3.3-70B
                     </SelectItem>
-                    <SelectItem value="nvidia/nemotron-nano-12b-v2-vl">
-                      NVIDIA: Nemotron Nano
+                    <SelectItem value="gpt-oss-20b">
+                      GPT-OSS-20B
+                    </SelectItem>
+                    <SelectItem value="groq/compound-mini">
+                      GROQ: Compound-Mini
+                    </SelectItem>
+                    <SelectItem value="gemini-2.5-flash">
+                      Gemini-2.5-flash
+                    </SelectItem>
+                    <SelectItem value="gemini-2.5-flash-lite">
+                      Gemini-2.5-flash-lite
                     </SelectItem>
                     <SelectItem value="mistralai/mistral-small-3.1-24b-instruct">
                       Mistral Small 3.1
