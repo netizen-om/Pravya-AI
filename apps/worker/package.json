@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json --noCheck",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test-redis": "ts-node-dev --respawn --transpile-only src/redis-test.ts",
     "dev:parser": "ts-node-dev --respawn --transpile-only src/parseResume.ts",
     "dev:analyse": "ts-node-dev --respawn --transpile-only src/analyseResume.ts",
     "test:embedding": "ts-node-dev --respawn --transpile-only src/test-embedding.ts"
