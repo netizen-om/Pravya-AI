@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Toaster } from "sonner";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -45,7 +45,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     <SessionProvider>
       {/* PostHogProvider wraps your app, making PostHog available everywhere  */}
       <PostHogProvider client={posthog}>
-        <PostHogPageview />
+        <Suspense fallback={null}> <PostHogPageview /> </Suspense>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
