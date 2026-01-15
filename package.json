@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev:pravya": "pnpm -F @repo/pravya run dev",
+    "postinstall": "pnpm -F @repo/db exec prisma generate",
     "dev:ws-server": "pnpm -F @repo/ws-server run dev",
     "dev:worker": "pnpm -F @repo/worker run dev",
     "dev:admin": "pnpm -F @repo/admin run dev",

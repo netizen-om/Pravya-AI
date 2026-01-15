@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   reactStrictMode: false,
   transpilePackages : ["@repo/db", "@repo/auth"],
   devIndicators: false,
@@ -17,7 +16,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    unoptimized : true,
+    unoptimized : false,
     remotePatterns : [
       {
         protocol: "https",
