@@ -249,6 +249,8 @@ export async function getAIAnswer(questionId: string): Promise<{
     }
 
     // If answer doesn't exist, call the API
+    console.log(process.env.WORKER_URL);
+    
     try {
       const response = await fetch(
         `${process.env.WORKER_URL}/api/v1/interview/questions/get-ai-answer`,
