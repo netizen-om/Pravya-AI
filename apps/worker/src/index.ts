@@ -25,20 +25,22 @@ import interviewRouter from "./routes/interview.routes";
 import { resumeParser } from "./utils/parseResume";
 import { resumeAnalysis } from "./utils/analyseResume";
 import { analyseInterview } from "./utils/analyseInterview";
-import { redis } from "./lib/redis";
+// import { redis } from "./lib/redis";
 
 app.use("/api/v1/resume", resumeRouter);
 app.use("/api/v1/interview", interviewRouter);
 
 const connection = {
   url: process.env.REDIS_URL!,
+  skipVersionCheck : true
 };
 
 const ParseingWorker = new Worker("resume-processing", resumeParser, {
   connection : {
-    url : process.env.REDIS_URL!
+    url : process.env.REDIS_URL!,
+    skipVersionCheck : true
   },
-  concurrency : 1
+  concurrency : 1,
 });
 
 const resumeAnalysingWorker = new Worker("resume-analyse", resumeAnalysis, {
@@ -52,5 +54,5 @@ const interviewAnalysingWorker = new Worker("interview-analyse", analyseIntervie
 });
 
 app.listen(PORT, () => {
-  console.log(`✨ Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

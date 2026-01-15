@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import Redis from "ioredis";
 
 console.log(process.env.REDIS_URL);
