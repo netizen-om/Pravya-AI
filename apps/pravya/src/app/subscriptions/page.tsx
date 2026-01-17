@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { log } from "console";
 
 function CancelSubscriptionDialog({ open, setOpen }) {
   const [loading, setLoading] = useState(false);

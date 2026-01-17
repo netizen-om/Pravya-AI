@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -47,8 +47,38 @@ export function InterviewHistoryCard({
 
   const router = useRouter();
 
-  const isFeedbackDisabled =
-    disableFeedback || status === "INCOMPLETE" || !feedbackId;
+  // ✅ Button behavior logic (ONLY LOGIC CHANGE)
+  const actionConfig = (() => {
+    if (status === "COMPLETED" && feedbackId && !disableFeedback) {
+      return {
+        label: "View Full Feedback",
+        href: `/interview/feedback/${feedbackId}`,
+        disabled: false,
+      };
+    }
+
+    if (status === "PENDING") {
+      return {
+        label: "Start Interview",
+        href: `/interview/session/${id}`,
+        disabled: false,
+      };
+    }
+
+    if (status === "INCOMPLETE") {
+      return {
+        label: "Retry",
+        href: `/interview/session/${id}`,
+        disabled: false,
+      };
+    }
+
+    return {
+      label: "View Full Feedback",
+      href: "",
+      disabled: true,
+    };
+  })();
 
   async function handleDelete() {
     try {
@@ -62,7 +92,7 @@ export function InterviewHistoryCard({
       }
 
       toast.success("Interview deleted successfully");
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
@@ -104,18 +134,16 @@ export function InterviewHistoryCard({
         </CardContent>
 
         <CardFooter className="flex flex-row items-center justify-between">
-          {isFeedbackDisabled ? (
+          {actionConfig.disabled ? (
             <Button disabled variant="secondary">
-              View Full Feedback
+              {actionConfig.label}
             </Button>
           ) : (
             <Button
               className="dark:bg-white hover:opacity-90 dark:text-neutral-900 bg-neutral-950 text-white"
               asChild
             >
-              <Link href={`/interview/feedback/${feedbackId}`}>
-                View Full Feedback
-              </Link>
+              <Link href={actionConfig.href}>{actionConfig.label}</Link>
             </Button>
           )}
 
@@ -123,7 +151,7 @@ export function InterviewHistoryCard({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-red-700 hover:text-red-800 hover:bg-destructive/40 transition-all duration-200 hover:scale-110"
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-600 hover:bg-destructive/40 transition-all duration-200 hover:scale-110"
             onClick={() => setOpen(true)}
           >
             <Trash2 className="w-4 h-4" />
