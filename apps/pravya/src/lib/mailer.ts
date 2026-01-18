@@ -1,15 +1,7 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-// Create a transporter using Gmail credentials
-export const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_SERVER_USER,
-    pass: process.env.EMAIL_SERVER_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
-// Email sending function
 export async function sendEmail({
   to,
   subject,
@@ -22,18 +14,17 @@ export async function sendEmail({
   html?: string;
 }) {
   try {
-    console.log("Attempting to send email to:", to);
-    
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_SERVER_USER,
+    //@ts-ignore
+    const data = await resend.emails.send({
+      from: "Pravya AI <no-reply@pravyatech.tech>",
       to,
       subject,
       text,
       html,
     });
 
-    console.log("Message sent successfully: %s", info.messageId);
-    return info;
+    console.log("Email sent successfully:", to);
+    return data;
   } catch (error) {
     console.error("Email sending failed:", error);
     throw error;
