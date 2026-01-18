@@ -33,10 +33,10 @@ interface DashboardClientProps {
 export const DashboardClient: React.FC<DashboardClientProps> = ({
   session,
 }) => {
-  const { theme, isMounted } = useHydrationSafeTheme();
+  const { resolvedTheme, isMounted } = useHydrationSafeTheme();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const isDark = theme === "dark";
+  const isDark = resolvedTheme === "dark";
 
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
