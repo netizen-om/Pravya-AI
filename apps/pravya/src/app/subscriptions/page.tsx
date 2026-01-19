@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -178,6 +178,8 @@ export default function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
@@ -236,8 +238,8 @@ export default function PricingSection() {
     mockSubscriptionData.status === "ACTIVE"
       ? "bg-green-500"
       : mockSubscriptionData.status === "CANCELLED"
-      ? "bg-red-500"
-      : "bg-gray-400";
+        ? "bg-red-500"
+        : "bg-gray-400";
 
   if (isLoading) {
     return <Loader title="" />;
@@ -258,17 +260,19 @@ export default function PricingSection() {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 backdrop-blur-sm mb-6"
-              >
-                <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="text-sm font-medium text-black/70 dark:text-white/80">
-                  Subscription Active
-                </span>
-              </motion.div>
+              {mockSubscriptionData.status === "ACTIVE" && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 backdrop-blur-sm mb-6"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-medium text-black/70 dark:text-white/80">
+                    Subscription Active
+                  </span>
+                </motion.div>
+              )}
 
               <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-black via-black to-black/60 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-transparent mb-4">
                 Your Subscription
@@ -352,7 +356,7 @@ export default function PricingSection() {
                     </p>
                     <p className="text-lg font-semibold text-black dark:text-white">
                       {new Date(
-                        mockSubscriptionData.startDate
+                        mockSubscriptionData.startDate,
                       ).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -366,7 +370,7 @@ export default function PricingSection() {
                     </p>
                     <p className="text-lg font-semibold text-black dark:text-white">
                       {new Date(
-                        mockSubscriptionData.endDate
+                        mockSubscriptionData.endDate,
                       ).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -396,7 +400,7 @@ export default function PricingSection() {
                   </p>
                   <p className="text-lg font-semibold text-black dark:text-white mb-4">
                     {new Date(
-                      mockSubscriptionData.renewalDate
+                      mockSubscriptionData.renewalDate,
                     ).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
@@ -418,12 +422,14 @@ export default function PricingSection() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-4 items-center justify-center"
             >
-              <button
-                onClick={() => setOpenDialog(true)}
-                className="px-8 py-3 rounded-lg font-medium transition-all duration-200 bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-md"
-              >
-                Cancel Subscription
-              </button>
+              {mockSubscriptionData.status === "ACTIVE" && (
+                <button
+                  onClick={() => setOpenDialog(true)}
+                  className="px-8 py-3 rounded-lg font-medium transition-all duration-200 bg-black text-white dark:bg-white dark:text-black hover:opacity-90 shadow-md"
+                >
+                  Cancel Subscription
+                </button>
+              )}
             </motion.div>
           </div>
         </section>
@@ -568,7 +574,14 @@ export default function PricingSection() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleSubmit()}
+                onClick={() => {
+                  if (plan.price === "Free") {
+                    router.push("/dashboard");
+                    return;
+                  }
+
+                  handleSubmit();
+                }}
                 disabled={isLoading && plan.popular}
                 className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 mt-auto ${
                   plan.popular

@@ -29,8 +29,8 @@ const containerVariants = {
 };
 
 export default function FeedbackPage({ feedback }: FeedbackPageProps) {
-  const { theme, isMounted } = useHydrationSafeTheme();
-  const isDark = theme === "dark";
+  const { resolvedTheme, isMounted } = useHydrationSafeTheme();
+  const isDark = resolvedTheme === "dark";
 
   // 3. Render skeleton on server / initial client render
   if (!isMounted) {

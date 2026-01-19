@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         "credit",
         "debit",
         "upi_collect",
-        // "upi_intent",
+        "upi_intent",
         "google_pay",
       ],
 
