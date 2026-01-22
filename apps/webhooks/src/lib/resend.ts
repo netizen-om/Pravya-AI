@@ -57,11 +57,25 @@ export async function sendSubscriptionActiveEmail(userId: string, sub: any) {
 </div>
 `;
 
+const emailText = `
+Pravya AI
+
+Your Pravya AI subscription is now active.
+
+Plan: Pravya Pro
+Status: Active
+Next billing date: ${sub.endDate.toDateString()}
+
+Dashboard:
+https://pravyatech.tech/dashboard
+`;
+
   await resend.emails.send({
     from: "Pravya AI <billing@pravyatech.tech>",
     to: user.email,
     subject: "Your subscription is now active",
     html: emailHtml,
+    text : emailText
   });
 }
 
@@ -126,11 +140,27 @@ export async function sendSubscriptionCancelledEmail(userId: string, sub: any) {
 </div>
 `;
 
+  const emailText = `
+Pravya AI
+
+Your Pravya AI subscription has been cancelled.
+
+Plan: Pravya Pro
+Access available until: ${sub.endDate.toDateString()}
+
+You’ll continue to have access until the end of your current billing period.
+No further charges will be made.
+
+Manage subscription:
+https://pravyatech.tech/dashboard
+`;
+
   await resend.emails.send({
     from: "Pravya AI <billing@pravyatech.tech>",
     to: user.email,
     subject: "Your subscription has been cancelled",
     html: emailHtml,
+    text : emailText
   });
 }
 
@@ -156,6 +186,7 @@ export async function sendInvoiceEmail(
     console.warn("Invoice details missing for payment:", payment.paymentId);
     return;
   }
+
 
   const emailHtml = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
 
@@ -191,7 +222,7 @@ export async function sendInvoiceEmail(
 
     
     <div style="text-align: center; margin: 32px 0;">
-      <a href="${invoiceUrl}}" style="background-color: #000000; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">
+      <a href="${invoiceUrl}" style="background-color: #000000; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">
         View invoice
       </a>
     </div>
@@ -216,5 +247,7 @@ export async function sendInvoiceEmail(
     to: user.email,
     subject: "Payment successful – Invoice available",
     html: emailHtml,
+    text: `Your payment was successful.
+Invoice: ${invoiceUrl}`,
   });
 }
