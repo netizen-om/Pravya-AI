@@ -87,9 +87,10 @@ export const handleChat = asyncHandler(async (req, res) => {
       "groq/compound-mini": groqClient("groq/compound-mini"),
       "gemini-2.5-flash-lite": google("gemini-2.5-flash-lite"),
       "gemini-2.5-flash": google("gemini-2.5-flash"),
-      "mistralai/mistral-small-3.1-24b-instruct": openrouter.chat(
-        "mistralai/mistral-small-3.1-24b-instruct:free"
-      ),  
+      "mistralai/mistral-small-3.1-24b-instruct":  groqClient("llama-3.1-8b-instant"),  
+      // "mistralai/mistral-small-3.1-24b-instruct": openrouter.chat(
+      //   "mistralai/mistral-small-3.1-24b-instruct:free"
+      // ),  
       "deepseek-r1t": openrouter.chat("tngtech/deepseek-r1t-chimera:free"),
     } as const;
 
