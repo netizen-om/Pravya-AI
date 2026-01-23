@@ -36,13 +36,12 @@ export default function ImprovementAreasChart({
   questions,
   isDark,
 }: ImprovementAreasChartPropsExtended) {
-  
-const COLORS = [
-  isDark ? "#EF4444" : "#3B82F6",  // red-500 for dark mode (relevance)
-  isDark ? "#FB923C" : "#10B981",  // orange-400 (clarity)
-  isDark ? "#16A34A" : "#F59E0B",  // green-600 (depth)
-  isDark ? "#8B5CF6" : "#8B5CF6",  // violet-500 (structure)
-];
+  const COLORS = [
+    isDark ? "#EF4444" : "#3B82F6", // red-500 for dark mode (relevance)
+    isDark ? "#FB923C" : "#10B981", // orange-400 (clarity)
+    isDark ? "#16A34A" : "#F59E0B", // green-600 (depth)
+    isDark ? "#8B5CF6" : "#8B5CF6", // violet-500 (structure)
+  ];
 
   const improvements = {
     Relevance: 0,
@@ -112,13 +111,20 @@ const COLORS = [
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: isDark ? "#1e1e1e" : "#f9fafb",
-                      borderColor: isDark ? "#333" : "#e5e7eb",
+                      backgroundColor: isDark ? "#18181B" : "#F9FAFB",
+                      borderColor: isDark ? "#27272A" : "#E5E7EB",
                       borderRadius: "8px",
-                      color: isDark ? "#fff" : "#111827",
                       boxShadow: isDark
                         ? "0 0 10px rgba(0,0,0,0.6)"
                         : "0 2px 8px rgba(0,0,0,0.1)",
+                    }}
+                    itemStyle={{
+                      color: isDark ? "#FFFFFF" : "#111827",
+                      fontSize: "16px",
+                    }}
+                    labelStyle={{
+                      color: isDark ? "#FFFFFF" : "#374151",
+                      fontWeight: 1200,
                     }}
                     formatter={(value: number) => value.toFixed(1)}
                   />

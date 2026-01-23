@@ -41,7 +41,7 @@ export default function AnswerQualityChart({ questions, isDark }: AnswerQualityC
         Relevance: "url(#gradBlueDark)",
         Clarity: "url(#gradGreenDark)",
         Depth: "url(#gradAmberDark)",
-        Structure: "url(#grad VioletDark)",
+        Structure: "url(#gradVioletDark)",
       }
     : {
         Relevance: "url(#gradBlueLight)",
@@ -89,7 +89,7 @@ export default function AnswerQualityChart({ questions, isDark }: AnswerQualityC
           </CardHeader>
 
           <CardContent>
-            <ResponsiveContainer width="100%" height={320}>
+            <ResponsiveContainer width="100%" height={430}>
               <ComposedChart
                 layout="vertical"
                 data={chartData}
