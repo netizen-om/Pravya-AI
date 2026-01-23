@@ -213,7 +213,7 @@ export async function sendInvoiceEmail(
     
     <div style="background-color: #f9fafb; border: 1px solid #e6ebf1; border-radius: 8px; padding: 16px; margin-bottom: 30px;">
       <p style="margin: 0; color: #4a5568; font-size: 14px; line-height: 1.7;">
-        <strong>Invoice number:</strong> ${invoiceId}}<br>
+        <strong>Invoice number:</strong> ${invoiceId}<br>
         <strong>Plan:</strong> Pravya Pro<br>
         <strong>Amount paid:</strong> ${payment.currency} ${payment.amount}}<br>
         <strong>Payment date:</strong> ${payment.createdAt.toDateString()}}
